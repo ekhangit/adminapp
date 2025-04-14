@@ -13,9 +13,8 @@ class AppColors {
   static const appBarTextColor = colorPrimary;
 
   // Button Color
-  static const buttonColor = colorPrimary;
-  static const buttonColor1 = Color(0xFF3B5998);
-  static const buttonColor2 = Color(0xFF6AA84D);
+  static const buttonColor1 = Color(0xFF003862);
+  static const buttonColor2 = Color(0xFFC70039);
 
   // Field Color
   static const textFieldColor = Color(0xFF1A82C4);

@@ -39,10 +39,19 @@ dependencies:
   # Toast
   another_flushbar: ^1.12.30
 
-  #SVG
+  # SVG
   flutter_svg: ^2.0.9
 
+  # Player
+  video_player: ^2.9.5
+
   flutter_native_splash: ^2.3.10
+
+  webview_flutter_plus: ^0.4.10
+
+  cached_network_image: ^3.4.1
+
+  local_auth: ^2.3.0
 
 dev_dependencies:
   flutter_test:
@@ -71,6 +80,8 @@ flutter:
     - assets/
     - assets/images/
     - assets/svg/
+    - assets/video/
+    - assets/fonts/ 
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
@@ -83,6 +94,11 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
+
+  fonts:
+    - family: Saira
+      fonts:
+        - asset: assets\fonts\Saira_SemiCondensed-Regular.ttf
   # fonts:
   #   - family: Schyler
   #     fonts:

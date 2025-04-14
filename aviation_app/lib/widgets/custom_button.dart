@@ -5,8 +5,10 @@ class CustomButton extends StatelessWidget {
   final VoidCallback onPressed;
   final Color color;
   final bool isLoading;
-  final bool disabled; // New flag for disabled state
+  final double borerRadius;
+  final bool disabled;
   final Widget loadingWidget;
+  final bool isTransparent; // 🔹 New flag
 
   const CustomButton({
     super.key,
@@ -15,7 +17,9 @@ class CustomButton extends StatelessWidget {
     required this.color,
     required this.isLoading,
     required this.loadingWidget,
-    this.disabled = false, // Default to false
+    this.disabled = false,
+    this.borerRadius = 50,
+    this.isTransparent = false, // 🔹 Default to false
   });
 
   @override
@@ -24,14 +28,22 @@ class CustomButton extends StatelessWidget {
 
     return SizedBox(
       width: double.infinity,
-      height: 45,
+      height: 50,
       child: ElevatedButton(
         onPressed: isButtonDisabled ? null : onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: color.withOpacity(
-            isButtonDisabled ? 0.6 : 1,
-          ), // Slightly faded if disabled
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+          backgroundColor:
+              isTransparent
+                  ? Colors.transparent
+                  : color.withOpacity(isButtonDisabled ? 0.6 : 1),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(borerRadius),
+            side:
+                isTransparent
+                    ? const BorderSide(color: Colors.white, width: 2)
+                    : BorderSide.none,
+          ),
+          elevation: 0, // no shadow for transparent style
         ),
         child:
             isLoading
@@ -40,9 +52,13 @@ class CustomButton extends StatelessWidget {
                   text,
                   style: TextStyle(
                     color:
-                        isButtonDisabled ? Colors.grey.shade600 : Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w400,
+                        isTransparent
+                            ? Colors.white
+                            : isButtonDisabled
+                            ? Colors.grey.shade600
+                            : Colors.white,
+                    fontSize: 20.5,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
       ),

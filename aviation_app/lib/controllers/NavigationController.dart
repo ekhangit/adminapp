@@ -1,3 +1,4 @@
+import 'package:aviation_app/screens/dashboard/dashboard_screen.dart';
 import 'package:aviation_app/screens/home/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -7,9 +8,9 @@ class Navigationcontroller extends GetxController {
   final selectedIndex = 0.obs;
 
   final screens = [
-    HomeScreen(),
+    DashboardScreen(),
     Container(color: Colors.green),
     Container(color: Colors.blue),
-    Container(color: Colors.purple),
+    HomeScreen(),
   ];
 }

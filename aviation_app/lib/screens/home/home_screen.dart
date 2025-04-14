@@ -29,7 +29,7 @@ class HomeScreen extends StatelessWidget {
           CustomButton(
             text: "Logout",
             onPressed: () => controller.logout(),
-            color: AppColors.buttonColor,
+            color: AppColors.buttonColor1,
             isLoading: false,
             loadingWidget: const SizedBox(
               width: 20,
