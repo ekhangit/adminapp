@@ -45,7 +45,7 @@ class LoginController extends GetxController {
             Utils.showFlushbar(
               Get.context!,
               "Login Successfully.",
-              backgroundColor: AppColors.buttonColor2,
+              backgroundColor: AppColors.colorSuccess,
             );
           } else {
             Utils.showFlushbar(

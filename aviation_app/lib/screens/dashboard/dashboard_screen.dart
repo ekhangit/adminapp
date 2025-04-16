@@ -115,7 +115,7 @@ class DashboardScreen extends StatelessWidget {
                             onTap: () {},
                           ),
                           CustomBox(
-                            title: 'Flight Watch',
+                            title: 'PTS',
                             iconPath: 'assets/svg/flight2.svg',
                             onTap: () {},
                           ),

@@ -18,12 +18,11 @@ class HomeScreen extends StatelessWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text(
-            "Welcom to Home Screen",
-            style: TextStyle(color: AppColors.matteBlackColor, fontSize: 20.0),
-          ),
-
-          const SizedBox(height: 20),
+          // const Text(
+          //   "Welcom to Home Screen",
+          //   style: TextStyle(color: AppColors.matteBlackColor, fontSize: 20.0),
+          // ),
+          // const SizedBox(height: 20),
 
           // Logout Button
           CustomButton(

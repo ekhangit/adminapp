@@ -54,37 +54,37 @@ class MainScreen extends StatelessWidget {
                 ),
                 label: 'Home',
               ),
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/svg/flight.svg',
-                  width: 30,
-                  height: 30,
-                  color:
-                      controller.selectedIndex.value == 1
-                          ? AppColors.colorPrimary
-                          : Colors.black38,
-                ),
-                label: 'Flight',
-              ),
-              NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/svg/chat.svg',
-                  width: 30,
-                  height: 30,
-                  color:
-                      controller.selectedIndex.value == 2
-                          ? AppColors.colorPrimary
-                          : Colors.black38,
-                ),
-                label: 'Chat',
-              ),
+              // NavigationDestination(
+              //   icon: SvgPicture.asset(
+              //     'assets/svg/flight.svg',
+              //     width: 30,
+              //     height: 30,
+              //     color:
+              //         controller.selectedIndex.value == 1
+              //             ? AppColors.colorPrimary
+              //             : Colors.black38,
+              //   ),
+              //   label: 'Flight',
+              // ),
+              // NavigationDestination(
+              //   icon: SvgPicture.asset(
+              //     'assets/svg/chat.svg',
+              //     width: 30,
+              //     height: 30,
+              //     color:
+              //         controller.selectedIndex.value == 2
+              //             ? AppColors.colorPrimary
+              //             : Colors.black38,
+              //   ),
+              //   label: 'Chat',
+              // ),
               NavigationDestination(
                 icon: SvgPicture.asset(
                   'assets/svg/user.svg',
                   width: 30,
                   height: 30,
                   color:
-                      controller.selectedIndex.value == 3
+                      controller.selectedIndex.value == 1
                           ? AppColors.colorPrimary
                           : Colors.black38,
                 ),
