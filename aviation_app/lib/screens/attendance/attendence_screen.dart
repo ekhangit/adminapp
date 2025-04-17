@@ -1,12 +1,13 @@
 import 'dart:developer';
 
+import 'package:aviation_app/screens/attendance/widget/attendance_info.dart';
 import 'package:aviation_app/screens/attendance/widget/check_in_button.dart';
+import 'package:dotted_line/dotted_line.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
-import '../../controllers/attendance/attendance_controller.dart';
+import '../../controllers/dashboard/attendance_controller.dart';
 import '../../utils/app_colors.dart';
-import '../../widgets/custom_box.dart';
 import '../../widgets/custom_image.dart';
 
 class AttendenceScreen extends StatelessWidget {
@@ -124,6 +125,7 @@ class AttendenceScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+
                       Obx(
                         () => Text(
                           controller.currentDate.value,
@@ -157,84 +159,38 @@ class AttendenceScreen extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 30),
+
+                      DottedLine(
+                        dashLength: 4.0,
+                        dashColor: AppColors.lightGreyTextColor.withOpacity(
+                          0.5,
+                        ),
+                      ),
+
+                      const SizedBox(height: 30),
+
+                      Row(
+                        children: const [
+                          AttendanceInfoTile(
+                            title: "Clock In",
+                            value: "09:10",
+                            iconPath: 'assets/svg/timer.svg',
+                          ),
+                          AttendanceInfoTile(
+                            title: "Clock Out",
+                            value: "- - : - -",
+                            iconPath: 'assets/svg/timer.svg',
+                          ),
+                          AttendanceInfoTile(
+                            title: "Total Hrs",
+                            value: "08:50",
+                            iconPath: 'assets/svg/timer.svg',
+                          ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
-                // const SizedBox(height: 30),
-                // Container(
-                //   padding: const EdgeInsets.all(16.0),
-
-                //   margin: EdgeInsets.symmetric(horizontal: 32.0),
-                //   width: double.infinity,
-                //   decoration: BoxDecoration(
-                //     color: Colors.white,
-                //     borderRadius: BorderRadius.circular(12.0),
-                //   ),
-                //   child: Column(
-                //     crossAxisAlignment: CrossAxisAlignment.start,
-                //     children: [
-                //       Padding(
-                //         padding: const EdgeInsets.all(8.0),
-                //         child: Column(
-                //           crossAxisAlignment: CrossAxisAlignment.start,
-
-                //           children: [
-                //             Text(
-                //               "Attendance",
-                //               style: TextStyle(
-                //                 fontSize: 20,
-                //                 fontWeight: FontWeight.bold,
-                //               ),
-                //             ),
-
-                //             Text(
-                //               "Current Month",
-                //               style: TextStyle(
-                //                 fontSize: 18,
-                //                 fontWeight: FontWeight.bold,
-                //                 color: AppColors.lightGreyTextColor,
-                //               ),
-                //             ),
-                //           ],
-                //         ),
-                //       ),
-                //       const SizedBox(height: 10),
-                // Wrap(
-                //   spacing: 16,
-                //   runSpacing: 16,
-                //   children: [
-                //     CustomArrowBox(
-                //       title: 'Early Leave',
-                //       count: '08',
-                //       color: Color(0xFF2c7fb8),
-                //       onTap: () {},
-                //     ),
-                //     CustomArrowBox(
-                //       title: 'Absent',
-                //       count: '08',
-
-                //       color: Color(0xFF6b5de8),
-                //       onTap: () {},
-                //     ),
-                //     CustomArrowBox(
-                //       title: 'Late In',
-                //       count: '08',
-
-                //       color: Color(0xFFe54e1f),
-                //       onTap: () {},
-                //     ),
-                //     CustomArrowBox(
-                //       title: 'Total Leaves',
-                //       count: '08',
-
-                //       color: Color(0xFFef8c18),
-                //       onTap: () {},
-                //     ),
-                //   ],
-                // ),
-                //     ],
-                //   ),
-                // ),
               ],
             ),
           ],

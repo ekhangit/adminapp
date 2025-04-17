@@ -1,3 +1,4 @@
+import 'package:aviation_app/screens/leave/leave_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -54,9 +55,8 @@ class DashboardScreen extends StatelessWidget {
                       ],
                     ),
                     CustomCircularImage(
-                      imageUrl:
-                          'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKt_6sESyf8bB3iEbzv_4cXGUIuUUSOQRstX03bwqEZFRcwdmBQQTtdrDUSy-NST0sMxo&usqp=CAU',
-                      isNetwork: true,
+                      imageUrl: 'assets/images/profile.jpg',
+                      isNetwork: false,
                       borderColor: Colors.white,
                       size: 50.0,
                     ),
@@ -118,6 +118,11 @@ class DashboardScreen extends StatelessWidget {
                             title: 'PTS',
                             iconPath: 'assets/svg/flight2.svg',
                             onTap: () {},
+                          ),
+                          CustomBox(
+                            title: 'Leave Request',
+                            iconPath: 'assets/svg/leave.svg',
+                            onTap: () => Get.to(() => const LeaveRequestScreen()),
                           ),
                         ],
                       ),
