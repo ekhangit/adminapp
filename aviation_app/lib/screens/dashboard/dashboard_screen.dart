@@ -1,3 +1,4 @@
+import 'package:aviation_app/screens/flightcomm/flightcomm_screen.dart';
 import 'package:aviation_app/screens/leave/leave_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -107,7 +108,7 @@ class DashboardScreen extends StatelessWidget {
                           CustomBox(
                             title: 'Flight Comm',
                             iconPath: 'assets/svg/flight.svg',
-                            onTap: () {},
+                            onTap: () => Get.to(() => const FlightcommScreen()),
                           ),
                           CustomBox(
                             title: 'My Roster',
@@ -122,7 +123,8 @@ class DashboardScreen extends StatelessWidget {
                           CustomBox(
                             title: 'Leave Request',
                             iconPath: 'assets/svg/leave.svg',
-                            onTap: () => Get.to(() => const LeaveRequestScreen()),
+                            onTap:
+                                () => Get.to(() => const LeaveRequestScreen()),
                           ),
                         ],
                       ),

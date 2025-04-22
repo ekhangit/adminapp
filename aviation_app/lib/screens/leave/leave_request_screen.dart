@@ -35,24 +35,9 @@ class LeaveRequestScreen extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            CustomTextFieldWithLabel(
-              label: "Description",
-              hintText: "Write your message or description...",
-              maxLines: 5, // 🔹 allows for multiline input
-              onChanged: (val) => controller.description.value = val,
-            ),
-            SizedBox(height: 20),
-            CustomTextFieldWithLabel(
-              label: "Leave Reason",
-              hintText: "Write your leave reason...",
-              onChanged: (val) => controller.reason.value = val,
-            ),
-
-            const SizedBox(height: 20),
-
             // 🔹 Leave Mode Title
             const Text(
-              "Leave Mode",
+              "Leave Type",
               style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
             ),
             const SizedBox(height: 10),
@@ -66,10 +51,53 @@ class LeaveRequestScreen extends StatelessWidget {
                     controller.leaveModes.map((mode) {
                       return LeaveModeChip(
                         label: mode,
-                        isSelected: controller.selectedMode.value == mode,
-                        onTap: () => controller.selectMode(mode),
+                        isSelected: controller.selectedLeaveType.value == mode,
+                        onTap: () => controller.selectType(mode),
                       );
                     }).toList(),
+              ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Text(
+              "Attach Document",
+              style: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                color: Colors.black87,
+              ),
+            ),
+            const SizedBox(height: 8),
+            GestureDetector(
+              onTap: () {
+                // TODO: Implement file picker logic
+                // controller.attachDocument();
+              },
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.grey.shade100,
+                  border: Border.all(color: Colors.grey.shade300),
+                ),
+                child: Row(
+                  children: const [
+                    Icon(Icons.attach_file, color: Colors.black54),
+                    SizedBox(width: 10),
+                    Text(
+                      "Choose File",
+                      style: TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.black87,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
 
@@ -125,8 +153,7 @@ class LeaveRequestScreen extends StatelessWidget {
                   final picked = await showDatePicker(
                     context: context,
                     initialDate: firstAvailableDate,
-                    firstDate:
-                        firstAvailableDate, // ⛔ Prevent selecting before "From" date
+                    firstDate: firstAvailableDate,
                     lastDate: DateTime(2100),
                     builder:
                         (context, child) => Theme(
@@ -144,9 +171,51 @@ class LeaveRequestScreen extends StatelessWidget {
                     controller.toDate.value = DateFormat(
                       'dd MMM, yyyy',
                     ).format(picked);
+                    controller.calculateTotalDays();
                   }
                 },
               ),
+            ),
+
+            const SizedBox(height: 20),
+
+            Obx(() {
+              final totalDays = controller.totalDays.value;
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const Text(
+                    "Total Days",
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+                  ),
+                  const SizedBox(height: 6),
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 14,
+                    ),
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8),
+                      color: Colors.white,
+                      border: Border.all(color: Colors.grey.shade300),
+                    ),
+                    child: Text(
+                      "$totalDays Days",
+                      style: const TextStyle(fontSize: 14),
+                    ),
+                  ),
+                ],
+              );
+            }),
+
+            const SizedBox(height: 20),
+
+            CustomTextFieldWithLabel(
+              label: "Leave Reason",
+              hintText: "Write your leave reason...",
+              maxLines: 3,
+              onChanged: (val) => controller.reason.value = val,
             ),
 
             const SizedBox(height: 30),

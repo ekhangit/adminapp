@@ -10,6 +10,8 @@ import '../../controllers/dashboard/attendance_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_image.dart';
 
+import 'package:intl/intl.dart';
+
 class AttendenceScreen extends StatelessWidget {
   const AttendenceScreen({super.key});
 
@@ -170,21 +172,37 @@ class AttendenceScreen extends StatelessWidget {
                       const SizedBox(height: 30),
 
                       Row(
-                        children: const [
-                          AttendanceInfoTile(
-                            title: "Clock In",
-                            value: "09:10",
-                            iconPath: 'assets/svg/timer.svg',
+                        children: [
+                          Obx(
+                            () => AttendanceInfoTile(
+                              title: "Clock In",
+                              value:
+                                  controller.clockInTime.value != null
+                                      ? DateFormat(
+                                        'hh:mm a',
+                                      ).format(controller.clockInTime.value!)
+                                      : "-- : --",
+                              iconPath: 'assets/svg/timer.svg',
+                            ),
                           ),
-                          AttendanceInfoTile(
-                            title: "Clock Out",
-                            value: "- - : - -",
-                            iconPath: 'assets/svg/timer.svg',
+                          Obx(
+                            () => AttendanceInfoTile(
+                              title: "Clock Out",
+                              value:
+                                  controller.clockOutTime.value != null
+                                      ? DateFormat(
+                                        'hh:mm a',
+                                      ).format(controller.clockOutTime.value!)
+                                      : "-- : --",
+                              iconPath: 'assets/svg/timer.svg',
+                            ),
                           ),
-                          AttendanceInfoTile(
-                            title: "Total Hrs",
-                            value: "08:50",
-                            iconPath: 'assets/svg/timer.svg',
+                          Obx(
+                            () => AttendanceInfoTile(
+                              title: "Total Hrs",
+                              value: controller.totalWorkedHours.value,
+                              iconPath: 'assets/svg/timer.svg',
+                            ),
                           ),
                         ],
                       ),

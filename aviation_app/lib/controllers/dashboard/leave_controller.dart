@@ -1,15 +1,19 @@
 import 'package:get/get.dart';
+import 'package:intl/intl.dart';
+
 
 class LeaveRequestController extends GetxController {
   // Input fields
   var description = ''.obs;
   var reason = ''.obs;
-  var selectedMode = ''.obs;
+  var selectedLeaveType = ''.obs;
   var fromDate = ''.obs;
   var toDate = ''.obs;
 
+  var totalDays = 0.obs;
+
   // Leave options
-  final List<String> leaveModes = ['Half Day', 'Full Day', 'Alternative'];
+  final List<String> leaveModes = ['Annual Leave', 'new'];
 
   // Button state
   var isLoading = false.obs;
@@ -17,12 +21,12 @@ class LeaveRequestController extends GetxController {
   bool get canContinue =>
       description.isNotEmpty &&
       reason.isNotEmpty &&
-      selectedMode.isNotEmpty &&
+      selectedLeaveType.isNotEmpty &&
       fromDate.isNotEmpty &&
       toDate.isNotEmpty;
 
-  void selectMode(String mode) {
-    selectedMode.value = mode;
+  void selectType(String type) {
+    selectedLeaveType.value = type;
   }
 
   Future<void> submitRequest() async {
@@ -54,7 +58,7 @@ class LeaveRequestController extends GetxController {
     // Reset all fields
     description.value = '';
     reason.value = '';
-    selectedMode.value = '';
+    selectedLeaveType.value = '';
     fromDate.value = '';
     toDate.value = '';
     isLoading.value = false;
@@ -86,5 +90,15 @@ class LeaveRequestController extends GetxController {
       'Dec': '12',
     };
     return months[month] ?? '01';
+  }
+
+  void calculateTotalDays() {
+    if (fromDate.value.isNotEmpty && toDate.value.isNotEmpty) {
+      final from = DateFormat('dd MMM, yyyy').parse(fromDate.value);
+      final to = DateFormat('dd MMM, yyyy').parse(toDate.value);
+
+      final days = to.difference(from).inDays + 1; // inclusive
+      totalDays.value = days.clamp(0, 999);
+    }
   }
 }
