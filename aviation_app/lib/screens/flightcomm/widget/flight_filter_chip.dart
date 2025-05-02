@@ -1,14 +1,14 @@
-import 'package:aviation_app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 
 import '../../../constant.dart';
+import '../../../utils/app_colors.dart';
 
-class LeaveModeChip extends StatelessWidget {
+class FlightFilterChip extends StatelessWidget {
   final String label;
   final bool isSelected;
   final VoidCallback onTap;
 
-  const LeaveModeChip({
+  const FlightFilterChip({
     super.key,
     required this.label,
     required this.isSelected,
@@ -21,25 +21,25 @@ class LeaveModeChip extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(50),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
         decoration: BoxDecoration(
           gradient: isSelected ? appThemeGradientSoft : null,
           color: isSelected ? null : Colors.grey.shade100,
-          borderRadius: BorderRadius.circular(50),
+          borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected ? AppColors.colorPrimary : Colors.grey.shade300,
-            width: 1.5,
+            width: 1.0,
           ),
         ),
         child: Text(
           label,
           style: TextStyle(
             color: isSelected ? Colors.white : Colors.black87,
-            fontWeight: FontWeight.w500,
+            fontWeight: FontWeight.w600,
+            fontSize: 14,
           ),
         ),
       ),
     );
   }
 }
-

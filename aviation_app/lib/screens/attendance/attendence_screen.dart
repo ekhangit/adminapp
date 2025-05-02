@@ -64,11 +64,10 @@ class AttendenceScreen extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
                           CustomCircularImage(
-                            imageUrl:
-                                'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRKt_6sESyf8bB3iEbzv_4cXGUIuUUSOQRstX03bwqEZFRcwdmBQQTtdrDUSy-NST0sMxo&usqp=CAU',
-                            isNetwork: true,
+                            imageUrl: 'assets/images/profile.jpg',
+                            isNetwork: false,
                             borderColor: Colors.white,
-                            size: 60.0,
+                            size: 50.0,
                           ),
                           SizedBox(width: 20.0),
                           Column(

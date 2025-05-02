@@ -1,4 +1,4 @@
-import 'package:aviation_app/screens/auth/welcome_screen.dart';
+
 import 'package:aviation_app/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
