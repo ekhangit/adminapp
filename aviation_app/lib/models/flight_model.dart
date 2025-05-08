@@ -33,7 +33,7 @@ class FlightDetailModel {
 final List<FlightDetailModel> flights = [
   FlightDetailModel(
     airlineLogo:
-        'https://brandstruck.co/wp-content/uploads/2016/08/british-airways-logo.png',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQri9xyomw2yZ-JzoobdCHknKBMYEORVzqDi24YeNzQ_thREgQfcNFAg4kpkqTvkPvABB8&usqp=CAU',
     airline: 'British Airways',
     flightNo: 'BA 963',
     fromCode: 'MUC',
@@ -48,7 +48,7 @@ final List<FlightDetailModel> flights = [
   ),
   FlightDetailModel(
     airlineLogo:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTBc71Wi9Jmn98jzC-d4EQE3_7komn9EAjSA&s',
+        'https://logosandtypes.com/wp-content/uploads/2020/07/Iberia.png',
     airline: 'Iberia',
     flightNo: 'IB 1332',
     fromCode: 'MAD',
@@ -64,9 +64,9 @@ final List<FlightDetailModel> flights = [
   ),
   FlightDetailModel(
     airlineLogo:
-        'https://www.priestmangoode.com/wp-content/uploads/2021/04/Aegean.jpg',
+        'https://w7.pngwing.com/pngs/775/68/png-transparent-aegean-airlines.png',
     airline: 'Aegeane',
-    flightNo: 'AE 501',
+    flightNo: 'AE 3501',
     fromCode: 'DXB',
     toCode: 'DOH',
     fromLocation: 'Dubai, UAE',
@@ -95,7 +95,7 @@ final List<FlightDetailModel> flights = [
   ),
   FlightDetailModel(
     airlineLogo:
-        'https://brandstruck.co/wp-content/uploads/2016/08/british-airways-logo.png',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQri9xyomw2yZ-JzoobdCHknKBMYEORVzqDi24YeNzQ_thREgQfcNFAg4kpkqTvkPvABB8&usqp=CAU',
     airline: 'British Airways',
     flightNo: 'BA 987',
     fromCode: 'LHR',
@@ -111,7 +111,7 @@ final List<FlightDetailModel> flights = [
   ),
   FlightDetailModel(
     airlineLogo:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTBc71Wi9Jmn98jzC-d4EQE3_7komn9EAjSA&s',
+        'https://logosandtypes.com/wp-content/uploads/2020/07/Iberia.png',
     airline: 'Iberia',
     flightNo: 'IB 1001',
     fromCode: 'BCN',
@@ -127,9 +127,9 @@ final List<FlightDetailModel> flights = [
   ),
   FlightDetailModel(
     airlineLogo:
-        'https://www.priestmangoode.com/wp-content/uploads/2021/04/Aegean.jpg',
+        'https://w7.pngwing.com/pngs/775/68/png-transparent-aegean-airlines.png',
     airline: 'Aegeane',
-    flightNo: 'AE 777',
+    flightNo: 'AE 3777',
     fromCode: 'ATH',
     toCode: 'FRA',
     fromLocation: 'Athens, Greece',
@@ -159,7 +159,7 @@ final List<FlightDetailModel> flights = [
   ),
   FlightDetailModel(
     airlineLogo:
-        'https://brandstruck.co/wp-content/uploads/2016/08/british-airways-logo.png',
+        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQri9xyomw2yZ-JzoobdCHknKBMYEORVzqDi24YeNzQ_thREgQfcNFAg4kpkqTvkPvABB8&usqp=CAU',
     airline: 'British Airways',
     flightNo: 'BA 315',
     fromCode: 'CDG',
@@ -175,7 +175,7 @@ final List<FlightDetailModel> flights = [
   ),
   FlightDetailModel(
     airlineLogo:
-        'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTBc71Wi9Jmn98jzC-d4EQE3_7komn9EAjSA&s',
+        'https://logosandtypes.com/wp-content/uploads/2020/07/Iberia.png',
     airline: 'Iberia',
     flightNo: 'IB 271',
     fromCode: 'LIS',

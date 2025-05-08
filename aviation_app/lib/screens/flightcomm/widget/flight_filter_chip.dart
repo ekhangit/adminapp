@@ -21,7 +21,7 @@ class FlightFilterChip extends StatelessWidget {
       onTap: onTap,
       borderRadius: BorderRadius.circular(50),
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
         decoration: BoxDecoration(
           gradient: isSelected ? appThemeGradientSoft : null,
           color: isSelected ? null : Colors.grey.shade100,

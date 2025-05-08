@@ -7,8 +7,77 @@ import '../../models/chat_model.dart';
 import 'package:intl/intl.dart';
 
 class ChatController extends GetxController {
+  final selectedTab = 'Chat'.obs;
+
+  final List<Color> _avatarColors = [
+    Colors.blue,
+    Colors.green,
+    Colors.red,
+    Colors.orange,
+    Colors.purple,
+    Colors.teal,
+    Colors.cyan,
+    Colors.pink,
+  ];
+
+  Color getAvatarColor(String name) {
+    final hash = name.hashCode;
+    final index = hash % _avatarColors.length;
+    return _avatarColors[index];
+  }
+
   RxList<ChatMessage> messages = <ChatMessage>[].obs;
   TextEditingController messageController = TextEditingController();
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    messages.addAll([
+      ChatMessage(
+        senderInitial: "J",
+        senderName: "James - FRA",
+        message:
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.",
+        time: "10:30 AM",
+      ),
+      ChatMessage(
+        senderInitial: "L",
+        senderName: "Lucas - MAD",
+        message:
+            "Sure, I’ll update the NOTOC and push to the shared folder shortly.",
+        time: "10:32 AM",
+        isSentByMe: true,
+      ),
+      ChatMessage(
+        senderInitial: "J",
+        senderName: "James - FRA",
+        message: "Copy. Let me know if you need me to send the LIR as well.",
+        time: "10:35 AM",
+      ),
+      ChatMessage(
+        senderInitial: "J",
+        senderName: "James - FRA",
+        message:
+            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.",
+        time: "10:30 AM",
+      ),
+      ChatMessage(
+        senderInitial: "L",
+        senderName: "Lucas - MAD",
+        message:
+            "Sure, I’ll update the NOTOC and push to the shared folder shortly.",
+        time: "10:32 AM",
+        isSentByMe: true,
+      ),
+      ChatMessage(
+        senderInitial: "J",
+        senderName: "James - FRA",
+        message: "Copy. Let me know if you need me to send the LIR as well.",
+        time: "10:35 AM",
+      ),
+    ]);
+  }
 
   var isHeaderExpanded = false.obs;
 
@@ -19,23 +88,6 @@ class ChatController extends GetxController {
   void sendMessage() {
     final text = messageController.text.trim();
     if (text.isEmpty) return;
-
-    messages.add(
-      ChatMessage(message: text, isSentByMe: true, timestamp: DateTime.now()),
-    );
-
-    messageController.clear();
-
-    // Simulate a reply
-    Future.delayed(const Duration(seconds: 1), () {
-      messages.add(
-        ChatMessage(
-          message: "Auto reply to: $text",
-          isSentByMe: false,
-          timestamp: DateTime.now(),
-        ),
-      );
-    });
   }
 
   // UPATE INFO

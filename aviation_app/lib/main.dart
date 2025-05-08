@@ -1,8 +1,8 @@
-
 import 'package:aviation_app/screens/main_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
+import 'package:responsive_sizer/responsive_sizer.dart';
 
 void main() {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
@@ -24,12 +24,16 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
-    return GetMaterialApp(
-      title: 'Aviation',
-      debugShowCheckedModeBanner: false,
+    return ResponsiveSizer(
+      builder: (context, orientation, screenType) {
+        return GetMaterialApp(
+          title: 'AvBIS',
+          debugShowCheckedModeBanner: false,
 
-      theme: ThemeData(fontFamily: 'Saira'),
-      home: const MainScreen(),
+          theme: ThemeData(fontFamily: 'Helvetica'),
+          home: const MainScreen(),
+        );
+      },
     );
   }
 }

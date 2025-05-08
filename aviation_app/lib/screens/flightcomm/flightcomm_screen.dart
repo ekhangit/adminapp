@@ -8,8 +8,6 @@ import '../../controllers/flight/flightcomm_controller.dart';
 import '../../models/flight_model.dart';
 import '../../utils/app_colors.dart';
 
-import 'package:intl/intl.dart';
-
 class FlightcommScreen extends StatelessWidget {
   const FlightcommScreen({super.key});
 
@@ -20,15 +18,41 @@ class FlightcommScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: AppColors.backgroundColor,
       appBar: AppBar(
-        title: const Text("Flight Comm", style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        title: Column(
+          children: [
+            const Text(
+              "Flight Comm",
+              style: TextStyle(
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 1.5),
+            Obx(
+              () => Text(
+                controller.formattedDateTime.value,
+                style: const TextStyle(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ],
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
           onPressed: () => Get.back(),
         ),
         actions: [
           Obx(() {
+            final isFavorite = controller.favoriteFlights.contains(
+              controller.selectedFlightIndex.value,
+            );
+
             return controller.selectedFlightIndex.value != -1
                 ? PopupMenuButton<int>(
+                  position: PopupMenuPosition.under,
                   icon: const Icon(Icons.more_vert, color: Colors.white),
                   color: Colors.white,
                   shape: RoundedRectangleBorder(
@@ -39,30 +63,40 @@ class FlightcommScreen extends StatelessWidget {
                       controller.toggleFavorite(
                         controller.selectedFlightIndex.value,
                       );
-                      Get.snackbar(
-                        "Success",
-                        "Flight added to favourites!",
-                        snackPosition: SnackPosition.BOTTOM,
-                        backgroundColor: Colors.green.withOpacity(0.7),
-                        colorText: Colors.white,
-                      );
-                      controller.selectedFlightIndex.value =
-                          -1; // Reset selection after action
+
+                      // Utils.showFlushbar(
+                      //   Get.context!,
+                      //   "Added to My Flight!",
+                      //   backgroundColor: AppColors.colorSuccess,
+                      // );
+                      controller.selectedFlightIndex.value = -1;
                     }
                   },
-                  itemBuilder:
-                      (context) => [
-                        const PopupMenuItem(
-                          value: 0,
-                          child: Row(
-                            children: [
-                              Icon(Icons.star, size: 20, color: Colors.orange),
-                              SizedBox(width: 8),
-                              Text("Add to Favourites"),
-                            ],
-                          ),
+                  itemBuilder: (context) {
+                    final isFavorite = controller.favoriteFlights.contains(
+                      controller.selectedFlightIndex.value,
+                    );
+                    return [
+                      PopupMenuItem(
+                        value: 0,
+                        child: Row(
+                          children: [
+                            Icon(
+                              isFavorite ? Icons.star_border : Icons.star,
+                              size: 20,
+                              color: Colors.orange,
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              isFavorite
+                                  ? "Remove from My Flight"
+                                  : "Add to My Flight",
+                            ),
+                          ],
                         ),
-                      ],
+                      ),
+                    ];
+                  },
                 )
                 : const SizedBox();
           }),
@@ -72,54 +106,13 @@ class FlightcommScreen extends StatelessWidget {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: Obx(
-                  () => SingleChildScrollView(
-                    scrollDirection: Axis.horizontal,
-                    child: Row(
-                      children: List.generate(controller.filters.length, (
-                        index,
-                      ) {
-                        final filter = controller.filters[index];
-                        final isSelected =
-                            controller.selectedFilter.value == filter;
-                        return Padding(
-                          padding: EdgeInsets.only(
-                            left: index == 0 ? 16 : 0,
-                            right: 10,
-                          ),
-                          child: FlightFilterChip(
-                            label: filter,
-                            isSelected: isSelected,
-                            onTap: () => controller.selectFilter(filter),
-                          ),
-                        );
-                      }),
-                    ),
-                  ),
-                ),
-              ),
+            // 🔁 Sticky Filter Chips
+            SliverPersistentHeader(
+              pinned: true,
+              delegate: _FilterHeaderDelegate(controller),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: 10)),
-
-            // 📅 Current DateTime
-            SliverToBoxAdapter(
-              child: Center(
-                child: Text(
-                  _formattedDateTime(),
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.black87,
-                  ),
-                ),
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 10)),
+            const SliverToBoxAdapter(child: SizedBox(height: 5)),
 
             // Flight List
             SliverList(
@@ -150,11 +143,50 @@ class FlightcommScreen extends StatelessWidget {
       ),
     );
   }
+}
 
-  // 📅 Format current date-time function
-  String _formattedDateTime() {
-    final now = DateTime.now().toUtc(); // UTC time
-    final formatter = DateFormat('EEEE, dd MMMM yyyy HH:mm:ss \'UTC\'');
-    return formatter.format(now);
+class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
+  final FlightCommController controller;
+
+  _FilterHeaderDelegate(this.controller);
+
+  @override
+  Widget build(
+    BuildContext context,
+    double shrinkOffset,
+    bool overlapsContent,
+  ) {
+    return Container(
+      color: AppColors.backgroundColor,
+      padding: const EdgeInsets.symmetric(vertical: 12),
+      child: Obx(() {
+        return SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: Row(
+            children: List.generate(controller.filters.length, (index) {
+              final filter = controller.filters[index];
+              final isSelected = controller.selectedFilter.value == filter;
+              return Padding(
+                padding: EdgeInsets.only(left: index == 0 ? 16 : 0, right: 10),
+                child: FlightFilterChip(
+                  label: filter,
+                  isSelected: isSelected,
+                  onTap: () => controller.selectFilter(filter),
+                ),
+              );
+            }),
+          ),
+        );
+      }),
+    );
   }
+
+  @override
+  double get maxExtent => 66;
+  @override
+  double get minExtent => 66;
+
+  @override
+  bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
+      true;
 }

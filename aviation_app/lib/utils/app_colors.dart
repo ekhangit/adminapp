@@ -20,6 +20,10 @@ class AppColors {
   // Field Color
   static const textFieldColor = Color(0xFF1A82C4);
 
+  // Chat Colors
+  static const chatCardColor = Color(0xFFe2ffc7);
+
+
   //text Colors
   // static const darkBlue = Color.fromRGBO(69, 79, 99, 1);
   // static const blueShadeMedium = Color.fromRGBO(30, 136, 229, 1);
