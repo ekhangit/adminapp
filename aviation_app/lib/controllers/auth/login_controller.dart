@@ -2,6 +2,7 @@ import 'package:aviation_app/utils/app_colors.dart';
 import 'package:aviation_app/screens/main_screen.dart';
 import 'package:get/get.dart';
 
+import '../../services/auth_service.dart';
 import '../../utils/utils.dart';
 
 class LoginController extends GetxController {
@@ -30,32 +31,45 @@ class LoginController extends GetxController {
       Utils.showSnackbar("Error", "All fields are required");
       return;
     }
+
     emailError.value = false;
     passwordError.value = false;
-
     _setLoading(true);
-    try {
-      await Future.wait([
-        Future.delayed(const Duration(seconds: 3)), // Minimum loading duration
-        Future(() async {
-          // Simulate login logic
-          if (email.value == 'admin' && password.value == 'admin') {
-            Get.offAll(() => MainScreen());
 
-            Utils.showFlushbar(
-              Get.context!,
-              "Login Successfully.",
-              backgroundColor: AppColors.colorSuccess,
-            );
-          } else {
-            Utils.showFlushbar(
-              Get.context!,
-              "These credentials do not match our record.",
-              backgroundColor: AppColors.colorWarning,
-            );
-          }
-        }),
-      ]);
+    try {
+      final response = await AuthService.instance.login(
+        email: email.value,
+        password: password.value,
+        deviceType: "android", // or "ios"
+        deviceToken: "your_device_token_here", // get from FCM ideally
+      );
+
+      if (response.isSuccess) {
+        // Access full response data (including token/user if needed)
+        final data = response.data!;
+        // final user = UserModel.fromMap(data['user']); 
+
+
+        Get.offAll(() => MainScreen());
+
+        Utils.showFlushbar(
+          Get.context!,
+          "Login Successfully.",
+          backgroundColor: AppColors.colorSuccess,
+        );
+      } else {
+        Utils.showFlushbar(
+          Get.context!,
+          "Login failed",
+          backgroundColor: AppColors.colorWarning,
+        );
+      }
+    } catch (e) {
+      Utils.showFlushbar(
+        Get.context!,
+        "Something went wrong",
+        backgroundColor: AppColors.colorWarning,
+      );
     } finally {
       _setLoading(false);
     }

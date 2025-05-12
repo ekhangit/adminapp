@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 import '../../services/local_auth_service.dart';
 
 class AttendanceController extends GetxController {
-  final AuthService _authService = AuthService();
+  final LocalAuthService _authService = LocalAuthService();
 
   var isClockedIn = false.obs;
   var currentTime = ''.obs;

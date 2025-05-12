@@ -44,69 +44,99 @@ class FlightCard extends StatelessWidget {
         child: Row(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Obx(() {
-              final isSelected = controller.selectedFlightIndex.value == index;
-              return Icon(
-                isSelected ? Icons.check_circle : Icons.flight_takeoff,
-                size: 2.8.h,
-                color: isSelected ? AppColors.colorPrimary : Colors.black54,
-              );
-            }),
-            SizedBox(width: 1.25.w),
+            // Flight status icon
+            Icon(
+              isSelected ? Icons.check_circle : Icons.flight_takeoff,
+              size: 2.8.h,
+              color: isSelected ? AppColors.colorPrimary : Colors.black54,
+            ),
+            SizedBox(width: 1.5.w),
 
-            // Flight Info Column
+            // Flight info section
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
-                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Wrap(
-                    crossAxisAlignment: WrapCrossAlignment.center,
-                    spacing: 1.6.w,
+                  // Row with logo, flight info, star
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CustomCircularImage(
                         imageUrl: flight.airlineLogo,
-                        size: 3.2.h,
+                        size: 3.0.h,
                       ),
-                      Padding(
-                        padding: EdgeInsets.only(left: 0.3.w),
-                        child: Text(
-                          "${flight.flightNo}${_shouldAddSpace(flight.flightNo) ? ' ' : ''}",
-                          style: TextStyle(
-                            fontSize: 15.sp,
-                            fontWeight: FontWeight.w700,
+                      SizedBox(width: 1.8.w),
+
+                      // Flight Details
+                      Expanded(
+                        child: Wrap(
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          spacing: 1.6.w,
+                          children: [
+                            Text(
+                              "${flight.flightNo}${_shouldAddSpace(flight.flightNo) ? '' : ''}",
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                            _divider(),
+                            Text(
+                              '${flight.fromCode}-${flight.toCode}',
+                              style: TextStyle(
+                                fontSize: 15.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            _divider(),
+                            Text(
+                              "A320",
+                              style: TextStyle(
+                                fontSize: 13.5.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            _divider(),
+                            Text(
+                              "G-EUYH",
+                              style: TextStyle(
+                                fontSize: 13.5.sp,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          if (flight.duration.isNotEmpty &&
+                              flight.unreadCount != "0")
+                            _seenCount(' ${flight.unreadCount} ', Colors.green),
+                          SizedBox(width: 0.2.h),
+
+                          // Star Icon
+                          Obx(
+                            () => Icon(
+                              controller.favoriteFlights.contains(index)
+                                  ? Icons.star
+                                  : Icons.star_border,
+                              size: 2.0.h,
+                              color:
+                                  controller.favoriteFlights.contains(index)
+                                      ? Colors.orange
+                                      : Colors.black45,
+                            ),
                           ),
-                        ),
-                      ),
-                      _divider(),
-                      Text(
-                        '${flight.fromCode}-${flight.toCode}',
-                        style: TextStyle(
-                          fontSize: 15.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      _divider(),
-                      Text(
-                        "A320",
-                        style: TextStyle(
-                          fontSize: 13.5.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      _divider(),
-                      Text(
-                        "G-EUYH",
-                        style: TextStyle(
-                          fontSize: 13.5.sp,
-                          fontWeight: FontWeight.w600,
-                        ),
+                        ],
                       ),
                     ],
                   ),
-                  SizedBox(height: 0.8.h),
 
-                  // Time Row
+                  SizedBox(height: 0.1.h),
+
+                  // Time & Duration Row
                   Row(
                     children: [
                       _timeBlock(
@@ -126,60 +156,25 @@ class FlightCard extends StatelessWidget {
                             color: Colors.red,
                           ),
                         ),
+                      Spacer(),
+                      if (flight.duration.isNotEmpty)
+                        Text(
+                          flight.duration,
+                          style: TextStyle(
+                            fontSize: 14.5.sp,
+                            color:
+                                flight.status == "late"
+                                    ? Colors.red
+                                    : Colors.green,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+                      if (flight.duration.isEmpty && flight.unreadCount != "0")
+                        _seenCount(' ${flight.unreadCount} ', Colors.green),
                     ],
                   ),
                 ],
               ),
-            ),
-            SizedBox(width: 1.25.w),
-
-            // Right Info Column
-            Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.end,
-              children: [
-                Obx(
-                  () => Icon(
-                    controller.favoriteFlights.contains(index)
-                        ? Icons.star
-                        : Icons.star_border,
-                    size: 2.5.h,
-                    color:
-                        controller.favoriteFlights.contains(index)
-                            ? Colors.orange
-                            : Colors.black54,
-                  ),
-                ),
-                SizedBox(height: 0.2.h),
-                if (flight.unreadCount != "0")
-                  Container(
-                    padding: EdgeInsets.all(0.6.h),
-                    alignment: Alignment.center,
-                    decoration: const BoxDecoration(
-                      color: Colors.green,
-                      shape: BoxShape.circle,
-                    ),
-                    child: Text(
-                      flight.unreadCount,
-                      style: TextStyle(
-                        fontSize: 12.sp,
-                        color: Colors.white,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ),
-                SizedBox(height: 0.2.h),
-                if (flight.duration.isNotEmpty)
-                  Text(
-                    flight.duration,
-                    style: TextStyle(
-                      fontSize: 13.5.sp,
-                      color:
-                          flight.status == "late" ? Colors.red : Colors.green,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-              ],
             ),
           ],
         ),
@@ -195,16 +190,15 @@ class FlightCard extends StatelessWidget {
   Widget _divider() => Container(
     width: 0.35.w,
     height: 2.0.h,
-    color: Colors.black87.withOpacity(0.75),
+    color: Colors.black.withOpacity(0.5),
   );
 
   Widget _timeBlock(String label, String time, Color color) {
     return Row(
-      crossAxisAlignment: CrossAxisAlignment.center,
       children: [
         Container(
           width: 7.0.w,
-          height: 1.8.h,
+          height: 1.9.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: color,
@@ -213,7 +207,7 @@ class FlightCard extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12.5.sp,
+              fontSize: 12.sp,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
@@ -225,6 +219,26 @@ class FlightCard extends StatelessWidget {
           style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
         ),
       ],
+    );
+  }
+
+  Widget _seenCount(String label, Color color) {
+    return Container(
+      width: 3.5.w,
+      height: 1.7.h,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(0.5.h),
+      ),
+      child: Text(
+        label,
+        style: TextStyle(
+          fontSize: 12.sp,
+          color: Colors.white,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
     );
   }
 }

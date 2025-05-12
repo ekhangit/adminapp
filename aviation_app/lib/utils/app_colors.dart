@@ -6,6 +6,7 @@ class AppColors {
   static const colorSecondary = Color(0xFFFFFFFF);
   static const colorWarning = Color(0xFFC70039);
   static const colorSuccess = Color(0xFF4BB543);
+  static const colorWhite = Color(0xFFFFFFFF);
 
   // Background Color
   static const backgroundColor = Color(0xFFFAFAFA);
@@ -23,7 +24,6 @@ class AppColors {
   // Chat Colors
   static const chatCardColor = Color(0xFFe2ffc7);
 
-
   //text Colors
   // static const darkBlue = Color.fromRGBO(69, 79, 99, 1);
   // static const blueShadeMedium = Color.fromRGBO(30, 136, 229, 1);
@@ -31,6 +31,7 @@ class AppColors {
   // static const darkGreyTextColor = Color.fromRGBO(70, 70, 70, 1);
   static const lightGreyTextColor = Color(0xFF9e9e9e);
   static const matteBlackColor = Color(0xFF28282B);
+  static const skyBlueColor = Color(0xFF80c8ff);
   // static const whiteTextColor = Color.fromRGBO(255, 255, 255, 1);
   // static const animationBackgroundColor = Color.fromRGBO(196, 209, 196, 1);
   // static const transparentColor = Color.fromRGBO(255, 255, 255, 0);

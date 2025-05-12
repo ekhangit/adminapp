@@ -13,14 +13,15 @@ class MainScreen extends StatelessWidget {
     final Navigationcontroller controller = Get.put(Navigationcontroller());
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: const SystemUiOverlayStyle(
+      value: SystemUiOverlayStyle(
         statusBarIconBrightness: Brightness.light,
-        systemNavigationBarColor: AppColors.colorSecondary,
+        systemNavigationBarColor: Color.fromARGB(255, 78, 135, 179),
+        systemNavigationBarIconBrightness: Brightness.dark,
       ),
       child: Scaffold(
         bottomNavigationBar: Obx(
           () => NavigationBar(
-            backgroundColor: AppColors.colorSecondary,
+            backgroundColor: Color.fromARGB(255, 78, 135, 179),
             height: 80,
             elevation: 0,
             selectedIndex: controller.selectedIndex.value,
@@ -32,12 +33,15 @@ class MainScreen extends StatelessWidget {
             ) {
               if (states.contains(MaterialState.selected)) {
                 return const TextStyle(
-                  color: AppColors.colorPrimary,
+                  color: AppColors.colorWhite,
+                  fontSize: 12.5,
                   fontWeight: FontWeight.w600,
                 );
               }
-              return const TextStyle(
-                color: Colors.black38,
+              return TextStyle(
+                // color: Colors.black38,
+                color: Colors.grey.shade400,
+                fontSize: 12.5,
                 fontWeight: FontWeight.w400,
               );
             }),
@@ -49,8 +53,8 @@ class MainScreen extends StatelessWidget {
                   height: 30,
                   color:
                       controller.selectedIndex.value == 0
-                          ? AppColors.colorPrimary
-                          : Colors.black38,
+                          ? AppColors.colorWhite
+                          : Colors.grey.shade400,
                 ),
                 label: 'Home',
               ),
@@ -85,8 +89,10 @@ class MainScreen extends StatelessWidget {
                   height: 30,
                   color:
                       controller.selectedIndex.value == 1
-                          ? AppColors.colorPrimary
-                          : Colors.black38,
+                          // ? AppColors.colorPrimary
+                          // : Colors.black38,
+                          ? AppColors.colorWhite
+                          : Colors.grey.shade400,
                 ),
                 label: 'Profile',
               ),
