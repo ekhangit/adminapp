@@ -1,5 +1,5 @@
 import 'package:aviation_app/screens/auth/login_screen.dart';
-import 'package:aviation_app/screens/auth/signup_screen.dart';
+// import 'package:aviation_app/screens/auth/signup_screen.dart';
 import 'package:aviation_app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -107,7 +107,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                                 'Welcome to Aviation Business Information Systems',
                                 style: TextStyle(
                                   color: Colors.white,
-                                  fontSize: 26,
+                                  fontSize: 24,
                                   fontWeight: FontWeight.bold,
                                 ),
                               ),

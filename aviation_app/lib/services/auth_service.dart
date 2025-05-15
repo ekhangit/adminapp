@@ -32,14 +32,14 @@ class AuthService {
     }
   }
 
-  /// 🔁 FCM Token Update
-  Future<ResponseClass<void>> setFCMToken(String fcmToken) async {
+  /// 🔐 Logout API
+  Future<ResponseClass<Map<String, dynamic>>> logout() async {
     try {
       final response = await BaseService.instance.dio.post(
-        "/profile/update_token",
-        data: {"token": fcmToken},
+        ApiConfig.logoutAPI,
       );
-      return ResponseClass.success(null);
+
+      return ResponseClass.success(response.data);
     } catch (e) {
       return ResponseClass.error(e.toString());
     }

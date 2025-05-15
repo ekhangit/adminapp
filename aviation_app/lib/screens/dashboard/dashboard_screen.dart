@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../constant.dart';
+import '../../controllers/storage/data_storage_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_box.dart';
 import '../attendance/attendence_screen.dart';
@@ -14,7 +15,7 @@ class DashboardScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    const initials = "JF";
+    final user = DataStorageController.to.user;
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -45,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
                       radius: 24,
                       backgroundColor: AppColors.colorPrimary.withOpacity(0.2),
                       child: Text(
-                        initials,
+                        user.name.isNotEmpty ? user.name[0] : "?",
                         style: TextStyle(
                           color: AppColors.colorPrimary,
                           fontWeight: FontWeight.bold,
@@ -59,7 +60,7 @@ class DashboardScreen extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          "James Faulkner",
+                          user.name,
                           style: TextStyle(
                             color: AppColors.colorPrimary,
                             fontSize: 16.0,

@@ -23,7 +23,7 @@ class FlightCard extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
         width: double.infinity,
-        margin: EdgeInsets.symmetric(vertical: 0.05.h),
+        margin: EdgeInsets.symmetric(vertical: 0.07.h),
         padding: EdgeInsets.symmetric(horizontal: 1.8.w, vertical: 0.7.h),
         decoration: BoxDecoration(
           color:
@@ -45,11 +45,17 @@ class FlightCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Flight status icon
-            Icon(
-              isSelected ? Icons.check_circle : Icons.flight_takeoff,
-              size: 2.8.h,
-              color: isSelected ? AppColors.colorPrimary : Colors.black54,
-            ),
+            isSelected
+                ? Icon(
+                  Icons.check_circle,
+                  size: 2.8.h,
+                  color: AppColors.colorPrimary,
+                )
+                : Image.asset(
+                  "assets/images/outbound.png",
+                  height: 2.8.h,
+                  width: 2.8.h,
+                ),
             SizedBox(width: 1.5.w),
 
             // Flight info section

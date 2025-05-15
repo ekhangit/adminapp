@@ -28,10 +28,10 @@ class MainScreen extends StatelessWidget {
             onDestinationSelected:
                 (index) => controller.selectedIndex.value = index,
             indicatorColor: Colors.transparent,
-            labelTextStyle: MaterialStateProperty.resolveWith<TextStyle>((
+            labelTextStyle: WidgetStateProperty.resolveWith<TextStyle>((
               states,
             ) {
-              if (states.contains(MaterialState.selected)) {
+              if (states.contains(WidgetState.selected)) {
                 return const TextStyle(
                   color: AppColors.colorWhite,
                   fontSize: 12.5,
@@ -58,39 +58,37 @@ class MainScreen extends StatelessWidget {
                 ),
                 label: 'Home',
               ),
-              // NavigationDestination(
-              //   icon: SvgPicture.asset(
-              //     'assets/svg/flight.svg',
-              //     width: 30,
-              //     height: 30,
-              //     color:
-              //         controller.selectedIndex.value == 1
-              //             ? AppColors.colorPrimary
-              //             : Colors.black38,
-              //   ),
-              //   label: 'Flight',
-              // ),
-              // NavigationDestination(
-              //   icon: SvgPicture.asset(
-              //     'assets/svg/chat.svg',
-              //     width: 30,
-              //     height: 30,
-              //     color:
-              //         controller.selectedIndex.value == 2
-              //             ? AppColors.colorPrimary
-              //             : Colors.black38,
-              //   ),
-              //   label: 'Chat',
-              // ),
+              NavigationDestination(
+                icon: SvgPicture.asset(
+                  'assets/svg/notification.svg',
+                  width: 30,
+                  height: 30,
+                  color:
+                      controller.selectedIndex.value == 1
+                          ? AppColors.colorWhite
+                          : Colors.grey.shade400,
+                ),
+                label: 'Notification',
+              ),
+              NavigationDestination(
+                icon: SvgPicture.asset(
+                  'assets/svg/about.svg',
+                  width: 30,
+                  height: 30,
+                  color:
+                      controller.selectedIndex.value == 2
+                          ? AppColors.colorWhite
+                          : Colors.grey.shade400,
+                ),
+                label: 'About',
+              ),
               NavigationDestination(
                 icon: SvgPicture.asset(
                   'assets/svg/user.svg',
                   width: 30,
                   height: 30,
                   color:
-                      controller.selectedIndex.value == 1
-                          // ? AppColors.colorPrimary
-                          // : Colors.black38,
+                      controller.selectedIndex.value == 3
                           ? AppColors.colorWhite
                           : Colors.grey.shade400,
                 ),

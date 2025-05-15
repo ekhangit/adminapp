@@ -1,9 +1,15 @@
+import 'dart:developer';
+import 'dart:io';
+
 import 'package:aviation_app/utils/app_colors.dart';
 import 'package:aviation_app/screens/main_screen.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:get/get.dart';
 
 import '../../services/auth_service.dart';
+import '../../services/base_service.dart';
 import '../../utils/utils.dart';
+import '../storage/data_storage_controller.dart';
 
 class LoginController extends GetxController {
   static LoginController instance = Get.find();
@@ -23,9 +29,27 @@ class LoginController extends GetxController {
 
   bool get canContinue => email.value.isNotEmpty && password.value.isNotEmpty;
 
+  // **🔹 Get FCM Token Android**
+  Future<String?> getFCMToken() async {
+    final fcm = FirebaseMessaging.instance;
+    return await fcm.getToken();
+  }
+
+  // **🔹 Get FCM Token iOS**
+  Future<String?> getFCMAPNSToken() async {
+    final fcm = FirebaseMessaging.instance;
+    return await fcm.getAPNSToken();
+  }
+
+  // fahadcse8820@gmail.com
+  // 123456
+
   /// **🔹 Login Function**
   Future<void> login() async {
+    log("[LoginController] Login initiated");
+
     if (email.value.isEmpty || password.value.isEmpty) {
+      log("[LoginController] Email or password is empty");
       emailError.value = email.value.isEmpty;
       passwordError.value = password.value.isEmpty;
       Utils.showSnackbar("Error", "All fields are required");
@@ -37,18 +61,50 @@ class LoginController extends GetxController {
     _setLoading(true);
 
     try {
+      log("[LoginController] Getting FCM token...");
+      String? deviceToken;
+
+      if (Platform.isIOS) {
+        deviceToken = await getFCMAPNSToken();
+      } else {
+        deviceToken = await getFCMToken();
+      }
+
+      log("[LoginController] deviceToken $deviceToken");
+
+      if (deviceToken == null) {
+        log("[LoginController] FCM token is null");
+        Utils.showFlushbar(
+          Get.context!,
+          "Failed to get device token",
+          backgroundColor: AppColors.colorWarning,
+        );
+        return;
+      }
+
+      log("[LoginController] FCM token obtained: $deviceToken");
+
+      log("[LoginController] Calling login API...");
       final response = await AuthService.instance.login(
         email: email.value,
         password: password.value,
-        deviceType: "android", // or "ios"
-        deviceToken: "your_device_token_here", // get from FCM ideally
+        deviceType: Platform.isAndroid ? "android" : "ios",
+        deviceToken: deviceToken,
       );
 
-      if (response.isSuccess) {
-        // Access full response data (including token/user if needed)
-        final data = response.data!;
-        // final user = UserModel.fromMap(data['user']); 
+      log(
+        "[LoginController] Login API response received: isSuccess = ${response.isSuccess}",
+      );
 
+      if (response.isSuccess && response.data!['status'] == true) {
+        log("[LoginController] Login successful ✅");
+        log("[LoginController] User data: ${response.data}");
+
+        final loginResponse = response.data!['body'];
+        if (loginResponse != null) {
+          DataStorageController.to.createAccount(loginResponse);
+          BaseService.instance.reloadHeaders();
+        }
 
         Get.offAll(() => MainScreen());
 
@@ -58,13 +114,19 @@ class LoginController extends GetxController {
           backgroundColor: AppColors.colorSuccess,
         );
       } else {
+        final message = response.data?['message'] ?? 'Login failed';
+        log("[LoginController] Login failed ❌: $message");
+
         Utils.showFlushbar(
           Get.context!,
-          "Login failed",
+          message,
           backgroundColor: AppColors.colorWarning,
         );
       }
-    } catch (e) {
+    } catch (e, stack) {
+      log("[LoginController] Exception during login: $e");
+      log("[LoginController] Stack trace: $stack");
+
       Utils.showFlushbar(
         Get.context!,
         "Something went wrong",
@@ -72,6 +134,7 @@ class LoginController extends GetxController {
       );
     } finally {
       _setLoading(false);
+      log("[LoginController] Login process completed");
     }
   }
 

@@ -1,8 +1,8 @@
+import 'dart:developer';
+
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../../models/user_model.dart';
-import '../../services/auth_service.dart';
 
 class DataStorageController extends GetxController {
   static DataStorageController get to => Get.find();
@@ -24,25 +24,11 @@ class DataStorageController extends GetxController {
   }
 
   UserModel get user => UserModel(
-        id: session.value!["id"],
-        name: session.value!["name"],
-        email: session.value!["email"],
-        picture: session.value!["picture"],
-      );
-
-  Future<void> saveToken(String token) async {
-    _prefs.setString("fcm_token", token);
-    await AuthService.instance.setFCMToken(token);
-  }
-
-
-  Future<String> getFCMToken() async {
-    return _prefs.getString("fcm_token") ?? "";
-  }
-
-  Future<String> getRefCode() async {
-    return _prefs.getString("refCode") ?? "";
-  }
+    id: session.value!["id"],
+    name: session.value!["name"],
+    email: session.value!["email"],
+    profilePhotoPath: session.value!["picture"],
+  );
 
   Future<String> fetchAuthToken() async {
     await initPrefs();
@@ -51,13 +37,11 @@ class DataStorageController extends GetxController {
 
   Future<void> initiateSession() async {
     if ((_prefs.getInt("id") ?? 0) != 0) {
-      // log("initiateSession");
-
       currentSession.value = UserModel(
         id: _prefs.getInt("id") ?? 0,
         name: _prefs.getString("name")!,
         email: _prefs.getString("email")!,
-        picture: _prefs.getString("picture") ?? "",
+        profilePhotoPath: _prefs.getString("picture") ?? "",
       );
 
       session.value = {
@@ -73,9 +57,9 @@ class DataStorageController extends GetxController {
 
     header.value = await getHeaders();
 
-    // log("[currentSession] CURRENT SESSION VALUE ${currentSession.value}");
-    // log("[currentSession] SESSION VALUE ${session.value}");
-    // log("[currentSession] Header Value ${header.value}");
+    log("[currentSession] CURRENT SESSION VALUE ${currentSession.value}");
+    log("[currentSession] SESSION VALUE ${session.value}");
+    log("[currentSession] Header Value ${header.value}");
   }
 
   Future<Map<String, dynamic>> getSessionMap() async {
@@ -87,23 +71,27 @@ class DataStorageController extends GetxController {
   }
 
   Future<Map<String, String>> getHeaders() async {
-    Map<String, String> headers = {
-      // 'authid': apiKey,
-      'authuid': _prefs.getString("auth") ?? "",
-    };
-    return headers;
+    return {'Authorization': 'Bearer ${_prefs.getString("auth") ?? ""}'};
   }
-
 
   Future<void> createAccount(Map<String, dynamic> response) async {
     print("[DataStorageController] createAccount: $response");
 
-    _prefs.setInt('id', response['id']);
-    _prefs.setString('name', response['name'] ?? "");
-    _prefs.setString('picture', response['picture'] ?? "");
-    _prefs.setString('email', response['email']);
-    await initiateSession();
+    final user = response['user'];
+    final apiToken = response['api_token'];
 
+    if (user != null) {
+      _prefs.setInt('id', user['id']);
+      _prefs.setString('name', user['name'] ?? "");
+      _prefs.setString('email', user['email'] ?? "");
+      _prefs.setString('picture', user['profile_photo_path'] ?? "");
+    }
+
+    if (apiToken != null) {
+      _prefs.setString('auth', apiToken);
+    }
+
+    await initiateSession();
   }
 
   Future<void> updateSession(Map<String, dynamic> value) async {
@@ -121,13 +109,10 @@ class DataStorageController extends GetxController {
     await initiateSession();
   }
 
-
-
   Future<void> clearSession() async {
     await _prefs.clear();
     session.value = null;
     currentSession.value = null;
     await initiateSession();
   }
-
 }

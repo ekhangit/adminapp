@@ -25,21 +25,9 @@ class FlightcommScreen extends StatelessWidget {
         backgroundColor: AppColors.backgroundColor,
         appBar: AppBar(
           centerTitle: true,
-          title: Column(
-            children: [
-              const Text("Flight Comm", style: TextStyle(color: Colors.white)),
-              SizedBox(height: 1.5),
-              Obx(
-                () => Text(
-                  controller.formattedDateTime.value,
-                  style: const TextStyle(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.w600,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+          title: const Text(
+            "Flight Comm",
+            style: TextStyle(color: Colors.white),
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -112,8 +100,7 @@ class FlightcommScreen extends StatelessWidget {
                 pinned: true,
                 delegate: _FilterHeaderDelegate(controller),
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: 5)),
+              // const SliverToBoxAdapter(child: SizedBox(height: 5)),
 
               // Flight List
               SliverList(
@@ -164,35 +151,81 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
   ) {
     return Container(
       color: AppColors.backgroundColor,
-      padding: const EdgeInsets.symmetric(vertical: 12),
+      // color: Colors.yellow,
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
       child: Obx(() {
-        return SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: List.generate(controller.filters.length, (index) {
-              final filter = controller.filters[index];
-              final isSelected = controller.selectedFilter.value == filter;
-              return Padding(
-                padding: EdgeInsets.only(left: index == 0 ? 16 : 0, right: 10),
-                child: FlightFilterChip(
-                  label: filter,
-                  isSelected: isSelected,
-                  onTap: () => controller.selectFilter(filter),
-                ),
-              );
-            }),
-          ),
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 🔹 Filter Chips Row
+            SingleChildScrollView(
+              scrollDirection: Axis.horizontal,
+              child: Row(
+                children: List.generate(controller.filters.length, (index) {
+                  final filter = controller.filters[index];
+                  final isSelected = controller.selectedFilter.value == filter;
+                  return Padding(
+                    padding: EdgeInsets.only(right: 10),
+                    child: FlightFilterChip(
+                      label: filter,
+                      isSelected: isSelected,
+                      onTap: () => controller.selectFilter(filter),
+                    ),
+                  );
+                }),
+              ),
+            ),
+
+            const SizedBox(height: 12),
+
+            // 🔹 Date-Time
+            RichText(
+              text: TextSpan(
+                children: [
+                  TextSpan(
+                    text: _getDatePart(controller.formattedDateTime.value),
+                    style: TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.redAccent.shade200,
+                    ),
+                  ),
+                  const TextSpan(text: '  '), // spacing
+                  TextSpan(
+                    text: _getTimePart(controller.formattedDateTime.value),
+                    style: const TextStyle(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         );
       }),
     );
   }
 
   @override
-  double get maxExtent => 66;
+  double get maxExtent => 95;
   @override
-  double get minExtent => 66;
+  double get minExtent => 95;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
       true;
+}
+
+String _getDatePart(String value) {
+  final split = value.split(' ');
+  if (split.length < 5) return value;
+  return '${split[0].replaceAll(',', '')}, ${split[1]} ${split[2]} ${split[3]}';
+}
+
+String _getTimePart(String value) {
+  final split = value.split(' ');
+  if (split.length < 5) return '';
+  return '${split[4]} ${split[5]}';
 }

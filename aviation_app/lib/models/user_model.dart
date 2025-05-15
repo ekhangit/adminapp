@@ -1,37 +1,59 @@
 class UserModel {
   final int id;
+  final int? airportId;
   final String name;
   final String email;
-  final String picture;
+  final String? gender;
+  final String? fcmToken;
+  final String? profilePhotoPath;
+  final String? avatar;
+  final String? lastLoginAt;
+  final String? lastLoginIp;
+  final String? type;
 
   UserModel({
     required this.id,
+    this.airportId,
     required this.name,
     required this.email,
-    required this.picture,
+    this.gender,
+    this.fcmToken,
+    this.profilePhotoPath,
+    this.avatar,
+    this.lastLoginAt,
+    this.lastLoginIp,
+    this.type,
   });
 
-  // Convert UserModel to Map (for Firestore or JSON)
-  Map<String, dynamic> toMap() {
-    return {
-      'id': id,
-      'name': name,
-      'email': email,
-      'picture': picture,
-    };
-  }
-
-  // Create UserModel from Map
   factory UserModel.fromMap(Map<String, dynamic> map) {
     return UserModel(
-      id: map['id'] ?? '',
+      id: map['id'],
+      airportId: map['airport_id'],
       name: map['name'] ?? '',
       email: map['email'] ?? '',
-      picture: map['picture'] ?? '',
+      gender: map['gender'],
+      fcmToken: map['fcm_token'],
+      profilePhotoPath: map['profile_photo_path'],
+      avatar: map['avatar'],
+      lastLoginAt: map['last_login_at'],
+      lastLoginIp: map['last_login_ip'],
+      type: map['type'],
     );
   }
 
-  // Optional: Override toString for easy debugging
-  @override
-  String toString() => 'UserModel(id: $id, name: $name, email: $email)';
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'airport_id': airportId,
+      'name': name,
+      'email': email,
+      'gender': gender,
+      'fcm_token': fcmToken,
+      'profile_photo_path': profilePhotoPath,
+      'avatar': avatar,
+      'last_login_at': lastLoginAt,
+      'last_login_ip': lastLoginIp,
+      'type': type,
+    };
+  }
 }

@@ -1,4 +1,3 @@
-import 'dart:developer';
 
 import 'package:aviation_app/screens/attendance/widget/attendance_info.dart';
 import 'package:aviation_app/screens/attendance/widget/check_in_button.dart';

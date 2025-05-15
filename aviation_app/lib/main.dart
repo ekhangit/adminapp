@@ -1,8 +1,9 @@
 import 'package:aviation_app/constant.dart';
 import 'package:aviation_app/controllers/storage/data_storage_controller.dart';
+import 'package:aviation_app/firebase_options.dart';
 import 'package:aviation_app/routes/AppPages.dart';
-import 'package:aviation_app/screens/main_screen.dart';
 import 'package:aviation_app/services/base_service.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
@@ -10,14 +11,18 @@ import 'package:responsive_sizer/responsive_sizer.dart';
 
 Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   removeSplash();
 
   await Get.putAsync(() async => DataStorageController(), permanent: true);
   await Get.putAsync(() async => BaseService().init(), permanent: true);
-  bool isLoggedIn = DataStorageController.to.currentSession.value != null;
-  runApp(MyApp(isLoggedIn: isLoggedIn));
+  final authToken = await DataStorageController.to.fetchAuthToken();
+
+  print("MyApp Login bool: $authToken");
+
+  runApp(MyApp(isLoggedIn: authToken.isNotEmpty));
 }
 
 Future removeSplash() async {
@@ -32,6 +37,8 @@ class MyApp extends StatelessWidget {
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
+    print("MyApp Login Status: $isLoggedIn");
+
     return ResponsiveSizer(
       builder: (context, orientation, screenType) {
         return GetMaterialApp(
@@ -39,7 +46,7 @@ class MyApp extends StatelessWidget {
           title: appName,
           debugShowCheckedModeBanner: false,
           theme: ThemeData(fontFamily: fontFamily),
-          // home: const MainScreen(),
+          initialRoute: isLoggedIn ? '/main' : '/login',
           getPages: AppPages.routes,
         );
       },

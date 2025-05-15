@@ -14,12 +14,19 @@ class Utils {
     );
   }
 
-  static showFlushbar(BuildContext context, String message, {Color? backgroundColor = AppColors.matteBlackColor}) {
+  static showFlushbar(
+    BuildContext context,
+    String message, {
+    Color? backgroundColor = AppColors.matteBlackColor,
+  }) {
     Flushbar(
       duration: Duration(seconds: 3),
       backgroundColor: backgroundColor!,
       messageText: Center(
-        child: Text(message, style: TextStyle(color: Colors.white)),
+        child: Text(
+          message,
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
       ),
       flushbarStyle: FlushbarStyle.GROUNDED,
     ).show(context);
