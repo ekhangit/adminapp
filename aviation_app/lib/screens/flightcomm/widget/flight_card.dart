@@ -1,13 +1,14 @@
+import 'package:aviation_app/models/flight_model.dart';
 import 'package:aviation_app/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import '../../../constant.dart';
 import '../../../controllers/flight/flightcomm_controller.dart';
-import '../../../models/flight_model.dart';
 import '../../../utils/app_colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
 class FlightCard extends StatelessWidget {
-  final FlightDetailModel flight;
+  final FlightsModel flight;
   final int index;
 
   const FlightCard({super.key, required this.flight, required this.index});
@@ -29,14 +30,14 @@ class FlightCard extends StatelessWidget {
           color:
               isSelected
                   ? AppColors.colorPrimary.withOpacity(0.15)
-                  : flight.unreadCount != "0"
+                  : flight.unseenChatsCount != 0
                   ? Colors.yellow.shade100.withOpacity(0.85)
                   : flight.status == "late"
                   ? Colors.red.withOpacity(0.25)
                   : Colors.white,
           border: Border(
             left: BorderSide(
-              color: flight.status == "on-time" ? Colors.green : Colors.red,
+              color: flight.flightDelayStatus ? Colors.red : Colors.green,
               width: 1.2.w,
             ),
           ),
@@ -52,7 +53,9 @@ class FlightCard extends StatelessWidget {
                   color: AppColors.colorPrimary,
                 )
                 : Image.asset(
-                  "assets/images/outbound.png",
+                  flight.isDeparture
+                      ? "assets/images/outbound.png"
+                      : "assets/images/inbound.png",
                   height: 2.8.h,
                   width: 2.8.h,
                 ),
@@ -68,7 +71,7 @@ class FlightCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CustomCircularImage(
-                        imageUrl: flight.airlineLogo,
+                        imageUrl: flight.airline?.picture ?? "",
                         size: 3.0.h,
                       ),
                       SizedBox(width: 1.8.w),
@@ -80,7 +83,7 @@ class FlightCard extends StatelessWidget {
                           spacing: 1.6.w,
                           children: [
                             Text(
-                              "${flight.flightNo}${_shouldAddSpace(flight.flightNo) ? '' : ''}",
+                              flight.flightInfo,
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w700,
@@ -88,38 +91,42 @@ class FlightCard extends StatelessWidget {
                             ),
                             _divider(),
                             Text(
-                              '${flight.fromCode}-${flight.toCode}',
+                              '${flight.departureAirport.iataCode}-${flight.arrivalAirport.iataCode}',
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
-                            _divider(),
-                            Text(
-                              "A320",
-                              style: TextStyle(
-                                fontSize: 13.5.sp,
-                                fontWeight: FontWeight.w600,
+                            if (flight.aircraft != null &&
+                                flight.aircraft!.aircraftType != null)
+                              _divider(),
+                            if (flight.aircraft != null &&
+                                flight.aircraft!.aircraftType != null)
+                              Text(
+                                flight.aircraft!.aircraftType!.icao,
+                                style: TextStyle(
+                                  fontSize: 13.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
-                            _divider(),
-                            Text(
-                              "G-EUYH",
-                              style: TextStyle(
-                                fontSize: 13.5.sp,
-                                fontWeight: FontWeight.w600,
+                            if (flight.aircraft != null) _divider(),
+                            if (flight.aircraft != null)
+                              Text(
+                                flight.aircraft!.name,
+                                style: TextStyle(
+                                  fontSize: 13.5.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            ),
                           ],
                         ),
                       ),
-
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          if (flight.duration.isNotEmpty &&
-                              flight.unreadCount != "0")
-                            _seenCount(' ${flight.unreadCount} ', Colors.green),
+                          // if (flight.duration.isNotEmpty &&
+                          //     flight.unreadCount != "0")
+                          //   _seenCount(' ${flight.unreadCount} ', Colors.green),
                           SizedBox(width: 0.2.h),
 
                           // Star Icon
@@ -145,17 +152,44 @@ class FlightCard extends StatelessWidget {
                   // Time & Duration Row
                   Row(
                     children: [
-                      _timeBlock(
-                        "STD",
-                        flight.departureTime,
-                        Colors.blue.shade700,
-                      ),
+                      if (flight.isDeparture) ...[
+                        if (flight.std != null && flight.std!.isNotEmpty)
+                          _timeBlock(
+                            "STD",
+                            formatFlightTime(flight.std!),
+                            Colors.blue.shade700,
+                          ),
+                        if (flight.std != null && flight.std!.isNotEmpty)
+                          SizedBox(width: 2.5.w),
+                        if (flight.atd != null && flight.atd!.isNotEmpty)
+                          _timeBlock(
+                            "ATD",
+                            formatFlightTime(flight.atd!),
+                            Colors.green.shade700,
+                          ),
+                      ] else ...[
+                        if (flight.sta != null && flight.sta!.isNotEmpty)
+                          _timeBlock(
+                            "STA",
+                            formatFlightTime(flight.sta!),
+                            Colors.blue.shade700,
+                          ),
+                        if (flight.sta != null && flight.sta!.isNotEmpty)
+                          SizedBox(width: 2.5.w),
+                        if (flight.ata != null && flight.ata!.isNotEmpty)
+                          _timeBlock(
+                            "ATA",
+                            formatFlightTime(flight.ata!),
+                            Colors.green.shade700,
+                          ),
+                      ],
                       SizedBox(width: 2.5.w),
-                      _timeBlock("ATD", flight.arrivalTime, Colors.green),
-                      SizedBox(width: 2.5.w),
-                      if (flight.status == "late")
+                      if (flight.flightDelays.isNotEmpty &&
+                          flight.flightDelays[0].delayType != '-' &&
+                          flight.flightDelays[0].delayCode != '-' &&
+                          flight.flightDelays[0].delayDate != '-')
                         Text(
-                          "DL81/0015",
+                          "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}/${flight.flightDelays[0].delayDate}",
                           style: TextStyle(
                             fontSize: 14.5.sp,
                             fontWeight: FontWeight.w600,
@@ -163,20 +197,23 @@ class FlightCard extends StatelessWidget {
                           ),
                         ),
                       Spacer(),
-                      if (flight.duration.isNotEmpty)
-                        Text(
-                          flight.duration,
-                          style: TextStyle(
-                            fontSize: 14.5.sp,
-                            color:
-                                flight.status == "late"
-                                    ? Colors.red
-                                    : Colors.green,
-                            fontWeight: FontWeight.w600,
-                          ),
+                      // if (flight.duration.isNotEmpty)
+                      //   Text(
+                      //     flight.duration,
+                      //     style: TextStyle(
+                      //       fontSize: 14.5.sp,
+                      //       color:
+                      //           flight.status == "late"
+                      //               ? Colors.red
+                      //               : Colors.green,
+                      //       fontWeight: FontWeight.w600,
+                      //     ),
+                      //   ),
+                      if (flight.unseenChatsCount != 0)
+                        _seenCount(
+                          ' ${flight.unseenChatsCount} ',
+                          Colors.green,
                         ),
-                      if (flight.duration.isEmpty && flight.unreadCount != "0")
-                        _seenCount(' ${flight.unreadCount} ', Colors.green),
                     ],
                   ),
                 ],

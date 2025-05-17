@@ -34,3 +34,15 @@ Color getRandomColor() {
   ];
   return colors[Random().nextInt(colors.length)];
 }
+
+String formatFlightTime(String dateTimeStr) {
+  try {
+    final dateTime = DateTime.parse(dateTimeStr);
+    final day = dateTime.day.toString().padLeft(2, '0');
+    final hour = dateTime.hour.toString().padLeft(2, '0');
+    final minute = dateTime.minute.toString().padLeft(2, '0');
+    return '$day $hour:$minute';
+  } catch (_) {
+    return dateTimeStr; // fallback if parsing fails
+  }
+}

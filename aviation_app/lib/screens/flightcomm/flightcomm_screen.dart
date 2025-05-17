@@ -6,7 +6,6 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/flight/flightcomm_controller.dart';
-import '../../models/flight_model.dart';
 import '../../utils/app_colors.dart';
 
 class FlightcommScreen extends StatelessWidget {
@@ -100,35 +99,49 @@ class FlightcommScreen extends StatelessWidget {
                 pinned: true,
                 delegate: _FilterHeaderDelegate(controller),
               ),
-              // const SliverToBoxAdapter(child: SizedBox(height: 5)),
+              SliverToBoxAdapter(
+                child: Obx(() {
+                  if (controller.isFlightCommLoading.value) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 60),
+                      child: Center(child: CircularProgressIndicator()),
+                    );
+                  }
 
-              // Flight List
-              SliverList(
-                delegate: SliverChildBuilderDelegate((context, index) {
-                  return GestureDetector(
-                    onTap: () {
-                      if (controller.selectedFlightIndex.value == -1) {
-                        Get.to(() => ChatScreen());
-                      } else {
-                        controller.selectFlight(index);
-                      }
+                  if (controller.allFlights.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 60),
+                      child: Center(child: Text("No flights available.")),
+                    );
+                  }
+
+                  return ListView.separated(
+                    itemCount: controller.allFlights.length,
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    separatorBuilder:
+                        (context, index) => const Divider(
+                          height: 0,
+                          thickness: 0.3,
+                          color: Colors.grey,
+                        ),
+                    itemBuilder: (context, index) {
+                      final flight = controller.allFlights[index];
+                      return GestureDetector(
+                        behavior: HitTestBehavior.opaque,
+                        onTap: () {
+                          if (controller.selectedFlightIndex.value == -1) {
+                            Get.to(() => const ChatScreen());
+                          } else {
+                            controller.selectFlight(index);
+                          }
+                        },
+                        onLongPress: () => controller.selectFlight(index),
+                        child: FlightCard(flight: flight, index: index),
+                      );
                     },
-
-                    onLongPress: () => controller.selectFlight(index),
-
-                    child: Column(
-                      children: [
-                        FlightCard(flight: flights[index], index: index),
-                        if (index != flights.length - 1)
-                          Divider(
-                            color: Colors.grey,
-                            height: 0,
-                            thickness: 0.25,
-                          ),
-                      ],
-                    ),
                   );
-                }, childCount: flights.length),
+                }),
               ),
             ],
           ),

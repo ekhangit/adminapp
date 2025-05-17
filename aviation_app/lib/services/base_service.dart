@@ -1,67 +1,12 @@
 import 'dart:developer';
 
+import 'package:aviation_app/utils/utils.dart';
 import 'package:dio/dio.dart';
 import 'package:get/get.dart';
 
 import '../constant.dart';
 import '../controllers/storage/data_storage_controller.dart';
-
-// class BaseService extends GetxService {
-//   late Dio _dio;
-//   static BaseService get instance => Get.find<BaseService>();
-
-//   void reloadHeaders() async {
-//     String authToken = await _fetchAuthToken();
-
-//     _dio.interceptors.add(
-//       InterceptorsWrapper(
-//         onRequest: (options, handler) {
-//           return handler.next(options);
-//         },
-//       ),
-//     );
-//   }
-
-//   Future<BaseService> init() async {
-
-//     String authToken = await _fetchAuthToken();
-
-//     _dio = Dio(
-//       BaseOptions(
-//         baseUrl: apiUrl,
-//         connectTimeout: const Duration(milliseconds: 10000),
-//         receiveTimeout: const Duration(milliseconds: 30000),
-//       ),
-//     );
-
-//     _dio.interceptors.add(
-//       InterceptorsWrapper(
-//         onRequest: (options, handler) {
-
-//           return handler.next(options); // Continue with the requestw
-//         },
-//         onResponse: (response, handler) {
-//           return handler.next(response); // Continue with the response
-//         },
-//         onError: (DioError e, handler) {
-//           return handler.next(e); // Continue with the error
-//         },
-//       ),
-//     );
-
-//     // print("[apiurl] ${dio.options.baseUrl}");
-
-//     return this;
-//   }
-
-//   Dio get dio => _dio;
-
-//   Future<String> _fetchAuthToken() async {
-//     String token = await DataStorageController.to.fetchAuthToken();
-//     log('[fetchAuthToken] toke : $token');
-//     return token;
-//   }
-// }
+import '../utils/app_colors.dart';
 
 class BaseService extends GetxService {
   late Dio _dio;
@@ -78,6 +23,30 @@ class BaseService extends GetxService {
             options.headers['Authorization'] = 'Bearer $token';
           }
           return handler.next(options);
+        },
+        onError: (DioException e, handler) async {
+          log('[BaseService] onError : ${e.response?.statusCode}');
+
+          if (e.response?.statusCode == 401 || e.response?.statusCode == 400) {
+            log(
+              '[BaseService] Auth error detected. Redirecting to LoginScreen.',
+            );
+
+            // Clear session
+            await DataStorageController.to.clearSession();
+
+            // Navigate to login screen
+            Get.offAllNamed('/login');
+
+            // Optionally show a message
+            Utils.showFlushbar(
+              Get.context!,
+              "Session expired. Please log in again.",
+              backgroundColor: AppColors.colorWarning,
+            );
+          }
+
+          return handler.next(e);
         },
       ),
     );
@@ -107,7 +76,30 @@ class BaseService extends GetxService {
           return handler.next(options);
         },
         onResponse: (response, handler) => handler.next(response),
-        onError: (DioException e, handler) => handler.next(e),
+        onError: (DioException e, handler) async {
+          log('[BaseService] onError : ${e.response?.statusCode}');
+
+          if (e.response?.statusCode == 302) {
+            log(
+              '[BaseService] Auth error detected. Redirecting to LoginScreen.',
+            );
+
+            // Clear session
+            await DataStorageController.to.clearSession();
+
+            // Navigate to login screen
+            Get.offAllNamed('/login');
+
+            // Optionally show a message
+            Utils.showFlushbar(
+              Get.context!,
+              "Session expired. Please log in again.",
+              backgroundColor: AppColors.colorWarning,
+            );
+          }
+
+          return handler.next(e);
+        },
       ),
     );
 

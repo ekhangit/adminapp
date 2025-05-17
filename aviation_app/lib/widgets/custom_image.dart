@@ -24,24 +24,31 @@ class CustomCircularImage extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        border: borderColor != null
-            ? Border.all(color: borderColor!, width: borderWidth)
-            : null,
+        border:
+            borderColor != null
+                ? Border.all(color: borderColor!, width: borderWidth)
+                : null,
       ),
       child: ClipOval(
-        child: isNetwork
-            ? CachedNetworkImage(
-                imageUrl: imageUrl,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => const Center(
-                  child: CircularProgressIndicator(strokeWidth: 2),
-                ),
-                errorWidget: (context, url, error) => const Icon(Icons.error),
-              )
-            : Image.asset(
-                imageUrl,
-                fit: BoxFit.cover,
-              ),
+        child:
+            isNetwork
+                ? CachedNetworkImage(
+                  imageUrl: imageUrl,
+                  fit: BoxFit.cover,
+                  placeholder:
+                      (context, url) => const Center(
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      ),
+                  errorWidget:
+                      (context, url, error) => Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: Colors.grey[200],
+                        ),
+                        child: const Icon(Icons.error_outline, size: 17.5),
+                      ),
+                )
+                : Image.asset(imageUrl, fit: BoxFit.cover),
       ),
     );
   }
