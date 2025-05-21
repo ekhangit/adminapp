@@ -118,37 +118,50 @@ class DashboardScreen extends StatelessWidget {
                           children: [
                             CustomBox2(
                               title: 'Attendance',
-                              iconPath: 'assets/svg/attendance_new.svg',
+                              iconPath: 'assets/images/hr_final.png',
                               onTap:
                                   () => Get.to(() => const AttendenceScreen()),
                             ),
                             CustomBox2(
                               title: 'Flight Comm',
-                              iconPath: 'assets/svg/flight_comm.svg',
+                              iconPath: 'assets/images/flight_comm_final.png',
                               onTap:
                                   () => Get.to(() => const FlightcommScreen()),
                             ),
+
                             CustomBox2(
                               title: 'My Roster',
-                              iconPath: 'assets/svg/my_roster.svg',
-                              onTap: () {},
+                              iconPath: 'assets/images/my_duties_final.png',
+                              onTap: () => (),
                             ),
                             CustomBox2(
                               title: 'PTS',
-                              iconPath: 'assets/svg/pts.svg',
-                              onTap: () {},
+                              iconPath: 'assets/images/airlines_final.png',
+                              onTap: () => (),
+                            ),
+
+                            CustomBox2(
+                              title: 'Flight Tracker',
+                              iconPath:
+                                  'assets/images/flight_tracker_final.png',
+                              onTap: () => (),
+                            ),
+                            CustomBox2(
+                              title: 'Flight Watch',
+                              iconPath: 'assets/images/flight_watch_final.png',
+                              onTap: () => (),
                             ),
                             CustomBox2(
                               title: 'Leave Request',
-                              iconPath: 'assets/svg/leave.svg',
+                              iconPath: 'assets/images/airlines_final.png',
                               onTap:
                                   () =>
                                       Get.to(() => const LeaveRequestScreen()),
                             ),
                             CustomBox2(
                               title: 'Staff Watch',
-                              iconPath: 'assets/svg/staff_watch.svg',
-                              onTap: () {},
+                              iconPath: 'assets/images/staff_watch_final.png',
+                              onTap: () => (),
                             ),
                           ],
                         ),

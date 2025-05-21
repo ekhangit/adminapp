@@ -6,17 +6,14 @@ class FlightsModel {
   final int airlineId;
   final int departureAirportId;
   final int arrivalAirportId;
-  final String flightDatetime;
+  final String? flightDatetime;
   final String scheduledDepartureTime;
   final String scheduledArrivalTime;
   final String status;
-  final int aircraftTypeId;
-  final int aircraftId;
   final String? std;
   final String? atd;
   final String? sta;
   final String? ata;
-  final int messagesCount;
   final int chatsCount;
   final int unseenChatsCount;
   final Airline? airline;
@@ -24,6 +21,11 @@ class FlightsModel {
   final Airport arrivalAirport;
   final Aircraft? aircraft;
   final List<FlightDelay> flightDelays;
+  final bool isFavorite;
+  final int departureDelayMinutes;
+  final String departureDelayColor;
+  final int arrivalDelayMinutes;
+  final String arrivalDelayColor;
 
   FlightsModel({
     required this.id,
@@ -31,17 +33,14 @@ class FlightsModel {
     required this.airlineId,
     required this.departureAirportId,
     required this.arrivalAirportId,
-    required this.flightDatetime,
+    this.flightDatetime,
     required this.scheduledDepartureTime,
     required this.scheduledArrivalTime,
     required this.status,
-    required this.aircraftTypeId,
-    required this.aircraftId,
     required this.std,
     required this.atd,
     required this.sta,
     this.ata,
-    required this.messagesCount,
     required this.chatsCount,
     required this.unseenChatsCount,
     this.airline,
@@ -49,6 +48,11 @@ class FlightsModel {
     required this.arrivalAirport,
     this.aircraft,
     required this.flightDelays,
+    required this.isFavorite,
+    required this.departureDelayMinutes,
+    required this.departureDelayColor,
+    required this.arrivalDelayMinutes,
+    required this.arrivalDelayColor,
   });
 
   factory FlightsModel.fromJson(Map<String, dynamic> json) {
@@ -64,17 +68,14 @@ class FlightsModel {
       airlineId: json['airline_id'],
       departureAirportId: json['departure_airport_id'],
       arrivalAirportId: json['arrival_airport_id'],
-      flightDatetime: json['flight_datetime'],
+      flightDatetime: json['flight_datetime'] ?? '',
       scheduledDepartureTime: json['scheduled_departure_time'],
       scheduledArrivalTime: json['scheduled_arrival_time'],
       status: json['status'],
-      aircraftTypeId: json['aircraft_type_id'],
-      aircraftId: json['aircraft_id'],
       std: json['std'] ?? '',
       atd: json['atd'] ?? '',
       sta: json['sta'] ?? '',
       ata: json['ata'] ?? '',
-      messagesCount: json['messages_count'],
       chatsCount: json['chats_count'],
       unseenChatsCount: json['unseen_chats_count'],
       airline:
@@ -84,6 +85,11 @@ class FlightsModel {
       aircraft:
           json['aircraft'] != null ? Aircraft.fromJson(json['aircraft']) : null,
       flightDelays: delays,
+      isFavorite: json['is_favorite'] ?? false,
+      departureDelayMinutes: json['departure_delay_minutes'] ?? 0,
+      departureDelayColor: json['departure_delay_color'] ?? 'green',
+      arrivalDelayMinutes: json['arrival_delay_minutes'] ?? 0,
+      arrivalDelayColor: json['arrival_delay_color'] ?? 'green',
     );
   }
 
@@ -91,6 +97,20 @@ class FlightsModel {
       ['FRA', 'MUC', 'DUS', 'HAM', 'STR'].contains(departureAirport.iataCode);
 
   bool get flightDelayStatus => flightDelays.isNotEmpty;
+
+  String get formattedDepartureDelay {
+    final minutes = departureDelayMinutes.abs(); // Handle negative values
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    return "${hours.toString().padLeft(2, '0')}:${mins.toString().padLeft(2, '0')}";
+  }
+
+  String get formattedArrivalDelay {
+    final minutes = arrivalDelayMinutes.abs(); // Handle negative values
+    final hours = minutes ~/ 60;
+    final mins = minutes % 60;
+    return "${hours.toString().padLeft(2, '0')}:${mins.toString().padLeft(2, '0')}";
+  }
 }
 
 class Airline {

@@ -12,23 +12,50 @@ class FlightCommService {
   static FlightCommService get instance => _instance;
 
   /// Fetch all flight communications
-  Future<ResponseClass<List<FlightsModel>>> allFlightComm({required String date, required String type}) async {
+  Future<ResponseClass<Map<String, List<FlightsModel>>>> allFlightComm({
+    required String date,
+  }) async {
     try {
       final response = await BaseService.instance.dio.post(
         ApiConfig.allFlightComm,
-        data: {"date": date, "type": type},
+        data: {"date": date},
       );
 
       log("[allFlightComm] response : ${response.data}");
 
-      var flightsList = response.data['body']['flights'] as List;
+      final body = response.data['body'];
 
-      log("[allFlightComm] flightsList  total : ${flightsList.length}");
+      Map<String, List<FlightsModel>> flightsMap = {
+        'all_flights':
+            (body['all_flights'] as List?)
+                ?.map((f) => FlightsModel.fromJson(f))
+                .toList() ??
+            [],
+        'departure_flights':
+            (body['departure_flights'] as List?)
+                ?.map((f) => FlightsModel.fromJson(f))
+                .toList() ??
+            [],
+        'arrival_flights':
+            (body['arrival_flights'] as List?)
+                ?.map((f) => FlightsModel.fromJson(f))
+                .toList() ??
+            [],
+        'cancelled_flights':
+            (body['cancelled_flights'] as List?)
+                ?.map((f) => FlightsModel.fromJson(f))
+                .toList() ??
+            [],
+        'my_flights':
+            (body['my_flights'] as List?)
+                ?.map((f) => FlightsModel.fromJson(f))
+                .toList() ??
+            [],
+      };
 
-      List<FlightsModel> flights =
-          flightsList.map((f) => FlightsModel.fromJson(f)).toList();
+      // log("[allFlightComm] flightsMap : $flightsMap");
 
-      return ResponseClass.success(flights);
+      return ResponseClass.success(flightsMap);
     } catch (e) {
       return ResponseClass.error(e.toString());
     }

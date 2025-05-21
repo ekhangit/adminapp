@@ -1,5 +1,9 @@
 import 'package:aviation_app/controllers/flight/chat_controller.dart';
+import 'package:aviation_app/screens/flightcomm/info/arr_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/chat_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/chkin_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/ldm_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/mvt_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/trc_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/widget/chat_bottom_view.dart';
 import 'package:aviation_app/screens/flightcomm/info/widget/into_widget.dart';
@@ -35,8 +39,11 @@ class ChatScreen extends StatelessWidget {
               child: Column(
                 children: [
                   // 🔵 Top Info Header (Fixed)
-                  Obx(
-                    () => Container(
+                  Obx(() {
+                    final flight = controller.flightDetail.value;
+                    if (flight == null) return const SizedBox.shrink();
+
+                    return Container(
                       padding: const EdgeInsets.only(
                         top: 16,
                         left: 16,
@@ -47,7 +54,7 @@ class ChatScreen extends StatelessWidget {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          // 🔹 First Row (Always Visible)
+                          // 🔹 Row 1: Flight Info & Route
                           Row(
                             crossAxisAlignment: CrossAxisAlignment.center,
                             children: [
@@ -59,97 +66,166 @@ class ChatScreen extends StatelessWidget {
                                   size: 20,
                                 ),
                               ),
-                              const SizedBox(width: 5),
+                              const SizedBox(width: 8),
                               Expanded(
-                                child: Wrap(
-                                  crossAxisAlignment: WrapCrossAlignment.center,
-                                  spacing: 6,
-                                  runSpacing: 2,
-                                  children: const [
-                                    Text(
-                                      "IB 1332 | FRA-MAD",
-                                      style: TextStyle(
-                                        color: Colors.red,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 16.5,
-                                        height: 0,
-                                      ),
-                                      overflow: TextOverflow.ellipsis,
+                                child: Column(
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Text(
+                                          flight.basicDetails.flightInfo,
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16.5,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+                                        _divider(Colors.red),
+                                        const SizedBox(width: 6),
+                                        Text(
+                                          "${flight.departureAirport.iataCode}-${flight.arrivalAirport.iataCode}",
+                                          style: const TextStyle(
+                                            color: Colors.red,
+                                            fontWeight: FontWeight.w500,
+                                            fontSize: 16.5,
+                                          ),
+                                        ),
+                                        const SizedBox(width: 6),
+
+                                        // Text(
+                                        //   "GATE: ${flight.basicDetails.gate ?? '--'}  |  POS: ${flight.basicDetails.pos ?? '--'}",
+                                        //   style: const TextStyle(
+                                        //     color: Colors.blue,
+                                        //     fontWeight: FontWeight.w500,
+                                        //     fontSize: 12.5,
+                                        //   ),
+                                        // ),
+                                        Row(
+                                          children: [
+                                            Text(
+                                              "GATE: ${flight.basicDetails.gate ?? '--'}",
+                                              style: const TextStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 12.5,
+                                              ),
+                                            ),
+                                            const SizedBox(width: 6),
+                                            _divider(Colors.blue),
+                                            const SizedBox(width: 6),
+                                            Text(
+                                              "POS: ${flight.basicDetails.pos ?? '--'}",
+                                              style: const TextStyle(
+                                                color: Colors.blue,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 12.5,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ],
                                     ),
-                                    Text(
-                                      "GATE: B37 | POS: 804",
-                                      style: TextStyle(
-                                        color: Colors.blue,
-                                        fontWeight: FontWeight.w600,
-                                        fontSize: 12.5,
+                                    const SizedBox(height: 2),
+
+                                    // 🔽 Row 2: Operational Details
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        children: [
+                                          InfoBadge(
+                                            label: "ATD",
+                                            color: Colors.green,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InfoText(
+                                            formatFlightTime(
+                                              flight.basicDetails.atd,
+                                            ),
+                                            textColor: Colors.black87,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InfoText(
+                                            flight.aircraft.aircraftType.icao,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _divider(Colors.blue),
+                                          const SizedBox(width: 6),
+                                          InfoText(flight.aircraft.name),
+                                          const SizedBox(width: 6),
+                                          _divider(Colors.blue),
+                                          const SizedBox(width: 6),
+                                          InfoBadge(
+                                            label: "CFG",
+                                            color: AppColors.colorPrimary,
+                                          ),
+                                          const SizedBox(width: 6),
+                                          InfoText(
+                                            [
+                                                  flight.capacity.f,
+                                                  flight.capacity.j,
+                                                  flight.capacity.c,
+                                                  flight.capacity.s,
+                                                  flight.capacity.w,
+                                                  flight.capacity.y,
+                                                  flight.capacity.m,
+                                                ]
+                                                .where(
+                                                  (e) =>
+                                                      e != null && e.isNotEmpty,
+                                                )
+                                                .join(' '),
+                                          ),
+                                          const SizedBox(width: 6),
+                                          _divider(Colors.blue),
+                                          const SizedBox(width: 6),
+                                          InfoBadge(
+                                            label: "ACT",
+                                            color: AppColors.colorPrimary,
+                                          ),
+                                          if (flight.actualPax.paxC!.isNotEmpty)
+                                            const SizedBox(width: 6),
+                                          if (flight.actualPax.paxC!.isNotEmpty)
+                                            InfoText(
+                                              "J${flight.actualPax.paxC}",
+                                            ),
+                                          if (flight.actualPax.paxY!.isNotEmpty)
+                                            const SizedBox(width: 6),
+                                          if (flight.actualPax.paxY!.isNotEmpty)
+                                            InfoText(
+                                              "Y${flight.actualPax.paxY}",
+                                            ),
+
+                                          if (flight
+                                              .actualPax
+                                              .paxInf!
+                                              .isNotEmpty)
+                                            const SizedBox(width: 6),
+                                          if (flight
+                                              .actualPax
+                                              .paxInf!
+                                              .isNotEmpty)
+                                            InfoText(
+                                              "+${flight.actualPax.paxInf} INF",
+                                            ),
+                                        ],
                                       ),
-                                      overflow: TextOverflow.ellipsis,
                                     ),
                                   ],
                                 ),
                               ),
-                              const SizedBox(width: 10),
-                              GestureDetector(
-                                onTap: () => controller.toggleHeaderExpansion(),
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(
-                                    horizontal: 10,
-                                    vertical: 4,
-                                  ),
-                                  decoration: BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.circular(4),
-                                    border: Border.all(
-                                      color: AppColors.matteBlackColor,
-                                      width: 0.2,
-                                    ),
-                                  ),
-                                  child: Text(
-                                    controller.isHeaderExpanded.value
-                                        ? "Hide"
-                                        : "Show",
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.w500,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ),
-                              ),
                             ],
                           ),
-                          // 🔽 Expanded Row (Conditional)
-                          if (controller.isHeaderExpanded.value) ...[
-                            const SizedBox(height: 8),
-                            Wrap(
-                              alignment: WrapAlignment.start,
-                              crossAxisAlignment: WrapCrossAlignment.center,
-                              spacing: 6,
-                              runSpacing: 6,
-                              children: [
-                                InfoBadge(label: "ATD", color: Colors.blue),
-                                InfoText("24 05:10", textColor: Colors.black),
-                                InfoText("CRJX"),
-                                InfoText("|"),
-                                InfoText("EC-MNR"),
-                                InfoText("|"),
-                                InfoText("CFG"),
-                                InfoText("J6 Y94"),
-                                InfoText("|"),
-                                InfoText("ACT 3C"),
-                                InfoText("J3 Y62"),
-                              ],
-                            ),
-                          ],
                         ],
                       ),
-                    ),
-                  ),
+                    );
+                  }),
 
                   // 🔵 Chip Filter Row (Fixed)
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.only(
-                      top: 4,
+                      top: 8,
                       left: 12,
                       right: 0,
                       bottom: 8,
@@ -177,7 +253,6 @@ class ChatScreen extends StatelessWidget {
                       ),
                     ),
                   ),
-
                   Expanded(
                     child: Obx(() {
                       switch (controller.selectedTab.value) {
@@ -193,9 +268,16 @@ class ChatScreen extends StatelessWidget {
                           return TrcInfo();
 
                         case 'CHKIN':
-                          return const Center(
-                            child: Text("Check-in Data Placeholder"),
-                          );
+                          return ChkinInfo();
+
+                        case 'ARR':
+                          return ArrInfo();
+
+                        case 'MVT':
+                          return MvtInfo();
+
+                        case 'LDM':
+                          return LdmInfo();
 
                         default:
                           return const Center(
@@ -212,6 +294,9 @@ class ChatScreen extends StatelessWidget {
       ),
     );
   }
+
+  Widget _divider(Color color) =>
+      Container(width: 1.0, height: 17.5, color: color);
 
   Widget _chip(String label) {
     final controller = Get.find<ChatController>();

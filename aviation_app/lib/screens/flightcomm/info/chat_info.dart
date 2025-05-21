@@ -34,23 +34,6 @@ class ChatInfo extends StatelessWidget {
                 children: [
                   // Incoming: Show avatar
                   if (!isSentMe)
-                    // Padding(
-                    //   padding: const EdgeInsets.only(top: 6),
-                    //   child: CircleAvatar(
-                    //     backgroundColor: controller.getAvatarColor(
-                    //       message.senderInitial,
-                    //     ),
-                    //     radius: 17.5,
-                    //     child: Text(
-                    //       message.senderInitial,
-                    //       style: TextStyle(
-                    //         color: Colors.white,
-                    //         fontWeight: FontWeight.w600,
-                    //         fontSize: 14,
-                    //       ),
-                    //     ),
-                    //   ),
-                    // ),
                     Container(
                       padding: EdgeInsets.all(10),
                       decoration: BoxDecoration(
@@ -92,29 +75,88 @@ class ChatInfo extends StatelessWidget {
                               bottomLeft: Radius.circular(12),
                               bottomRight: Radius.circular(12),
                             ),
+                            border:
+                                message.type != null
+                                    ? Border.all(
+                                      color: AppColors.chatCardColor,
+                                      width: 2.5,
+                                    )
+                                    : null,
                           ),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               if (!isSentMe)
-                                Text(
-                                  message.senderName,
-                                  style: TextStyle(
-                                    color: controller.getAvatarColor(
-                                      message.senderInitial,
+                                Row(
+                                  children: [
+                                    Text(
+                                      message.senderName,
+                                      style: TextStyle(
+                                        color: controller.getAvatarColor(
+                                          message.senderInitial,
+                                        ),
+                                        fontSize: 15,
+                                        fontWeight: FontWeight.w600,
+                                      ),
                                     ),
-                                    fontSize: 15,
-                                    fontWeight: FontWeight.w600,
-                                  ),
+                                    Spacer(),
+                                    if (message.type != null) ...[
+                                      const SizedBox(height: 8),
+                                      Text(
+                                        "(${message.type!})",
+                                        style: const TextStyle(
+                                          fontSize: 13,
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ],
                                 ),
                               if (!isSentMe) SizedBox(height: 4),
-                              Text(
-                                message.message,
-                                style: TextStyle(
-                                  color: Colors.black87,
-                                  fontSize: 15,
+                              if (message.type == null) ...[
+                                Text(
+                                  message.message,
+                                  style: TextStyle(
+                                    color: Colors.black87,
+                                    fontSize: 15,
+                                  ),
                                 ),
-                              ),
+                              ],
+
+                              // 🟡 Metadata if exists
+                              if (message.metadata != null &&
+                                  message.metadata!.isNotEmpty) ...[
+                                const SizedBox(height: 8),
+                                ...message.metadata!.entries.map(
+                                  (entry) => Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Padding(
+                                        padding: const EdgeInsets.only(
+                                          bottom: 2.0,
+                                        ),
+                                        child: Text(
+                                          "${entry.key}: ${entry.value}",
+                                          style: const TextStyle(
+                                            fontSize: 13,
+                                            color: Colors.black87,
+                                            fontWeight: FontWeight.w600,
+                                          ),
+                                        ),
+                                      ),
+                                      if (entry.key !=
+                                          message.metadata!.entries.last.key)
+                                        const Divider(
+                                          color: Colors.grey,
+                                          thickness: 0.4,
+                                          height: 8,
+                                        ),
+                                    ],
+                                  ),
+                                ),
+                              ],
                               Container(
                                 alignment: Alignment.centerRight,
                                 padding: const EdgeInsets.only(

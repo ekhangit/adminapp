@@ -1,12 +1,12 @@
-import 'package:aviation_app/constant.dart';
 import 'package:aviation_app/screens/flightcomm/info/widget/into_widget.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../constant.dart';
 import '../../../controllers/flight/chat_controller.dart';
 
-class TrcInfo extends StatelessWidget {
-  const TrcInfo({super.key});
+class ChkinInfo extends StatelessWidget {
+  const ChkinInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -39,49 +39,47 @@ class TrcInfo extends StatelessWidget {
           ),
           SizedBox(height: 12),
           InfoSection(
-            title: "TRC Info",
-            data: {"TRC": "--", "Mobile No": "--", "TRC RMKS": "--"},
-          ),
-          SizedBox(height: 12),
-          InfoSection(
-            title: "A/Data",
+            title: "STAFF Info",
             data: {
-              "CREW": "--",
-              "PANTRY": "--",
-              "CAPTAIN": "--",
-              "DOW": "--",
-              "DOI": "--",
-              "MTOW": "--",
-              "RTOW": "--",
+              "CKIN": "--",
+              "GATE": "--",
+              "GATE SPVR": "--",
+              "SPVR": "--",
+              "SPVR RMKS": "--",
             },
           ),
           SizedBox(height: 12),
           InfoSection(
-            title: "Fuel Data",
+            title: "CKIN Info",
             data: {
-              "TAXI+APU": "--",
-              "BLOCK": "--",
-              "TRIP": "--",
-              "EET": "--",
-              "TAKE OFF": "--",
-              "UPLIFTED": "--",
-              "ALTN": "--",
+              "CKIN Desk No.": "--",
+              "CKIN OPENED": "--",
+              "GATE OPENED": "--",
+              "BOARDING STARTED": "--",
+              "ALL MATERIAL SECURED CKIN": "--",
+              "No OF CKIN DESK USED": "--",
+              "CKIN CLOSED": "--",
+              "GATE CLOSED": "--",
+              "BOARDING COMPLETED": "--",
+              "ALL MATERIAL SECURED GATE": "--",
             },
           ),
           SizedBox(height: 12),
           InfoSection(
-            title: "F.O.D",
+            title: "Flight Briefing",
             data: {
-              "Before Arrival": "--",
-              "Before Departure": "--",
-              "After Departure": "--",
+              "SPECIALS": "--",
+              "BOOKING STATUS": "--",
+              "SCHEDULE INFO": "--",
+              "DOCS CHECK": "--",
+              "RAMP (SPECIAL)": "--",
+              "OTHERS": "--",
             },
           ),
           SizedBox(height: 12),
-          InfoSection(title: "Total Onboard", data: {"PAX": "--"}),
+          InfoSection(title: "Total Onboard", data: {"": ""}),
         ],
       ),
     );
   }
 }
-

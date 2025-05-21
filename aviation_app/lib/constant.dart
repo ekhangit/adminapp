@@ -1,6 +1,8 @@
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
+
 
 // Server Configuration
 const apiUrl = "https://staging.avsysdev.com";
@@ -45,4 +47,10 @@ String formatFlightTime(String dateTimeStr) {
   } catch (_) {
     return dateTimeStr; // fallback if parsing fails
   }
+}
+
+String formatDate(String rawDate) {
+  final date = DateTime.parse(rawDate);
+  final formatter = DateFormat('dd MMM yy'); // → 21 May 25
+  return formatter.format(date);
 }

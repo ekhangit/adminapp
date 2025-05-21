@@ -37,7 +37,15 @@ class FlightCard extends StatelessWidget {
                   : Colors.white,
           border: Border(
             left: BorderSide(
-              color: flight.flightDelayStatus ? Colors.red : Colors.green,
+              // color: flight.flightDelayStatus ? Colors.red : Colors.green,
+              color:
+                  flight.isDeparture
+                      ? flight.departureDelayColor == 'green'
+                          ? Colors.green.shade700
+                          : Colors.red.shade700
+                      : flight.arrivalDelayColor == 'green'
+                      ? Colors.green.shade700
+                      : Colors.red.shade700,
               width: 1.2.w,
             ),
           ),
@@ -165,7 +173,13 @@ class FlightCard extends StatelessWidget {
                           _timeBlock(
                             "ATD",
                             formatFlightTime(flight.atd!),
-                            Colors.green.shade700,
+                            flight.isDeparture
+                                ? flight.departureDelayColor == 'green'
+                                    ? Colors.green.shade700
+                                    : Colors.red.shade700
+                                : flight.arrivalDelayColor == 'green'
+                                ? Colors.green.shade700
+                                : Colors.red.shade700,
                           ),
                       ] else ...[
                         if (flight.sta != null && flight.sta!.isNotEmpty)
@@ -180,7 +194,13 @@ class FlightCard extends StatelessWidget {
                           _timeBlock(
                             "ATA",
                             formatFlightTime(flight.ata!),
-                            Colors.green.shade700,
+                            flight.isDeparture
+                                ? flight.departureDelayColor == 'green'
+                                    ? Colors.green.shade700
+                                    : Colors.red.shade700
+                                : flight.arrivalDelayColor == 'green'
+                                ? Colors.green.shade700
+                                : Colors.red.shade700,
                           ),
                       ],
                       SizedBox(width: 2.5.w),
@@ -197,18 +217,28 @@ class FlightCard extends StatelessWidget {
                           ),
                         ),
                       Spacer(),
-                      // if (flight.duration.isNotEmpty)
-                      //   Text(
-                      //     flight.duration,
-                      //     style: TextStyle(
-                      //       fontSize: 14.5.sp,
-                      //       color:
-                      //           flight.status == "late"
-                      //               ? Colors.red
-                      //               : Colors.green,
-                      //       fontWeight: FontWeight.w600,
-                      //     ),
-                      //   ),
+                      if ((flight.isDeparture &&
+                              flight.departureDelayMinutes != 0) ||
+                          (!flight.isDeparture &&
+                              flight.arrivalDelayMinutes != 0))
+                        Text(
+                          flight.isDeparture
+                              ? flight.formattedDepartureDelay
+                              : flight.formattedArrivalDelay,
+                          style: TextStyle(
+                            fontSize: 14.5.sp,
+                            color:
+                                flight.isDeparture
+                                    ? flight.departureDelayColor == 'green'
+                                        ? Colors.green
+                                        : Colors.red
+                                    : flight.arrivalDelayColor == 'green'
+                                    ? Colors.green
+                                    : Colors.red,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
+
                       if (flight.unseenChatsCount != 0)
                         _seenCount(
                           ' ${flight.unseenChatsCount} ',

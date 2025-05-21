@@ -81,7 +81,7 @@ class CustomBox2 extends StatelessWidget {
       onTap: onTap,
       child: Container(
         width: (MediaQuery.of(context).size.width - 50) / 2, // 2 per row
-        margin: const EdgeInsets.only(bottom: 12),
+        margin: const EdgeInsets.only(bottom: 6),
         padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           // color: AppColors.colorWhite,
@@ -98,18 +98,19 @@ class CustomBox2 extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              padding: const EdgeInsets.all(20),
+              // padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 // color: Color(0xFF0083e6).withOpacity(0.25),
-                color: AppColors.colorWarning,
+                // color: AppColors.colorWarning,
                 shape: BoxShape.circle,
               ),
-              child: SvgPicture.asset(
-                iconPath,
-                width: 45,
-                height: 45,
-                color: Colors.white,
-              ),
+              // child: SvgPicture.asset(
+              //   iconPath,
+              //   width: 45,
+              //   height: 45,
+              //   color: Colors.white,
+              // ),
+              child: Image.asset(iconPath, width: 75, height: 75),
             ),
             const SizedBox(height: 12),
             Text(

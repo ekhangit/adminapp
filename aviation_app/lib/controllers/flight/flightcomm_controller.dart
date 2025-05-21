@@ -11,8 +11,14 @@ class FlightCommController extends GetxController {
   RxString formattedDateTime = ''.obs;
   late Timer _timer;
 
-  var allFlights = <FlightsModel>[].obs;
+  var myFlightList = <FlightsModel>[].obs;
+  var allFlightList = <FlightsModel>[].obs;
+  var arrivalFlightList = <FlightsModel>[].obs;
+  var departureFlightList = <FlightsModel>[].obs;
+  var cancelledFlightList = <FlightsModel>[].obs;
+
   var isFlightCommLoading = false.obs;
+  var isFlightCommLoading2 = false.obs;
 
   @override
   void onInit() {
@@ -39,7 +45,7 @@ class FlightCommController extends GetxController {
     'All',
     'Arrivals',
     'Departures',
-    'Canceled',
+    'Cancelled',
   ];
 
   void selectFilter(String filter) {
@@ -58,20 +64,27 @@ class FlightCommController extends GetxController {
   }
 
   Future<void> fetchFlightComm() async {
+    final now = DateTime.now().toUtc();
+    final formattedDate = DateFormat('yyyy-MM-dd').format(now);
+
+    log('[FlightCommController] formattedDate: $formattedDate');
     isFlightCommLoading.value = true;
 
     try {
-      final now = DateTime.now().toUtc();
-      final formattedDate = DateFormat('yyyy-MM-dd').format(now);
-
-      log('[FlightCommController] formattedDate: $formattedDate');
-
       final response = await FlightCommService.instance.allFlightComm(
         date: formattedDate,
-        type: 'all',
       );
-      if (response.isSuccess) {
-        allFlights.assignAll(response.data!);
+
+      if (response.isSuccess && response.data != null) {
+        final map = response.data!;
+        allFlightList.assignAll(map['all_flights'] ?? []);
+        arrivalFlightList.assignAll(map['arrival_flights'] ?? []);
+        departureFlightList.assignAll(map['departure_flights'] ?? []);
+        cancelledFlightList.assignAll(map['cancelled_flights'] ?? []);
+        myFlightList.assignAll(map['my_flights'] ?? []);
+
+        // show complete list of flights with json
+        // log('[FlightCommController]: ${arrivalFlightList.map((f) => f.id)}');
       } else {
         log('[FlightCommController] API Error: ${response.errorMessage}');
       }
@@ -80,6 +93,23 @@ class FlightCommController extends GetxController {
       log('[FlightCommController] Stack: $stack');
     } finally {
       isFlightCommLoading.value = false;
+    }
+  }
+
+  List<FlightsModel> get flightList {
+    switch (selectedFilter.value.toLowerCase()) {
+      case 'all':
+        return allFlightList;
+      case 'arrivals':
+        return arrivalFlightList;
+      case 'departures':
+        return departureFlightList;
+      case 'cancelled':
+        return cancelledFlightList;
+      case 'my flights':
+        return myFlightList;
+      default:
+        return allFlightList;
     }
   }
 

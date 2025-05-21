@@ -4,6 +4,9 @@ class ChatMessage {
   final String message;
   final String time;
   final bool isSentByMe;
+  final String? type;
+  final Map<String, dynamic>? metadata;
+
 
   ChatMessage({
     required this.senderInitial,
@@ -11,6 +14,8 @@ class ChatMessage {
     required this.message,
     required this.time,
     this.isSentByMe = false,
+    this.type,
+    this.metadata,
   });
 }
 

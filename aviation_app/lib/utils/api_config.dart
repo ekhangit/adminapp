@@ -5,4 +5,5 @@ class ApiConfig {
 
   // FLIGHT COMM
   static const allFlightComm = '/api/v1/flight-comm/all-flights';
+  static const getFlightDetail = '/api/v1/flight-comm/get-flight-details';
 }

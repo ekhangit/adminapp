@@ -1,9 +1,13 @@
+import 'dart:developer';
 
+import 'package:aviation_app/services/flightchat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../models/chat_model.dart';
 import 'package:intl/intl.dart';
+
+import '../../models/flight_detail_model.dart';
 
 class ChatController extends GetxController {
   final selectedTab = 'Chat'.obs;
@@ -27,45 +31,40 @@ class ChatController extends GetxController {
 
   RxList<ChatMessage> messages = <ChatMessage>[].obs;
   TextEditingController messageController = TextEditingController();
+  var argument = Get.arguments;
 
   @override
   void onInit() {
     super.onInit();
 
+    log('[ChatController] argument : $argument');
+
+    fetchFlightChatDetail(argument);
+
     messages.addAll([
       ChatMessage(
         senderInitial: "J",
         senderName: "James - FRA",
-        message:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.",
+        message: "Arrival info shared below.",
         time: "10:30 AM",
+        type: "ARR",
+        metadata: {
+          'LOFO': 'ABC',
+          'LOFO RMKS': 'Arrival remarks included in NOTOC.',
+          'START TIME': '19:00',
+          'END TIME': '20:00',
+        },
+      ),
+      ChatMessage(
+        senderInitial: "A",
+        senderName: "Ava - LHR",
+        message: "Acknowledged. Please keep an eye on the stand availability.",
+        time: "10:31 AM",
       ),
       ChatMessage(
         senderInitial: "L",
         senderName: "Lucas - MAD",
-        message:
-            "Sure, I’ll update the NOTOC and push to the shared folder shortly.",
-        time: "10:32 AM",
-        isSentByMe: true,
-      ),
-      ChatMessage(
-        senderInitial: "J",
-        senderName: "James - FRA",
-        message: "Copy. Let me know if you need me to send the LIR as well.",
-        time: "10:35 AM",
-      ),
-      ChatMessage(
-        senderInitial: "J",
-        senderName: "James - FRA",
-        message:
-            "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor.",
-        time: "10:30 AM",
-      ),
-      ChatMessage(
-        senderInitial: "L",
-        senderName: "Lucas - MAD",
-        message:
-            "Sure, I’ll update the NOTOC and push to the shared folder shortly.",
+        message: "Sure, I’ll update the NOTOC and push to the shared folder.",
         time: "10:32 AM",
         isSentByMe: true,
       ),
@@ -76,6 +75,28 @@ class ChatController extends GetxController {
         time: "10:35 AM",
       ),
     ]);
+  }
+
+  Rxn<FlightDetailModel> flightDetail = Rxn<FlightDetailModel>();
+
+  Future<void> fetchFlightChatDetail(int flightId) async {
+    log('[ChatController] flightId : $flightId');
+
+    try {
+      final response = await FlightChatService.instance.flightChatDetail(
+        flightId: flightId,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        flightDetail.value = response.data!;
+        log('[ChatController] Flight detail fetched successfully.');
+      } else {
+        log('[ChatController] API Error: ${response.errorMessage}');
+      }
+    } catch (e, stack) {
+      log('[ChatController] Exception: $e');
+      log('[ChatController] Stack: $stack');
+    }
   }
 
   var isHeaderExpanded = false.obs;
