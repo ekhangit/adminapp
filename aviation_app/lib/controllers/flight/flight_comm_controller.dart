@@ -5,7 +5,7 @@ import 'package:aviation_app/models/flight_model.dart';
 import 'package:get/get.dart';
 
 import 'package:intl/intl.dart';
-import '../../services/flightcomm_service.dart';
+import '../../services/flight_comm_service.dart';
 
 class FlightCommController extends GetxController {
   RxString formattedDateTime = ''.obs;

@@ -1,6 +1,7 @@
 import 'dart:developer';
 
-import 'package:aviation_app/services/flightchat_service.dart';
+import 'package:aviation_app/controllers/flight/flightinfo_controller.dart';
+import 'package:aviation_app/services/flight_chat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -10,6 +11,18 @@ import 'package:intl/intl.dart';
 import '../../models/flight_detail_model.dart';
 
 class ChatController extends GetxController {
+  var argument = Get.arguments;
+
+  @override
+  void onInit() {
+    super.onInit();
+
+    log('[ChatController] argument : $argument');
+
+    fetchFlightChatDetail(argument);
+    fetchFlightChats(argument);
+  }
+
   final selectedTab = 'Chat'.obs;
 
   final List<Color> _avatarColors = [
@@ -31,51 +44,6 @@ class ChatController extends GetxController {
 
   RxList<ChatMessage> messages = <ChatMessage>[].obs;
   TextEditingController messageController = TextEditingController();
-  var argument = Get.arguments;
-
-  @override
-  void onInit() {
-    super.onInit();
-
-    log('[ChatController] argument : $argument');
-
-    fetchFlightChatDetail(argument);
-
-    messages.addAll([
-      ChatMessage(
-        senderInitial: "J",
-        senderName: "James - FRA",
-        message: "Arrival info shared below.",
-        time: "10:30 AM",
-        type: "ARR",
-        metadata: {
-          'LOFO': 'ABC',
-          'LOFO RMKS': 'Arrival remarks included in NOTOC.',
-          'START TIME': '19:00',
-          'END TIME': '20:00',
-        },
-      ),
-      ChatMessage(
-        senderInitial: "A",
-        senderName: "Ava - LHR",
-        message: "Acknowledged. Please keep an eye on the stand availability.",
-        time: "10:31 AM",
-      ),
-      ChatMessage(
-        senderInitial: "L",
-        senderName: "Lucas - MAD",
-        message: "Sure, I’ll update the NOTOC and push to the shared folder.",
-        time: "10:32 AM",
-        isSentByMe: true,
-      ),
-      ChatMessage(
-        senderInitial: "J",
-        senderName: "James - FRA",
-        message: "Copy. Let me know if you need me to send the LIR as well.",
-        time: "10:35 AM",
-      ),
-    ]);
-  }
 
   Rxn<FlightDetailModel> flightDetail = Rxn<FlightDetailModel>();
 
@@ -110,7 +78,41 @@ class ChatController extends GetxController {
     if (text.isEmpty) return;
   }
 
+  // CHAT FORM
+  Future<void> fetchFlightChats(int flightId) async {
+    log('[ChatController] flightId : $flightId');
+
+    try {
+      final response = await FlightChatService.instance.flightChats(
+        flightId: flightId,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        log('[ChatController] Flight chats fetched successfully.');
+        messages.assignAll(response.data!);
+      } else {
+        log('[ChatController] API Error: ${response.errorMessage}');
+      }
+    } catch (e, stack) {
+      log('[ChatController] Exception: $e');
+      log('[ChatController] Stack: $stack');
+    }
+  }
+
   // UPATE INFO
+
+  final RxInt selectedIndex = 0.obs;
+  final List<String> tabTitles = [
+    "TRC",
+    "CHECK IN",
+    "SSR",
+    "ARR",
+    "PTS",
+    "DSR",
+    "FHR",
+    "STAFF",
+    "OCC",
+  ];
 
   // TRC FORM
 
@@ -158,44 +160,168 @@ class ChatController extends GetxController {
   ];
 
   // ARR FORM
+  final TextEditingController lofoController = TextEditingController();
+  final TextEditingController lofoRemarksController = TextEditingController();
   final TextEditingController startTimeController = TextEditingController();
   final TextEditingController endTimeController = TextEditingController();
+  final TextEditingController mhbAHLController = TextEditingController();
+  final TextEditingController ohdController = TextEditingController();
+  final TextEditingController dprController = TextEditingController();
 
-  Future<void> pickTime(BuildContext context, bool isStart) async {
-    final nowUtc = DateTime.now().toUtc();
-    final initialTime = TimeOfDay.fromDateTime(nowUtc);
+  Future<void> pickTime(bool isStart) async {
+    final fixedTime = DateTime.utc(0, 1, 1, 12, 0);
+    final formatted = DateFormat.Hm().format(fixedTime);
 
-    final TimeOfDay? picked = await showTimePicker(
-      context: context,
-      initialTime: initialTime,
-    );
-
-    if (picked != null) {
-      final selectedTime = DateTime.utc(
-        nowUtc.year,
-        nowUtc.month,
-        nowUtc.day,
-        picked.hour,
-        picked.minute,
-      );
-      final formattedTime = DateFormat.Hm().format(selectedTime);
-
-      if (isStart) {
-        startTimeController.text = formattedTime;
-      } else {
-        endTimeController.text = formattedTime;
-      }
+    if (isStart) {
+      startTimeController.text = formatted;
     } else {
-      // If user cancels, still show current UTC time
-      final formattedNow = DateFormat.Hm().format(nowUtc);
-      if (isStart) {
-        startTimeController.text = formattedNow;
-      } else {
-        endTimeController.text = formattedNow;
-      }
+      endTimeController.text = formatted;
+    }
+  }
+
+  void incrementTime(TextEditingController controller, {bool isHour = true}) {
+    final now = TimeOfDay.now();
+    final parts = controller.text.split(":");
+
+    int hour = int.tryParse(parts[0]) ?? now.hour;
+    int minute = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? now.minute;
+
+    if (isHour) {
+      hour = (hour + 1) % 24;
+    } else {
+      minute = (minute + 5) % 60;
+    }
+
+    controller.text =
+        "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+  }
+
+  void decrementTime(TextEditingController controller, {bool isHour = true}) {
+    final now = TimeOfDay.now();
+    final parts = controller.text.split(":");
+
+    int hour = int.tryParse(parts[0]) ?? now.hour;
+    int minute = int.tryParse(parts.length > 1 ? parts[1] : '0') ?? now.minute;
+
+    if (isHour) {
+      hour = (hour - 1 + 24) % 24;
+    } else {
+      minute = (minute - 5 + 60) % 60;
+    }
+
+    controller.text =
+        "${hour.toString().padLeft(2, '0')}:${minute.toString().padLeft(2, '0')}";
+  }
+
+  Future<void> sendArr() async {
+    log("[ChatController] Sending ARR data...");
+
+    final payload = {
+      "lofo": lofoController.text,
+      "lofo_rmks": lofoRemarksController.text,
+      "start_time": startTimeController.text,
+      "end_time": endTimeController.text,
+      "mhb_ahl": mhbAHLController.text,
+      "ohd": ohdController.text,
+      "dpr": dprController.text,
+      "flight_id": argument, // make sure this is correctly set
+    };
+
+    log("[ChatController] ARR Payload: $payload");
+
+    try {
+      // final response = await FlightChatService.instance.sendArr(payload);
+
+      // if (response.isSuccess) {
+      //   log("[ChatController] ARR data submitted successfully.");
+      // } else {
+      //   log("[ChatController] ARR submission failed: ${response.errorMessage}");
+      // }
+    } catch (e, stack) {
+      log("[ChatController] Exception while sending ARR: $e");
+      log("[ChatController] Stack: $stack");
     }
   }
 
   // PTS FORM
   final selectedTimeMode = "UTC".obs;
+
+  // FHR FORM
+  final missedArtg5ExplanationController = TextEditingController();
+  final delayExplanationController = TextEditingController();
+  final chkInTKGIssueController = TextEditingController();
+  final rampCrewDistruptivePaxController = TextEditingController();
+  final safetySecuritySystemController = TextEditingController();
+  final otherController = TextEditingController();
+  final involDeniedBoardingController = TextEditingController();
+
+  Future<void> sendFhr() async {
+    log("[ChatController] Sending FHR data...");
+
+    final payload = {
+      "MISSED_ARTSG_5_EXPLANATION": missedArtg5ExplanationController.text,
+      "DELAY_EXPLANATION": delayExplanationController.text,
+      "CHECK-IN/TKTG ISSUES": chkInTKGIssueController.text,
+      "RAMP/CREWDISRUPTIVE PAX ETC": rampCrewDistruptivePaxController.text,
+      "SAFETY/SECURITY/SYSTEM": safetySecuritySystemController.text,
+      "OTHER": otherController.text,
+      "INVOL DENIED BOARDING": involDeniedBoardingController.text,
+    };
+
+    log("[ChatController] FHR Payload: $payload");
+
+    try {
+      // final response = await FlightChatService.instance.sendFhr(payload);
+
+      // if (response.isSuccess) {
+      //   log("[ChatController] FHR data submitted successfully.");
+      // } else {
+      //   log("[ChatController] FHR submission failed: ${response.errorMessage}");
+      // }
+    } catch (e, stack) {
+      log("[ChatController] Exception while sending ARR: $e");
+      log("[ChatController] Stack: $stack");
+    }
+  }
+
+  // Save Changes
+
+  final RxBool saveLoading = false.obs;
+
+  Future<void> saveChanges() async {
+    log("[ChatController] Saving changes...");
+    saveLoading.value = true;
+
+    final selectedTabTitle = tabTitles[selectedIndex.value];
+
+    final flightInfoController = Get.find<FlightInfoController>();
+
+    try {
+      switch (selectedTabTitle) {
+        case "ARR":
+          await sendArr();
+          break;
+
+        case "DSR":
+          await flightInfoController.sendDsr();
+          break;
+
+        case "FHR":
+          await sendFhr();
+          break;
+        // Add more cases as needed
+        default:
+          log(
+            "[ChatController] No save handler defined for tab: $selectedTabTitle",
+          );
+      }
+
+      log("[ChatController] Changes saved for tab: $selectedTabTitle");
+    } catch (e, stack) {
+      log("[ChatController] Save exception: $e");
+      log("[ChatController] Stack: $stack");
+    } finally {
+      saveLoading.value = false;
+    }
+  }
 }

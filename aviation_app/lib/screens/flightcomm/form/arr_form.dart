@@ -21,10 +21,19 @@ class ARRForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            singleField("LOFO", showLabel: false),
+            singleField(
+              "LOFO",
+              showLabel: false,
+              controller: controller.lofoController,
+            ),
             const SizedBox(height: 12),
 
-            singleField("LOFO RMKS", showLabel: false, maxLines: 3),
+            singleField(
+              "LOFO RMKS",
+              showLabel: false,
+              maxLines: 3,
+              controller: controller.lofoRemarksController,
+            ),
             const SizedBox(height: 24),
 
             Padding(
@@ -32,20 +41,20 @@ class ARRForm extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: timerField(
+                    child: arrTimerField(
                       label: "START TIME",
                       showHint: false,
                       controller: controller.startTimeController,
-                      onTap: () => controller.pickTime(context, true),
+                      onTap: () => controller.pickTime(true),
                     ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: timerField(
+                    child: arrTimerField(
                       label: "END TIME",
                       showHint: false,
                       controller: controller.endTimeController,
-                      onTap: () => controller.pickTime(context, false),
+                      onTap: () => controller.pickTime(false),
                     ),
                   ),
                 ],
@@ -57,11 +66,29 @@ class ARRForm extends StatelessWidget {
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Row(
                 children: [
-                  Expanded(child: singleField("MHB AHL", showLabel: false)),
+                  Expanded(
+                    child: singleField(
+                      "MHB AHL",
+                      showLabel: false,
+                      controller: controller.mhbAHLController,
+                    ),
+                  ),
                   const SizedBox(width: 20),
-                  Expanded(child: singleField("OHD", showLabel: false)),
+                  Expanded(
+                    child: singleField(
+                      "OHD",
+                      showLabel: false,
+                      controller: controller.ohdController,
+                    ),
+                  ),
                   const SizedBox(width: 20),
-                  Expanded(child: singleField("DPR", showLabel: false)),
+                  Expanded(
+                    child: singleField(
+                      "DPR",
+                      showLabel: false,
+                      controller: controller.dprController,
+                    ),
+                  ),
                 ],
               ),
             ),

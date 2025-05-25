@@ -1,4 +1,4 @@
-import 'package:aviation_app/screens/flightcomm/flightcomm_screen.dart';
+import 'package:aviation_app/screens/flightcomm/flight_comm_screen.dart';
 import 'package:aviation_app/screens/leave/leave_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -126,7 +126,7 @@ class DashboardScreen extends StatelessWidget {
                               title: 'Flight Comm',
                               iconPath: 'assets/images/flight_comm_final.png',
                               onTap:
-                                  () => Get.to(() => const FlightcommScreen()),
+                                  () => Get.to(() => const FlightCommScreen()),
                             ),
 
                             CustomBox2(

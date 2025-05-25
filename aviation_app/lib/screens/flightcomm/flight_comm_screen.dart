@@ -5,11 +5,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
-import '../../controllers/flight/flightcomm_controller.dart';
+import '../../controllers/flight/flight_comm_controller.dart';
 import '../../utils/app_colors.dart';
 
-class FlightcommScreen extends StatelessWidget {
-  const FlightcommScreen({super.key});
+class FlightCommScreen extends StatelessWidget {
+  const FlightCommScreen({super.key});
 
   @override
   Widget build(BuildContext context) {

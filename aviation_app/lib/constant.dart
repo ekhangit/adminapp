@@ -54,3 +54,13 @@ String formatDate(String rawDate) {
   final formatter = DateFormat('dd MMM yy'); // → 21 May 25
   return formatter.format(date);
 }
+
+String formatChatTimestamp(String raw) {
+  try {
+    final parsed = DateTime.parse(raw); // "2025-05-22 21:22:57"
+    final formatted = DateFormat("dd MMM yy  HH:mm").format(parsed);
+    return formatted;
+  } catch (_) {
+    return raw; // fallback if parsing fails
+  }
+}

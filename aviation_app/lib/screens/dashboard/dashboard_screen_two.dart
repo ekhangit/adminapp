@@ -1,5 +1,5 @@
 import 'package:aviation_app/screens/attendance/attendence_screen.dart';
-import 'package:aviation_app/screens/flightcomm/flightcomm_screen.dart';
+import 'package:aviation_app/screens/flightcomm/flight_comm_screen.dart';
 import 'package:aviation_app/screens/leave/leave_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -234,7 +234,7 @@ class DashboardScreenTwo extends StatelessWidget {
                           CustomBox2(
                             title: 'Flight Comm',
                             iconPath: 'assets/svg/flight_comm.svg',
-                            onTap: () => Get.to(() => const FlightcommScreen()),
+                            onTap: () => Get.to(() => const FlightCommScreen()),
                           ),
                           CustomBox2(
                             title: 'My Roster',

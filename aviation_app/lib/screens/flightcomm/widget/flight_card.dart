@@ -3,7 +3,7 @@ import 'package:aviation_app/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../constant.dart';
-import '../../../controllers/flight/flightcomm_controller.dart';
+import '../../../controllers/flight/flight_comm_controller.dart';
 import '../../../utils/app_colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 

@@ -1,9 +1,9 @@
+import 'package:aviation_app/screens/flightcomm/update_info_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/flight/chat_controller.dart';
 import '../../../../utils/app_colors.dart';
-import '../../widget/show_flight_info.dart';
 
 class ChatBottomView extends StatelessWidget {
   const ChatBottomView({super.key});
@@ -21,7 +21,12 @@ class ChatBottomView extends StatelessWidget {
             backgroundColor: AppColors.colorPrimary,
             child: IconButton(
               icon: const Icon(Icons.arrow_upward, color: Colors.white),
-              onPressed: () => showFlightInfoBottomSheet(context),
+
+              onPressed:
+                  () => Get.to(
+                    () => UpdateInfoScreen(),
+                    arguments: controller.flightDetail.value!.basicDetails.id,
+                  ),
             ),
           ),
           SizedBox(width: 6),
