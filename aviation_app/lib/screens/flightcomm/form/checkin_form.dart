@@ -24,51 +24,51 @@ class CheckInForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Row(
-              children: [
-                Expanded(
-                  child: MultiSelectDropdown(
-                    label: "Flight No",
-                    options: controller.flightOptions,
-                    selectedItems: controller.selectedFlight,
-                  ),
-                ),
-                const SizedBox(width: 12),
-                Expanded(child: singleField("Callsign")),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: singleField("Date")),
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: MultiSelectDropdown(
+            //         label: "Flight No",
+            //         options: controller.flightOptions,
+            //         selectedItems: controller.selectedFlight,
+            //       ),
+            //     ),
+            //     const SizedBox(width: 12),
+            //     Expanded(child: singleField("Callsign")),
+            //   ],
+            // ),
+            // const SizedBox(height: 12),
+            // Row(
+            //   children: [
+            //     Expanded(child: singleField("Date")),
 
-                const SizedBox(width: 12),
-                Expanded(
-                  child: MultiSelectDropdown(
-                    label: "A/C Type",
-                    options: controller.flightOptions,
-                    selectedItems: controller.selectedFlight,
-                  ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
+            //     const SizedBox(width: 12),
+            //     Expanded(
+            //       child: MultiSelectDropdown(
+            //         label: "A/C Type",
+            //         options: controller.flightOptions,
+            //         selectedItems: controller.selectedFlight,
+            //       ),
+            //     ),
+            //   ],
+            // ),
+            // const SizedBox(height: 12),
 
-            Row(
-              children: [
-                Expanded(
-                  child: MultiSelectDropdown(
-                    label: "A/C Regin",
-                    options: controller.flightOptions,
-                    selectedItems: controller.selectedFlight,
-                  ),
-                ),
+            // Row(
+            //   children: [
+            //     Expanded(
+            //       child: MultiSelectDropdown(
+            //         label: "A/C Regin",
+            //         options: controller.flightOptions,
+            //         selectedItems: controller.selectedFlight,
+            //       ),
+            //     ),
 
-                const SizedBox(width: 12),
+            //     const SizedBox(width: 12),
 
-                Expanded(child: singleField("Gate")),
-              ],
-            ),
+            //     Expanded(child: singleField("Gate")),
+            //   ],
+            // ),
             const SizedBox(height: 12),
             formRow("Stand", "Baggage Belt"),
 

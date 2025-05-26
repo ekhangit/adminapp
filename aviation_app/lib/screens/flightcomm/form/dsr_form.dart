@@ -1,6 +1,6 @@
-import 'package:aviation_app/controllers/flight/flightinfo_controller.dart';
+import 'package:aviation_app/controllers/flight/flight_info_controller.dart';
 import 'package:aviation_app/screens/flightcomm/form/widget/form_widgets.dart';
-import 'package:aviation_app/screens/flightcomm/form/widget/multi_select_dropdown.dart';
+import 'package:aviation_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 

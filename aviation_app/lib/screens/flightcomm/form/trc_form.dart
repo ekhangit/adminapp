@@ -1,9 +1,11 @@
 import 'package:aviation_app/screens/flightcomm/form/widget/form_widgets.dart';
 import 'package:aviation_app/screens/flightcomm/form/widget/multi_select_dropdown.dart';
+import 'package:aviation_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../../controllers/flight/chat_controller.dart';
+import '../../../controllers/flight/flight_info_controller.dart';
 import '../../../utils/app_colors.dart';
 
 class TRCForm extends StatelessWidget {
@@ -12,6 +14,7 @@ class TRCForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
+    final flightInfoController = Get.find<FlightInfoController>();
 
     return SingleChildScrollView(
       child: Padding(
@@ -27,10 +30,10 @@ class TRCForm extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: MultiSelectDropdown(
-                    label: "Flight No",
-                    options: controller.flightOptions,
-                    selectedItems: controller.selectedFlight,
+                  child: FlightNoSelectDropdown(
+                    label: "Flight Info",
+                    options: flightInfoController.getFlightNo,
+                    selectedItem: flightInfoController.selectedFlightInfoTRC,
                   ),
                 ),
                 const SizedBox(width: 12),
@@ -44,28 +47,26 @@ class TRCForm extends StatelessWidget {
 
                 const SizedBox(width: 12),
                 Expanded(
-                  child: MultiSelectDropdown(
+                  child: AircraftTypeSelectDropdown(
                     label: "A/C Type",
-                    options: controller.flightOptions,
-                    selectedItems: controller.selectedFlight,
+                    options: flightInfoController.aircraftTypes,
+                    selectedItem: flightInfoController.selectedAircraft,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 12),
-
             Row(
               children: [
                 Expanded(
-                  child: MultiSelectDropdown(
+                  child: AircraftRegSelectDropdown(
                     label: "A/C Regin",
-                    options: controller.flightOptions,
-                    selectedItems: controller.selectedFlight,
+                    options: flightInfoController.aircraftReg,
+                    selectedItem: flightInfoController.selectedAircraftReg,
                   ),
                 ),
 
                 const SizedBox(width: 12),
-
                 Expanded(child: singleField("Gate")),
               ],
             ),

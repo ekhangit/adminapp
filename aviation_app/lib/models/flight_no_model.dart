@@ -6,7 +6,7 @@ class FlightNoModel {
 
   factory FlightNoModel.fromJson(Map<String, dynamic> json) {
     return FlightNoModel(
-      id: json['id'] ?? 0,
+      id: json['id'] ?? json['flight_id'] ?? 0,
       flightInfo: json['flight_info'] ?? '',
     );
   }

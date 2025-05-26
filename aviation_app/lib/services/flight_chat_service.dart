@@ -1,5 +1,7 @@
 import 'dart:developer';
 
+import 'package:aviation_app/models/aircraft_model.dart';
+import 'package:aviation_app/models/airline_model.dart';
 import 'package:aviation_app/models/chat_model.dart';
 import 'package:aviation_app/models/flight_no_model.dart';
 import 'package:aviation_app/services/base_service.dart';
@@ -70,23 +72,6 @@ class FlightChatService {
     }
   }
 
-  // Send ARR
-  Future<ResponseClass<bool>> sendArr(Map<String, dynamic> data) async {
-    try {
-      final response = await BaseService.instance.dio.post(
-        ApiConfig.sendArr,
-        data: data,
-      );
-
-      log("[sendArr] response : ${response.data}");
-
-      return ResponseClass.success(true);
-    } catch (e) {
-      return ResponseClass.error(e.toString());
-    }
-  }
-
-  // Send DSR
   Future<ResponseClass<List<FlightNoModel>>> allFlightNo() async {
     try {
       final response = await BaseService.instance.dio.post(
@@ -114,6 +99,198 @@ class FlightChatService {
     }
   }
 
+  Future<ResponseClass<List<FlightNoModel>>> allFlightNoWithFlightId({
+    required int flightId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getFlightNo,
+        data: {"flight_id": flightId},
+      );
+
+      log("[allFlightNoWithFlightId] Api Response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<FlightNoModel> flightNos =
+            rawList.map((e) => FlightNoModel.fromJson(e)).toList();
+
+        return ResponseClass.success(flightNos);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  Future<ResponseClass<List<AircraftTypeModel>>> aircraftTypes({
+    required int flightId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getAircraftType,
+        data: {"flight_id": flightId},
+      );
+
+      log("[aircraftTypes] Api Response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<AircraftTypeModel> aircraftTypes =
+            rawList.map((e) => AircraftTypeModel.fromJson(e)).toList();
+
+        return ResponseClass.success(aircraftTypes);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  Future<ResponseClass<List<AircraftRegModel>>> aircraftReg({
+    required int flightId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getAircraftReg,
+        data: {"flight_id": flightId},
+      );
+
+      log("[aircraftReg] Api Response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<AircraftRegModel> aircraftReg =
+            rawList.map((e) => AircraftRegModel.fromJson(e)).toList();
+
+        return ResponseClass.success(aircraftReg);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  Future<ResponseClass<List<AirlineModel>>> getAirlines() async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getAirlines,
+      );
+
+      log("[getAirlines] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<AirlineModel> airlinesData =
+            rawList.map((e) => AirlineModel.fromJson(e)).toList();
+
+        return ResponseClass.success(airlinesData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  Future<ResponseClass<List<FlightNoModel>>> getAirlineFlightNumber({
+    required int airlineId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getAirlineFlightNo,
+        data: {"airline_id": airlineId},
+      );
+
+      log("[getAirlineFlightNumber] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<FlightNoModel> airlineFlightNumData =
+            rawList.map((e) => FlightNoModel.fromJson(e)).toList();
+
+        return ResponseClass.success(airlineFlightNumData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  Future<ResponseClass<List<AirportModel>>> getAirport() async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getAirports,
+      );
+
+      log("[getAirport] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<AirportModel> airportsData =
+            rawList.map((e) => AirportModel.fromJson(e)).toList();
+
+        return ResponseClass.success(airportsData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Send ARR
+  Future<ResponseClass<bool>> sendArr(Map<String, dynamic> data) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.sendArr,
+        data: data,
+      );
+
+      log("[sendArr] response : ${response.data}");
+
+      return ResponseClass.success(true);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Send DSR
+
   Future<ResponseClass<bool>> sendDsr(Map<String, dynamic> data) async {
     try {
       final response = await BaseService.instance.dio.post(
@@ -130,6 +307,7 @@ class FlightChatService {
   }
 
   // Send FHR
+
   Future<ResponseClass<bool>> sendFhr(Map<String, dynamic> data) async {
     try {
       final response = await BaseService.instance.dio.post(
@@ -138,6 +316,23 @@ class FlightChatService {
       );
 
       log("[sendFhr] response : ${response.data}");
+
+      return ResponseClass.success(true);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Send OCC
+
+  Future<ResponseClass<bool>> sendOCC(Map<String, dynamic> data) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.sendOcc,
+        data: data,
+      );
+
+      log("[sendOCC] response : ${response.data}");
 
       return ResponseClass.success(true);
     } catch (e) {

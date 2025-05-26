@@ -1,6 +1,6 @@
 import 'dart:developer';
 
-import 'package:aviation_app/controllers/flight/flightinfo_controller.dart';
+import 'package:aviation_app/controllers/flight/flight_info_controller.dart';
 import 'package:aviation_app/services/flight_chat_service.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -112,27 +112,6 @@ class ChatController extends GetxController {
     "FHR",
     "STAFF",
     "OCC",
-  ];
-
-  // TRC FORM
-
-  final RxList<String> selectedFlight = <String>[].obs;
-  final List<String> flightOptions = [
-    "IB 1332 MAD - FRA",
-    "LH 789 FRA - JFK",
-    "BA 142 LHR - DXB",
-    "EK 202 JFK - DXB",
-    "QR 001 DOH - LHR",
-    "AF 348 CDG - YUL",
-    "AA 100 MIA - LAX",
-    "DL 303 ATL - AMS",
-    "UA 881 ORD - NRT",
-    "QF 10 LHR - SYD",
-    "NH 12 NRT - LAX",
-    "KL 601 AMS - LAX",
-    "SU 200 SVO - BKK",
-    "CX 708 BKK - HKG",
-    "SQ 321 LHR - SIN",
   ];
 
   final RxList<String> selectedPos = <String>[].obs;
@@ -309,7 +288,11 @@ class ChatController extends GetxController {
         case "FHR":
           await sendFhr();
           break;
-        // Add more cases as needed
+
+        case "OCC":
+          await flightInfoController.sendOcc();
+          break;
+
         default:
           log(
             "[ChatController] No save handler defined for tab: $selectedTabTitle",

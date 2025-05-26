@@ -11,7 +11,7 @@ import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../controllers/flight/chat_controller.dart';
-import '../../controllers/flight/flightinfo_controller.dart';
+import '../../controllers/flight/flight_info_controller.dart';
 import '../../utils/app_colors.dart';
 
 class UpdateInfoScreen extends StatelessWidget {
