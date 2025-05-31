@@ -36,8 +36,13 @@ class CustomCircularImage extends StatelessWidget {
                   imageUrl: imageUrl,
                   fit: BoxFit.cover,
                   placeholder:
-                      (context, url) => const Center(
-                        child: CircularProgressIndicator(strokeWidth: 2),
+                      (context, url) => Center(
+                        child: Container(
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: Colors.grey[200],
+                          ),
+                        ),
                       ),
                   errorWidget:
                       (context, url, error) => Container(

@@ -13,20 +13,20 @@ class ChatInfo extends StatelessWidget {
     final controller = Get.find<ChatController>();
 
     return CustomScrollView(
+      controller: controller.scrollController,
       slivers: [
         // 🔵 Chat Messages
         Obx(
           () => SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
-              final reversedMessages = controller.messages.reversed.toList();
-              final message = reversedMessages[index];
+              final message = controller.messages[index];
 
-              final isSentMe = false;
+              final isSentMe = message.isOwn;
 
               return Container(
                 margin: EdgeInsets.only(
                   top: index == 0 ? 16 : 8,
-                  bottom: index == controller.messages.length - 1 ? 16 : 0,
+                  bottom: index == controller.messages.length - 1 ? 70 : 0,
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,
@@ -39,24 +39,28 @@ class ChatInfo extends StatelessWidget {
                     // Incoming: Show avatar
                     if (!isSentMe)
                       Container(
-                        padding: EdgeInsets.all(10),
+                        height: 35,
+                        width: 35,
+                        padding: EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           shape: BoxShape.circle,
                           color: controller.getAvatarColor(
                             _getInitials(message.senderName),
                           ),
                         ),
-                        child: Text(
-                          _getInitials(message.senderName),
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
+                        child: FittedBox(
+                          child: Text(
+                            _getInitials(message.senderName),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
                           ),
                         ),
                       ),
                     if (!isSentMe) const SizedBox(width: 8),
-                    // if (isSentMe) const SizedBox(width: 50),
+                    if (isSentMe) const SizedBox(width: 40),
                     // Chat bubble
                     Flexible(
                       child: Column(
@@ -70,8 +74,14 @@ class ChatInfo extends StatelessWidget {
                             decoration: BoxDecoration(
                               color: Colors.white,
                               borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(0),
-                                topRight: Radius.circular(12),
+                                topLeft:
+                                    isSentMe
+                                        ? const Radius.circular(12)
+                                        : const Radius.circular(0),
+                                topRight:
+                                    isSentMe
+                                        ? Radius.circular(0)
+                                        : const Radius.circular(12),
                                 bottomLeft: Radius.circular(12),
                                 bottomRight: Radius.circular(12),
                               ),
@@ -99,10 +109,9 @@ class ChatInfo extends StatelessWidget {
                                           fontWeight: FontWeight.w600,
                                         ),
                                       ),
-
                                       Spacer(),
                                       if (message.messageFrom != null) ...[
-                                        const SizedBox(height: 8),               
+                                        const SizedBox(height: 8),
                                         Container(
                                           padding: const EdgeInsets.symmetric(
                                             horizontal: 8,
@@ -143,7 +152,6 @@ class ChatInfo extends StatelessWidget {
                                     ),
                                   ),
                                 ],
-
                                 // 🟡 Metadata if exists
                                 if (message.chatMetadata != null &&
                                     message.chatMetadata!.isNotEmpty) ...[
@@ -189,7 +197,6 @@ class ChatInfo extends StatelessWidget {
                                     right: 4,
                                   ),
                                   child: Text(
-                                    // message.time,
                                     formatChatTimestamp(message.time),
                                     style: TextStyle(
                                       fontSize: 11,
@@ -203,8 +210,30 @@ class ChatInfo extends StatelessWidget {
                         ],
                       ),
                     ),
-                    // if (isSentMe) const SizedBox(width: 4),
-                    if (!isSentMe) const SizedBox(width: 50),
+                    if (isSentMe) const SizedBox(width: 8),
+                    if (isSentMe)
+                      Container(
+                        height: 35,
+                        width: 35,
+                        padding: EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: controller.getAvatarColor(
+                            _getInitials(message.senderName),
+                          ),
+                        ),
+                        child: FittedBox(
+                          child: Text(
+                            _getInitials(message.senderName),
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                        ),
+                      ),
+                    if (!isSentMe) const SizedBox(width: 40),
                   ],
                 ),
               );

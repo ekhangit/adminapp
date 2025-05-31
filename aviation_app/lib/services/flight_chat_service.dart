@@ -16,6 +16,8 @@ class FlightChatService {
       FlightChatService._privateConstructor();
   static FlightChatService get instance => _instance;
 
+  // CHAT
+
   Future<ResponseClass<FlightDetailModel>> flightChatDetail({
     required int flightId,
   }) async {
@@ -72,6 +74,23 @@ class FlightChatService {
     }
   }
 
+  // Send Chat
+
+  Future<ResponseClass<bool>> sendMessage(Map<String, dynamic> data) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.sendMessage,
+        data: data,
+      );
+
+      log("[sendMessage] response : ${response.data}");
+
+      return ResponseClass.success(true);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
   Future<ResponseClass<List<FlightNoModel>>> allFlightNo() async {
     try {
       final response = await BaseService.instance.dio.post(
@@ -108,7 +127,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[allFlightNoWithFlightId] Api Response : ${response.data}");
+      // log("[allFlightNoWithFlightId] Api Response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -129,6 +148,35 @@ class FlightChatService {
     }
   }
 
+  Future<ResponseClass<List<String>>> getSSROption({
+    required int flightId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getSSROption,
+        data: {"flight_id": flightId},
+      );
+
+      // log("[getSSROption] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<String> ssrData = rawList.map((e) => e.toString()).toList();
+
+        return ResponseClass.success(ssrData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
   Future<ResponseClass<List<AircraftTypeModel>>> aircraftTypes({
     required int flightId,
   }) async {
@@ -138,7 +186,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[aircraftTypes] Api Response : ${response.data}");
+      // log("[aircraftTypes] Api Response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -168,7 +216,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[aircraftReg] Api Response : ${response.data}");
+      // log("[aircraftReg] Api Response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -195,7 +243,7 @@ class FlightChatService {
         ApiConfig.getAirlines,
       );
 
-      log("[getAirlines] response : ${response.data}");
+      // log("[getAirlines] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -225,7 +273,7 @@ class FlightChatService {
         data: {"airline_id": airlineId},
       );
 
-      log("[getAirlineFlightNumber] response : ${response.data}");
+      // log("[getAirlineFlightNumber] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -252,7 +300,7 @@ class FlightChatService {
         ApiConfig.getAirports,
       );
 
-      log("[getAirport] response : ${response.data}");
+      // log("[getAirport] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -273,7 +321,54 @@ class FlightChatService {
     }
   }
 
+  Future<ResponseClass<List<String>>> getPTSOption({
+    required int flightId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getPTSOption,
+        data: {"flight_id": flightId},
+      );
+
+      log("[getPTSOption] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<String> ptsData = rawList.map((e) => e.toString()).toList();
+
+        return ResponseClass.success(ptsData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Send SSR
+
+  Future<ResponseClass<bool>> sendSsr(Map<String, dynamic> data) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.sendSsr,
+        data: data,
+      );
+
+      log("[sendSsr] response : ${response.data}");
+
+      return ResponseClass.success(true);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
   // Send ARR
+
   Future<ResponseClass<bool>> sendArr(Map<String, dynamic> data) async {
     try {
       final response = await BaseService.instance.dio.post(
@@ -282,6 +377,23 @@ class FlightChatService {
       );
 
       log("[sendArr] response : ${response.data}");
+
+      return ResponseClass.success(true);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Send PTS
+
+  Future<ResponseClass<bool>> sendPts(Map<String, dynamic> data) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.sendPTS,
+        data: data,
+      );
+
+      log("[sendPts] response : ${response.data}");
 
       return ResponseClass.success(true);
     } catch (e) {

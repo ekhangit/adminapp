@@ -69,13 +69,23 @@ class ChatBottomView extends StatelessWidget {
             ),
           ),
           SizedBox(width: 6),
-
-          CircleAvatar(
-            radius: 20,
-            backgroundColor: AppColors.colorPrimary,
-            child: IconButton(
-              icon: const Icon(Icons.send, color: Colors.white),
-              onPressed: controller.sendMessage,
+          Obx(
+            () => CircleAvatar(
+              radius: 20,
+              backgroundColor: AppColors.colorPrimary,
+              child:
+                  controller.isSendingMessage.value
+                      ? Padding(
+                        padding: const EdgeInsets.all(10.0),
+                        child: const CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 2,
+                        ),
+                      )
+                      : IconButton(
+                        icon: const Icon(Icons.send, color: Colors.white),
+                        onPressed: controller.sendMessage,
+                      ),
             ),
           ),
         ],

@@ -24,6 +24,9 @@ class FlightInfoController extends GetxController {
     fetchAircraftReg(argument);
     fetchAllFlightNoWithFlightId(argument);
 
+    fetchSSROptions(argument);
+    fetchPTSOptions(argument);
+
     // OCC
     fetchAirline();
     fetchAirport();
@@ -104,6 +107,151 @@ class FlightInfoController extends GetxController {
     } catch (e, stack) {
       log('[fetchAircraftReg] Exception: $e');
       log('[fetchAircraftReg] Stack: $stack');
+    }
+  }
+
+  // SSR
+
+  // Fetch airline
+  RxList<String> getSSROptions = <String>[].obs;
+
+  final RxList<String> selectedSSR = <String>[].obs;
+
+  Future<void> fetchSSROptions(int flightId) async {
+    try {
+      final response = await FlightChatService.instance.getSSROption(
+        flightId: flightId,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        log('[fetchSSROptions] All Airline fetched successfully.');
+
+        getSSROptions.assignAll(response.data!);
+      } else {
+        log('[fetchSSROptions] API Error: ${response.errorMessage}');
+      }
+    } catch (e, stack) {
+      log('[fetchSSROptions] Exception: $e');
+      log('[fetchSSROptions] Stack: $stack');
+    }
+  }
+
+  final RxMap<String, TextEditingController> ssrInputs =
+      <String, TextEditingController>{}.obs;
+
+  Future<void> sendSsr() async {
+    log("[FlightInfoController] Sending sendSsr data...");
+
+    final Map<String, String> ssrFields = {};
+
+    for (var ssr in selectedSSR) {
+      if (!ssrInputs.containsKey(ssr)) {
+        ssrInputs[ssr] = TextEditingController();
+      }
+
+      ssrFields[ssr] = ssrInputs[ssr]!.text;
+    }
+
+    final payload = {"flight_id": argument, "ssr_fields": ssrFields};
+
+    log("[FlightInfoController] sendSsr Payload: $payload");
+
+    try {
+      // final response = await FlightChatService.instance.sendSsr(payload);
+
+      // if (response.isSuccess) {
+      //   log("[FlightInfoController] SSR data submitted successfully.");
+      // } else {
+      //   log("[FlightInfoController] SSR submission failed: ${response.errorMessage}");
+      // }
+    } catch (e, stack) {
+      log("[FlightInfoController] Exception while sending SSR: $e");
+      log("[FlightInfoController] Stack: $stack");
+    }
+  }
+
+  // PTS
+
+  final selectedTimeMode = "UTC".obs;
+
+  final timeController = TextEditingController();
+
+  RxList<String> getPTSOptions = <String>[].obs;
+
+  final RxMap<String, TextEditingController> ptsTimeControllers =
+      <String, TextEditingController>{}.obs;
+  final RxMap<String, String> ptsDropdownSelections = <String, String>{}.obs;
+
+  Future<void> fetchPTSOptions(int flightId) async {
+    try {
+      final response = await FlightChatService.instance.getPTSOption(
+        flightId: flightId,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        log('[fetchPTSOptions] All PTS fetched successfully.');
+
+        final List<String> fields = List<String>.from(response.data!);
+
+        // Assign fetched options
+        getPTSOptions.assignAll(fields);
+
+        // Optionally initialize controllers
+        for (var field in fields) {
+          if (!_isDropdownField(field)) {
+            ptsTimeControllers.putIfAbsent(
+              field,
+              () => TextEditingController(),
+            );
+          } else {
+            ptsDropdownSelections.putIfAbsent(field, () => '');
+          }
+        }
+      } else {
+        log('[fetchPTSOptions] API Error: ${response.errorMessage}');
+      }
+    } catch (e, stack) {
+      log('[fetchPTSOptions] Exception: $e');
+      log('[fetchPTSOptions] Stack: $stack');
+    }
+  }
+
+  bool _isDropdownField(String field) {
+    return ["jetway/steps", "back_steps_used"].contains(field);
+  }
+
+  void pickTimePTS(String field) {
+    final time = DateFormat.Hm().format(DateTime.now());
+    ptsTimeControllers[field]?.text = time;
+  }
+
+  Future<void> sendPts() async {
+    log("[FlightInfoController] Sending PTS data...");
+
+    final Map<String, dynamic> payloadData = {"flight_id": argument};
+
+    for (final field in getPTSOptions) {
+      final key = field.toLowerCase().replaceAll("/", "_").replaceAll(" ", "_");
+
+      if (_isDropdownField(field)) {
+        payloadData[key] = ptsDropdownSelections[field] ?? "";
+      } else {
+        payloadData[key] = ptsTimeControllers[field]?.text ?? "";
+      }
+    }
+
+    log("[FlightInfoController] PTS Payload: $payloadData");
+
+    try {
+      // final response = await FlightChatService.instance.sendPts(payloadData);
+      // if (response.isSuccess) {
+      //   log("[FlightInfoController] PTS data submitted successfully.");
+      // } else {
+      //   log("[FlightInfoController] PTS submission failed: ${response.errorMessage}");
+      // }
+    } catch (e, stack) {
+      log("[FlightInfoController] Exception while sending PTS: $e");
+      log("[FlightInfoController] Stack: $stack");
     }
   }
 
@@ -208,15 +356,15 @@ class FlightInfoController extends GetxController {
     log("[FlightInfoController] DSR Payload: $payload");
 
     try {
-      final response = await FlightChatService.instance.sendDsr(payload);
+      // final response = await FlightChatService.instance.sendDsr(payload);
 
-      if (response.isSuccess) {
-        log("[FlightInfoController] DSR data submitted successfully.");
-      } else {
-        log(
-          "[FlightInfoController] DSR submission failed: ${response.errorMessage}",
-        );
-      }
+      // if (response.isSuccess) {
+      //   log("[FlightInfoController] DSR data submitted successfully.");
+      // } else {
+      //   log(
+      //     "[FlightInfoController] DSR submission failed: ${response.errorMessage}",
+      //   );
+      // }
     } catch (e, stack) {
       log("[FlightInfoController] Exception while sending ARR: $e");
       log("[FlightInfoController] Stack: $stack");
@@ -352,15 +500,15 @@ class FlightInfoController extends GetxController {
     log("[FlightInfoController] OCC Payload: $payload");
 
     try {
-      final response = await FlightChatService.instance.sendOCC(payload);
+      // final response = await FlightChatService.instance.sendOCC(payload);
 
-      if (response.isSuccess) {
-        log("[FlightInfoController] OCC data submitted successfully.");
-      } else {
-        log(
-          "[FlightInfoController] OCC submission failed: ${response.errorMessage}",
-        );
-      }
+      // if (response.isSuccess) {
+      //   log("[FlightInfoController] OCC data submitted successfully.");
+      // } else {
+      //   log(
+      //     "[FlightInfoController] OCC submission failed: ${response.errorMessage}",
+      //   );
+      // }
     } catch (e, stack) {
       log("[FlightInfoController] Exception while sending ARR: $e");
       log("[FlightInfoController] Stack: $stack");

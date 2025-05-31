@@ -41,7 +41,7 @@ class ARRForm extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: arrTimerField(
+                    child: timerField(
                       label: "START TIME",
                       showHint: false,
                       controller: controller.startTimeController,
@@ -50,7 +50,7 @@ class ARRForm extends StatelessWidget {
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: arrTimerField(
+                    child: timerField(
                       label: "END TIME",
                       showHint: false,
                       controller: controller.endTimeController,
@@ -60,6 +60,7 @@ class ARRForm extends StatelessWidget {
                 ],
               ),
             ),
+
             const SizedBox(height: 24),
 
             Padding(

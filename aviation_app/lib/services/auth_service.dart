@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import 'package:aviation_app/services/base_service.dart';
 import 'package:aviation_app/utils/api_config.dart';
 
@@ -26,6 +28,8 @@ class AuthService {
         },
       );
 
+      log("[login] Response: ${response.data}");
+
       return ResponseClass.success(response.data);
     } catch (e) {
       return ResponseClass.error(e.toString());
@@ -35,9 +39,7 @@ class AuthService {
   /// 🔐 Logout API
   Future<ResponseClass<Map<String, dynamic>>> logout() async {
     try {
-      final response = await BaseService.instance.dio.post(
-        ApiConfig.logoutAPI,
-      );
+      final response = await BaseService.instance.dio.post(ApiConfig.logoutAPI);
 
       return ResponseClass.success(response.data);
     } catch (e) {

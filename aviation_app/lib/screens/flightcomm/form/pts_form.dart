@@ -1,7 +1,8 @@
+import 'package:aviation_app/screens/flightcomm/form/widget/form_widgets.dart';
+import 'package:aviation_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
-import '../../../controllers/flight/chat_controller.dart';
+import '../../../controllers/flight/flight_info_controller.dart';
 import '../../../utils/app_colors.dart';
 
 class PTSForm extends StatelessWidget {
@@ -9,7 +10,7 @@ class PTSForm extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final controller = Get.find<ChatController>();
+    final controller = Get.find<FlightInfoController>();
 
     return SingleChildScrollView(
       child: Padding(
@@ -44,6 +45,83 @@ class PTSForm extends StatelessWidget {
                 ],
               ),
             ),
+            const SizedBox(height: 16),
+
+            Obx(() {
+              final List<Widget> widgets = [];
+
+              final dropdowns =
+                  controller.getPTSOptions
+                      .where((field) => _isDropdownField(field))
+                      .toList();
+
+              final nonDropdowns =
+                  controller.getPTSOptions
+                      .where((field) => !_isDropdownField(field))
+                      .toList();
+
+              // 👉 1. Render all dropdowns first
+              for (final field in dropdowns) {
+                widgets.add(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: SingleSelectDropdown(
+                      showSearchField: false,
+                      label: field.toUpperCase().replaceAll('_', ' '),
+                      options: ['Yes', 'No'],
+                      selectedItem:
+                          controller.ptsDropdownSelections[field]!.obs,
+                      hint: 'Select $field',
+                      onChanged: (String? newValue) {
+                        if (newValue != null) {
+                          controller.ptsDropdownSelections[field] = newValue;
+                        }
+                      },
+                    ),
+                  ),
+                );
+              }
+
+              // 👉 2. Render timerFields in pairs
+              for (int i = 0; i < nonDropdowns.length; i += 2) {
+                final first = nonDropdowns[i];
+                final second =
+                    i + 1 < nonDropdowns.length ? nonDropdowns[i + 1] : null;
+
+                widgets.add(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        Expanded(
+                          child: timerField(
+                            label: first.toUpperCase().replaceAll('_', ' '),
+                            controller: controller.ptsTimeControllers[first]!,
+
+                            // labelMaxLines: 2,
+                            onTap: () => controller.pickTimePTS(first),
+                          ),
+                        ),
+                        if (second != null) const SizedBox(width: 20),
+                        if (second != null)
+                          Expanded(
+                            child: timerField(
+                              label: second.toUpperCase().replaceAll('_', ' '),
+                              controller:
+                                  controller.ptsTimeControllers[second]!,
+
+                              // labelMaxLines: 2,
+                              onTap: () => controller.pickTimePTS(second),
+                            ),
+                          ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              return Column(children: widgets);
+            }),
           ],
         ),
       ),
@@ -66,9 +144,13 @@ class PTSForm extends StatelessWidget {
           materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
           visualDensity: VisualDensity.compact,
         ),
-        SizedBox(width: 4),
+        const SizedBox(width: 4),
         Text(label, style: const TextStyle(fontSize: 13.5, color: Colors.red)),
       ],
     );
+  }
+
+  bool _isDropdownField(String field) {
+    return field == 'jetway/steps' || field == 'back_steps_used';
   }
 }

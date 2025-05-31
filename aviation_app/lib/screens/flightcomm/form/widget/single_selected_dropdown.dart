@@ -175,7 +175,6 @@ class FlightNoSelectDropdown extends StatelessWidget {
   }
 }
 
-
 class AircraftTypeSelectDropdown extends StatelessWidget {
   final String label;
   final List<AircraftTypeModel> options;
@@ -346,7 +345,6 @@ class AircraftTypeSelectDropdown extends StatelessWidget {
     );
   }
 }
-
 
 class AircraftRegSelectDropdown extends StatelessWidget {
   final String label;
@@ -524,13 +522,17 @@ class SingleSelectDropdown extends StatelessWidget {
   final List<String> options;
   final RxString selectedItem;
   final String hint;
+  final bool showSearchField;
+  final ValueChanged<String?>? onChanged; // Add onChanged callback
 
   const SingleSelectDropdown({
     super.key,
     required this.label,
     required this.options,
     required this.selectedItem,
+    this.showSearchField = true,
     this.hint = "Select option",
+    this.onChanged, // Add to constructor
   });
 
   @override
@@ -549,7 +551,11 @@ class SingleSelectDropdown extends StatelessWidget {
           ),
           const SizedBox(height: 6),
           GestureDetector(
-            onTap: () => _showSelectionDialog(context),
+            onTap:
+                () => _showSelectionDialog(
+                  context,
+                  showSearchField: showSearchField,
+                ),
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
@@ -583,7 +589,10 @@ class SingleSelectDropdown extends StatelessWidget {
     );
   }
 
-  void _showSelectionDialog(BuildContext context) {
+  void _showSelectionDialog(
+    BuildContext context, {
+    bool showSearchField = true,
+  }) {
     final RxString searchTerm = ''.obs;
     final TextEditingController searchController = TextEditingController();
 
@@ -623,22 +632,23 @@ class SingleSelectDropdown extends StatelessWidget {
                         fontSize: 16,
                       ),
                     ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: searchController,
-                      onChanged: (value) => searchTerm.value = value,
-                      decoration: InputDecoration(
-                        hintText: "Search...",
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
+                    if (showSearchField) const SizedBox(height: 12),
+                    if (showSearchField)
+                      TextField(
+                        controller: searchController,
+                        onChanged: (value) => searchTerm.value = value,
+                        decoration: InputDecoration(
+                          hintText: "Search...",
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey.shade100,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.all(12),
                         ),
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.all(12),
                       ),
-                    ),
                     const SizedBox(height: 12),
                     ...filteredOptions.map((item) {
                       final isSelected = selectedItem.value == item;
@@ -647,7 +657,9 @@ class SingleSelectDropdown extends StatelessWidget {
                         decoration: BoxDecoration(
                           color:
                               isSelected
-                                  ? AppColors.colorPrimary.withOpacity(0.1)
+                                  ? AppColors.colorPrimary.withValues(
+                                    alpha: 0.1,
+                                  )
                                   : null,
                           borderRadius: BorderRadius.circular(6),
                         ),
@@ -674,6 +686,9 @@ class SingleSelectDropdown extends StatelessWidget {
                                   : null,
                           onTap: () {
                             selectedItem.value = item;
+                            onChanged?.call(
+                              item,
+                            ); // Call onChanged with the selected item
                             Navigator.pop(context);
                           },
                         ),
@@ -689,8 +704,6 @@ class SingleSelectDropdown extends StatelessWidget {
     );
   }
 }
-
-
 
 class GenericSelectDropdown<T> extends StatelessWidget {
   final String label;
@@ -745,9 +758,10 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                           ? displayText(selectedItem.value!)
                           : hint,
                       style: TextStyle(
-                        color: selectedItem.value == null
-                            ? Colors.grey
-                            : Colors.black,
+                        color:
+                            selectedItem.value == null
+                                ? Colors.grey
+                                : Colors.black,
                         fontSize: 14,
                       ),
                       overflow: TextOverflow.ellipsis,
@@ -784,10 +798,12 @@ class GenericSelectDropdown<T> extends StatelessWidget {
             return Container(
               padding: const EdgeInsets.all(16),
               child: Obx(() {
-                final filteredOptions = options
-                    .where((item) =>
-                        filterCondition(item, searchTerm.value))
-                    .toList();
+                final filteredOptions =
+                    options
+                        .where(
+                          (item) => filterCondition(item, searchTerm.value),
+                        )
+                        .toList();
 
                 return ListView(
                   controller: scrollController,
@@ -817,14 +833,16 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     ...filteredOptions.map((item) {
-                      final selected = selectedItem.value != null &&
+                      final selected =
+                          selectedItem.value != null &&
                           isSelected(selectedItem.value!, item);
 
                       return Container(
                         decoration: BoxDecoration(
-                          color: selected
-                              ? AppColors.colorPrimary.withOpacity(0.1)
-                              : null,
+                          color:
+                              selected
+                                  ? AppColors.colorPrimary.withOpacity(0.1)
+                                  : null,
                           borderRadius: BorderRadius.circular(6),
                         ),
                         child: ListTile(
@@ -832,16 +850,22 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                             displayText(item),
                             style: TextStyle(
                               fontWeight:
-                                  selected ? FontWeight.bold : FontWeight.normal,
-                              color: selected
-                                  ? AppColors.colorPrimary
-                                  : Colors.black,
+                                  selected
+                                      ? FontWeight.bold
+                                      : FontWeight.normal,
+                              color:
+                                  selected
+                                      ? AppColors.colorPrimary
+                                      : Colors.black,
                             ),
                           ),
-                          trailing: selected
-                              ? const Icon(Icons.check,
-                                  color: AppColors.colorPrimary)
-                              : null,
+                          trailing:
+                              selected
+                                  ? const Icon(
+                                    Icons.check,
+                                    color: AppColors.colorPrimary,
+                                  )
+                                  : null,
                           onTap: () {
                             selectedItem.value = item;
                             Navigator.pop(context);

@@ -33,7 +33,6 @@ class FlightDetailModel {
       // inboundFlight: info['inbound_flight'] ?? '',
       // outboundFlight: info['outbound_flight'] ?? '',
       // messages: FlightMessages.fromJson(json['messages']
-
       // ),
     );
   }
@@ -42,10 +41,10 @@ class FlightDetailModel {
 class BasicDetails {
   final int id;
   final String flightInfo;
-  final String std;
-  final String atd;
-  final String sta;
-  final String ata;
+  final String? std;
+  final String? atd;
+  final String? sta;
+  final String? ata;
   final String date;
   final String? callSign;
   final String? gate;
@@ -55,10 +54,10 @@ class BasicDetails {
   BasicDetails({
     required this.id,
     required this.flightInfo,
-    required this.std,
-    required this.atd,
-    required this.sta,
-    required this.ata,
+    this.std,
+    this.atd,
+    this.sta,
+    this.ata,
     required this.date,
     this.callSign,
     this.gate,
@@ -69,10 +68,10 @@ class BasicDetails {
   factory BasicDetails.fromJson(Map<String, dynamic> json) => BasicDetails(
     id: json['id'],
     flightInfo: json['flight_info'],
-    std: json['std'],
-    atd: json['atd'],
-    sta: json['sta'],
-    ata: json['ata'],
+    std: json['std'] ?? '',
+    atd: json['atd'] ?? '',
+    sta: json['sta'] ?? '',
+    ata: json['ata'] ?? '',
     date: json['date'],
     callSign: json['call_sign'],
     gate: json['gate'],

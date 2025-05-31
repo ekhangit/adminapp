@@ -145,25 +145,32 @@ Widget _formField(
 //   );
 // }
 
-Widget arrTimerField({
+Widget timerField({
   required String label,
   required TextEditingController controller,
   VoidCallback? onTap,
   bool? showHint = true,
+  int labelMaxLines = 1,
 }) {
   final chatController = Get.find<ChatController>();
 
   return Column(
     crossAxisAlignment: CrossAxisAlignment.start,
     children: [
-      Text(
-        label,
-        style: const TextStyle(
-          fontWeight: FontWeight.w600,
-          fontSize: 14,
-          color: AppColors.colorPrimary,
+      SizedBox(
+        height: labelMaxLines == 2 ? 34 : null, // Approx. 2 lines height
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 13.5,
+            color: AppColors.colorPrimary,
+          ),
+          maxLines: labelMaxLines,
+          textAlign: TextAlign.start,
         ),
       ),
+
       const SizedBox(height: 8),
       Row(
         children: [

@@ -29,11 +29,11 @@ class FlightCard extends StatelessWidget {
         decoration: BoxDecoration(
           color:
               isSelected
-                  ? AppColors.colorPrimary.withOpacity(0.15)
+                  ? AppColors.colorPrimary.withValues(alpha: 0.15)
                   : flight.unseenChatsCount != 0
-                  ? Colors.yellow.shade100.withOpacity(0.85)
+                  ? Colors.yellow.shade100.withValues(alpha: 0.85)
                   : flight.status == "late"
-                  ? Colors.red.withOpacity(0.25)
+                  ? Colors.red.withValues(alpha: 0.25)
                   : Colors.white,
           border: Border(
             left: BorderSide(
@@ -132,9 +132,15 @@ class FlightCard extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          // if (flight.duration.isNotEmpty &&
-                          //     flight.unreadCount != "0")
-                          //   _seenCount(' ${flight.unreadCount} ', Colors.green),
+                          if ((flight.isDeparture &&
+                                  flight.departureDelayMinutes != 0) ||
+                              (!flight.isDeparture &&
+                                  flight.arrivalDelayMinutes != 0))
+                            if (flight.unseenChatsCount != 0)
+                              _seenCount(
+                                ' ${flight.unseenChatsCount} ',
+                                Colors.green,
+                              ),
                           SizedBox(width: 0.2.h),
 
                           // Star Icon
@@ -203,19 +209,25 @@ class FlightCard extends StatelessWidget {
                                 : Colors.red.shade700,
                           ),
                       ],
-                      SizedBox(width: 2.5.w),
+                      SizedBox(width: 2.0.w),
                       if (flight.flightDelays.isNotEmpty &&
                           flight.flightDelays[0].delayType != '-' &&
                           flight.flightDelays[0].delayCode != '-' &&
                           flight.flightDelays[0].delayDate != '-')
-                        Text(
-                          "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}/${flight.flightDelays[0].delayDate}",
-                          style: TextStyle(
-                            fontSize: 14.5.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.red,
+                        Expanded(
+                          child: Text(
+                            "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}/${flight.flightDelays[0].delayDate}",
+                            style: TextStyle(
+                              fontSize: 13.5.sp,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.red,
+                            ),
+                            overflow: TextOverflow.ellipsis,
+                            maxLines: 1,
+                            softWrap: false,
                           ),
                         ),
+
                       Spacer(),
                       if ((flight.isDeparture &&
                               flight.departureDelayMinutes != 0) ||
@@ -226,7 +238,7 @@ class FlightCard extends StatelessWidget {
                               ? flight.formattedDepartureDelay
                               : flight.formattedArrivalDelay,
                           style: TextStyle(
-                            fontSize: 14.5.sp,
+                            fontSize: 14.sp,
                             color:
                                 flight.isDeparture
                                     ? flight.departureDelayColor == 'green'
@@ -239,11 +251,15 @@ class FlightCard extends StatelessWidget {
                           ),
                         ),
 
-                      if (flight.unseenChatsCount != 0)
-                        _seenCount(
-                          ' ${flight.unseenChatsCount} ',
-                          Colors.green,
-                        ),
+                      if (!(flight.isDeparture &&
+                              flight.departureDelayMinutes != 0) ||
+                          (!flight.isDeparture &&
+                              flight.arrivalDelayMinutes != 0))
+                        if (flight.unseenChatsCount != 0)
+                          _seenCount(
+                            ' ${flight.unseenChatsCount} ',
+                            Colors.green,
+                          ),
                     ],
                   ),
                 ],
@@ -255,15 +271,10 @@ class FlightCard extends StatelessWidget {
     });
   }
 
-  bool _shouldAddSpace(String flightNo) {
-    final numericPart = flightNo.replaceAll(RegExp(r'[^0-9]'), '');
-    return numericPart.length == 3;
-  }
-
   Widget _divider() => Container(
     width: 0.35.w,
     height: 2.0.h,
-    color: Colors.black.withOpacity(0.5),
+    color: Colors.black.withValues(alpha: .5),
   );
 
   Widget _timeBlock(String label, String time, Color color) {
@@ -298,16 +309,16 @@ class FlightCard extends StatelessWidget {
   Widget _seenCount(String label, Color color) {
     return Container(
       width: 3.5.w,
-      height: 1.7.h,
+      height: 1.75.h,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(0.5.h),
+        borderRadius: BorderRadius.circular(0.55.h),
       ),
       child: Text(
         label,
         style: TextStyle(
-          fontSize: 12.sp,
+          fontSize: 11.5.sp,
           color: Colors.white,
           fontWeight: FontWeight.w600,
         ),

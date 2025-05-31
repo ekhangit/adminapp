@@ -13,6 +13,8 @@ import '../../models/flight_detail_model.dart';
 class ChatController extends GetxController {
   var argument = Get.arguments;
 
+  final ScrollController scrollController = ScrollController();
+
   @override
   void onInit() {
     super.onInit();
@@ -21,6 +23,31 @@ class ChatController extends GetxController {
 
     fetchFlightChatDetail(argument);
     fetchFlightChats(argument);
+
+    // Scroll to bottom when messages change
+    ever(messages, (_) {
+      log("[ChatController] Messages updated, scrolling to bottom");
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (scrollController.hasClients) {
+          log(
+            "[ChatController] Scrolling to ${scrollController.position.maxScrollExtent}",
+          );
+          scrollController.animateTo(
+            scrollController.position.maxScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        } else {
+          log("[ChatController] ScrollController has no clients");
+        }
+      });
+    });
+  }
+
+  @override
+  void onClose() {
+    scrollController.dispose(); // Dispose ScrollController
+    super.onClose();
   }
 
   final selectedTab = 'Chat'.obs;
@@ -48,7 +75,7 @@ class ChatController extends GetxController {
   Rxn<FlightDetailModel> flightDetail = Rxn<FlightDetailModel>();
 
   Future<void> fetchFlightChatDetail(int flightId) async {
-    log('[ChatController] flightId : $flightId');
+    log('[fetchFlightChatDetail] flightId : $flightId');
 
     try {
       final response = await FlightChatService.instance.flightChatDetail(
@@ -57,13 +84,13 @@ class ChatController extends GetxController {
 
       if (response.isSuccess && response.data != null) {
         flightDetail.value = response.data!;
-        log('[ChatController] Flight detail fetched successfully.');
+        log('[fetchFlightChatDetail] Flight detail fetched successfully.');
       } else {
-        log('[ChatController] API Error: ${response.errorMessage}');
+        log('[fetchFlightChatDetail] API Error: ${response.errorMessage}');
       }
     } catch (e, stack) {
-      log('[ChatController] Exception: $e');
-      log('[ChatController] Stack: $stack');
+      log('[fetchFlightChatDetail] Exception: $e');
+      log('[fetchFlightChatDetail] Stack: $stack');
     }
   }
 
@@ -73,12 +100,48 @@ class ChatController extends GetxController {
     isHeaderExpanded.value = !isHeaderExpanded.value;
   }
 
-  void sendMessage() {
+  final RxBool isSendingMessage = false.obs;
+
+  Future<void> sendMessage() async {
+    log("[sendMessage] sendMessage data...");
+
     final text = messageController.text.trim();
     if (text.isEmpty) return;
+
+    isSendingMessage.value = true;
+
+    final payload = {
+      "flight_id": argument,
+      "message": text,
+      "type": null,
+      "file": null,
+    };
+
+    log("[sendMessage] sendMessage Payload: $payload");
+
+    try {
+      final response = await FlightChatService.instance.sendMessage(payload);
+
+      if (response.isSuccess) {
+        log("[ChatController] sendMessage data submitted successfully.");
+
+        messageController.clear();
+        fetchFlightChats(argument);
+      } else {
+        log(
+          "[ChatController] sendMessage submission failed: ${response.errorMessage}",
+        );
+      }
+    } catch (e, stack) {
+      log("[sendMessage] Exception while sending ARR: $e");
+      log("[sendMessage] Stack: $stack");
+    } finally {
+      isSendingMessage.value = false;
+    }
   }
 
   // CHAT FORM
+
   Future<void> fetchFlightChats(int flightId) async {
     log('[ChatController] flightId : $flightId');
 
@@ -120,23 +183,6 @@ class ChatController extends GetxController {
   final RxList<String> selectedVR = <String>[].obs;
 
   final List<String> posOptions = ["11", "12", "13", "14"];
-
-  // SSR FORM
-  final RxList<String> selectedSsrs = <String>[].obs;
-  final List<String> ssrOptions = [
-    "AVIH",
-    "BBSL",
-    "BDGP",
-    "BDGR",
-    "BIKE",
-    "BLDP",
-    "BLDR",
-    "BLND",
-    "BLSC",
-    "CBBG",
-    "DEAF",
-    "DEPA",
-  ];
 
   // ARR FORM
   final TextEditingController lofoController = TextEditingController();
@@ -222,9 +268,6 @@ class ChatController extends GetxController {
     }
   }
 
-  // PTS FORM
-  final selectedTimeMode = "UTC".obs;
-
   // FHR FORM
   final missedArtg5ExplanationController = TextEditingController();
   final delayExplanationController = TextEditingController();
@@ -277,8 +320,16 @@ class ChatController extends GetxController {
 
     try {
       switch (selectedTabTitle) {
+        case "SSR":
+          await flightInfoController.sendSsr();
+          break;
+
         case "ARR":
           await sendArr();
+          break;
+
+        case "PTS":
+          await flightInfoController.sendPts();
           break;
 
         case "DSR":

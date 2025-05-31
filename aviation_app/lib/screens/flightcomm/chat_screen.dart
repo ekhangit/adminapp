@@ -140,7 +140,7 @@ class ChatScreen extends StatelessWidget {
                                           const SizedBox(width: 6),
                                           InfoText(
                                             formatFlightTime(
-                                              flight.basicDetails.atd,
+                                              flight.basicDetails.atd!,
                                             ),
                                             textColor: Colors.black87,
                                           ),
@@ -155,6 +155,7 @@ class ChatScreen extends StatelessWidget {
                                           const SizedBox(width: 6),
                                           _divider(Colors.blue),
                                           const SizedBox(width: 6),
+
                                           InfoBadge(
                                             label: "CFG",
                                             color: AppColors.colorPrimary,
