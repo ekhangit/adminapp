@@ -6,7 +6,6 @@ import '../../services/leave_service.dart';
 
 class LeaveRequestController extends GetxController {
   // Input fields
-  var description = ''.obs;
   var reason = ''.obs;
   var selectedLeaveType = ''.obs;
   var fromDate = ''.obs;
@@ -31,9 +30,11 @@ class LeaveRequestController extends GetxController {
   // Observable variables for leave types
   RxList<LeaveTypeModel> leaveModes = <LeaveTypeModel>[].obs;
 
+  var isLoadingLeaveType = false.obs;
+
   // Method to fetch leave types
   Future<void> fetchLeaveTypes() async {
-    isLoading.value = true;
+    isLoadingLeaveType.value = true;
     try {
       final response = await LeaveService.instance.leaveTypes();
       if (response.isSuccess) {
@@ -42,13 +43,13 @@ class LeaveRequestController extends GetxController {
         Get.snackbar('Error', 'Failed to fetch leave types');
       }
     } catch (e) {
-      Get.snackbar('Error', 'Failed to fetch leave types');
+      Get.snackbar('Error', 'Failed to fetch leave types: $e');
     } finally {
-      isLoading.value = false;
+      isLoadingLeaveType.value = false;
     }
   }
 
-  // Calculate total days when dates from api
+  // Calculate total days when dates from API
   Future<void> calculateTotalDays() async {
     if (fromDate.isNotEmpty && toDate.isNotEmpty) {
       String formattedFromDate = _reformatDate(fromDate.value);
@@ -82,11 +83,8 @@ class LeaveRequestController extends GetxController {
           'API Response: isSuccess=${response.isSuccess}, data=${response.data}',
         );
 
-        if (response.isSuccess) {
-          totalDays.value =
-              response.data! as String == '0'
-                  ? 0
-                  : int.tryParse(response.data!) ?? 0;
+        if (response.isSuccess && response.data != null) {
+          totalDays.value = int.tryParse(response.data.toString()) ?? 0;
         } else {
           Get.snackbar(
             'Error',
@@ -107,7 +105,6 @@ class LeaveRequestController extends GetxController {
   var isLoading = false.obs;
 
   bool get canContinue =>
-      description.isNotEmpty &&
       reason.isNotEmpty &&
       selectedLeaveType.isNotEmpty &&
       fromDate.isNotEmpty &&
@@ -115,42 +112,49 @@ class LeaveRequestController extends GetxController {
 
   void selectType(String type) {
     selectedLeaveType.value = type;
+    print('Selected leave type: $type'); // Debug
   }
 
-  // Future<void> submitRequest() async {
-  //   // Defensive validation
-  //   if (!canContinue) {
-  //     Get.snackbar("Validation Error", "Please complete all required fields.");
-  //     return;
-  //   }
+  // Submit leave request from API
+  Future<void> submitLeaveRequest() async {
+    if (!canContinue) {
+      Get.snackbar("Validation Error", "Please complete all required fields.");
+      return;
+    }
 
-  //   final from =
-  //       DateTime.tryParse(fromDate.value) ??
-  //       DateTime.parse(_reformatDate(fromDate.value));
-  //   final to =
-  //       DateTime.tryParse(toDate.value) ??
-  //       DateTime.parse(_reformatDate(toDate.value));
+    isLoading.value = true;
 
-  //   if (to.isBefore(from)) {
-  //     Get.snackbar("Validation Error", "To date cannot be before From date.");
-  //     return;
-  //   }
+    try {
+      final response = await LeaveService.instance.submitLeaveRequest(
+        leaveTypeId:
+            leaveModes
+                .firstWhere((type) => type.title == selectedLeaveType.value)
+                .id,
+        fromDate: _reformatDate(fromDate.value),
+        toDate: _reformatDate(toDate.value),
+        totalLeaveDays: totalDays.value,
+        leaveReason: reason.value,
+      );
 
-  //   isLoading.value = true;
-
-  //   await Future.delayed(const Duration(seconds: 2)); // simulate API call
-
-  //   // Success
-  //   Get.snackbar("Success", "Leave request submitted successfully!");
-
-  //   // Reset all fields
-  //   description.value = '';
-  //   reason.value = '';
-  //   selectedLeaveType.value = '';
-  //   fromDate.value = '';
-  //   toDate.value = '';
-  //   isLoading.value = false;
-  // }
+      if (response.isSuccess) {
+        Get.snackbar("Success", "Leave request submitted successfully!");
+        // Reset fields after successful submission
+        reason.value = '';
+        selectedLeaveType.value = '';
+        fromDate.value = '';
+        toDate.value = '';
+      } else {
+        Get.snackbar(
+          "Error",
+          response.errorMessage ?? "Failed to submit leave request",
+        );
+      }
+    } catch (e) {
+      Get.snackbar("Error", "An error occurred while submitting request: $e");
+    } finally {
+      isLoading.value = false;
+    }
+  }
 
   // Helper to parse dd MMM, yyyy into yyyy-MM-dd
   String _reformatDate(String input) {
@@ -178,44 +182,5 @@ class LeaveRequestController extends GetxController {
       'Dec': '12',
     };
     return months[month] ?? '01';
-  }
-
-  // Submit leave request from api
-  Future<void> submitLeaveRequest() async {
-    // if (!canContinue) {
-    //   Get.snackbar("Validation Error", "Please complete all required fields.");
-    //   return;
-    // }
-
-    isLoading.value = true;
-
-    try {
-      final response = await LeaveService.instance.submitLeaveRequest(
-        leaveTypeId:
-            leaveModes
-                .firstWhere((type) => type.title == selectedLeaveType.value)
-                .id,
-        fromDate: _reformatDate(fromDate.value),
-        toDate: _reformatDate(toDate.value),
-        totalLeaveDays: totalDays.value,
-        leaveReason: reason.value,
-      );
-
-      if (response.isSuccess) {
-        Get.snackbar("Success", "Leave request submitted successfully!");
-        // Reset fields after successful submission
-        description.value = '';
-        reason.value = '';
-        selectedLeaveType.value = '';
-        fromDate.value = '';
-        toDate.value = '';
-      } else {
-        Get.snackbar("Error", response.errorMessage);
-      }
-    } catch (e) {
-      Get.snackbar("Error", "An error occurred while submitting request: $e");
-    } finally {
-      isLoading.value = false;
-    }
   }
 }

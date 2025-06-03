@@ -113,7 +113,7 @@ class LeaveRequestScreen extends StatelessWidget {
                     final picked = await showDatePicker(
                       context: context,
                       initialDate: DateTime.now(),
-                      firstDate: DateTime.now(), // ⛔ Prevent past dates
+                      firstDate: DateTime.now(), // Prevent past dates
                       lastDate: DateTime(2100),
                       builder:
                           (context, child) => Theme(
@@ -131,6 +131,9 @@ class LeaveRequestScreen extends StatelessWidget {
                       controller.fromDate.value = DateFormat(
                         'dd MMM, yyyy',
                       ).format(picked);
+                      print(
+                        'From date set: ${controller.fromDate.value}',
+                      ); // Debug
                     }
                   },
                 ),
@@ -173,7 +176,7 @@ class LeaveRequestScreen extends StatelessWidget {
                       controller.toDate.value = DateFormat(
                         'dd MMM, yyyy',
                       ).format(picked);
-                      // controller.calculateTotalDays();
+                      print('To date set: ${controller.toDate.value}'); // Debug
                     }
                   },
                 ),
@@ -220,7 +223,10 @@ class LeaveRequestScreen extends StatelessWidget {
                 label: "Leave Reason",
                 hintText: "Write your leave reason...",
                 maxLines: 3,
-                onChanged: (val) => controller.reason.value = val,
+                onChanged: (val) {
+                  controller.reason.value = val;
+                  print('Reason set: $val'); // Debug
+                },
               ),
 
               const SizedBox(height: 30),
@@ -228,9 +234,12 @@ class LeaveRequestScreen extends StatelessWidget {
               Obx(
                 () => CustomButton(
                   text: "Submit",
-                  onPressed: () => controller.submitLeaveRequest(),
+                  onPressed: () {
+                    print('canContinue: ${controller.canContinue}'); // Debug
+                    controller.submitLeaveRequest();
+                  },
                   color: AppColors.buttonColor1,
-                  // disabled: !controller.canContinue,
+                  disabled: !controller.canContinue,
                   isLoading: controller.isLoading.value,
                   borerRadius: 8,
                   loadingWidget: const SizedBox(
