@@ -3,8 +3,15 @@ class ApiConfig {
   static const loginAPI = '/api/v1/login';
   static const logoutAPI = '/api/v1/logout';
 
+  // LEAVE
+  static const leaveTypes = '/api/v1/leave/get-leave-types';
+  static const calculateTotalDays = '/api/v1/leave/calculate-totalDays';
+  static const leaveRequest = '/api/v1/leave/request-leave';
+
   // FLIGHT COMM
   static const allFlightComm = '/api/v1/flight-comm/all-flights';
+  static const favFlightComm = '/api/v1/flight-comm//mark-favourite';
+
   static const getFlightDetail = '/api/v1/flight-comm/get-flight-details';
   static const getFlightChats = '/api/v1/flight-comm/get-chat';
 

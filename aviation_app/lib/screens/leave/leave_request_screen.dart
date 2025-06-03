@@ -51,10 +51,10 @@ class LeaveRequestScreen extends StatelessWidget {
                   children:
                       controller.leaveModes.map((mode) {
                         return LeaveModeChip(
-                          label: mode,
+                          label: mode.title,
                           isSelected:
-                              controller.selectedLeaveType.value == mode,
-                          onTap: () => controller.selectType(mode),
+                              controller.selectedLeaveType.value == mode.title,
+                          onTap: () => controller.selectType(mode.title),
                         );
                       }).toList(),
                 ),
@@ -173,7 +173,7 @@ class LeaveRequestScreen extends StatelessWidget {
                       controller.toDate.value = DateFormat(
                         'dd MMM, yyyy',
                       ).format(picked);
-                      controller.calculateTotalDays();
+                      // controller.calculateTotalDays();
                     }
                   },
                 ),
@@ -228,9 +228,9 @@ class LeaveRequestScreen extends StatelessWidget {
               Obx(
                 () => CustomButton(
                   text: "Submit",
-                  onPressed: () => controller.submitRequest(),
+                  onPressed: () => controller.submitLeaveRequest(),
                   color: AppColors.buttonColor1,
-                  disabled: !controller.canContinue,
+                  // disabled: !controller.canContinue,
                   isLoading: controller.isLoading.value,
                   borerRadius: 8,
                   loadingWidget: const SizedBox(

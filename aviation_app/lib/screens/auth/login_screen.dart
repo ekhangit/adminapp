@@ -107,32 +107,6 @@ class LoginScreen extends StatelessWidget {
                             ),
                           ),
                         ),
-
-                        // const SizedBox(height: 30),
-
-                        // const Text(
-                        //   "Forgot password?",
-                        //   textAlign: TextAlign.center,
-                        //   style: TextStyle(color: AppColors.colorPrimary),
-                        // ),
-                        // const SizedBox(height: 15),
-                        // RichText(
-                        //   text: TextSpan(
-                        //     text: "Don't have an account? ",
-                        //     style: TextStyle(color: Colors.black54),
-                        //     children: [
-                        //       TextSpan(
-                        //         text: 'Sign up',
-                        //         style: TextStyle(color: AppColors.colorPrimary),
-                        //         recognizer:
-                        //             TapGestureRecognizer()
-                        //               ..onTap = () {
-                        //                 Get.to(() => const SignUpScreen());
-                        //               },
-                        //       ),
-                        //     ],
-                        //   ),
-                        // ),
                       ],
                     ),
                   ),
@@ -144,8 +118,7 @@ class LoginScreen extends StatelessWidget {
             Obx(() {
               return controller.isLoading.value
                   ? Container(
-                    color: Colors.white.withOpacity(0.50),
-
+                    color: Colors.white.withValues(alpha: 0.50),
                     child: Center(
                       child: Container(
                         padding: EdgeInsets.all(12.0),

@@ -1,5 +1,5 @@
 import 'package:aviation_app/utils/app_colors.dart';
-import 'package:aviation_app/controllers/NavigationController.dart';
+import 'package:aviation_app/controllers/navigation_controller.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';

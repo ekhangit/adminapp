@@ -4,6 +4,7 @@ import 'dart:io';
 import 'package:aviation_app/utils/app_colors.dart';
 import 'package:aviation_app/screens/main_screen.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../services/auth_service.dart';
@@ -104,6 +105,12 @@ class LoginController extends GetxController {
         if (loginResponse != null) {
           DataStorageController.to.createAccount(loginResponse);
           BaseService.instance.reloadHeaders();
+        }
+
+        if (FocusManager.instance.primaryFocus?.hasFocus ?? false) {
+          FocusManager.instance.primaryFocus?.unfocus();
+          log("[LoginController] Keyboard dismissed");
+          await Future.delayed(Duration(milliseconds: 200));
         }
 
         Get.offAll(() => MainScreen());

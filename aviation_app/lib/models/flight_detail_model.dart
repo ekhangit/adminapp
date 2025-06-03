@@ -2,7 +2,7 @@ class FlightDetailModel {
   final BasicDetails basicDetails;
   final Airport departureAirport;
   final Airport arrivalAirport;
-  final Aircraft aircraft;
+  final Aircraft? aircraft;
   final Capacity capacity;
   final ActualPax actualPax;
   // final String inboundFlight;
@@ -13,7 +13,7 @@ class FlightDetailModel {
     required this.basicDetails,
     required this.departureAirport,
     required this.arrivalAirport,
-    required this.aircraft,
+    this.aircraft,
     required this.capacity,
     required this.actualPax,
     // required this.inboundFlight,
@@ -27,7 +27,8 @@ class FlightDetailModel {
       basicDetails: BasicDetails.fromJson(info['basic_details']),
       departureAirport: Airport.fromJson(info['departure_airport']),
       arrivalAirport: Airport.fromJson(info['arrival_airport']),
-      aircraft: Aircraft.fromJson(info['aircraft']),
+      aircraft:
+          info['aircraft'] != null ? Aircraft.fromJson(info['aircraft']) : null,
       capacity: Capacity.fromJson(info['capacity']),
       actualPax: ActualPax.fromJson(info['actual_pax']),
       // inboundFlight: info['inbound_flight'] ?? '',
@@ -73,10 +74,10 @@ class BasicDetails {
     sta: json['sta'] ?? '',
     ata: json['ata'] ?? '',
     date: json['date'],
-    callSign: json['call_sign'],
-    gate: json['gate'],
-    pos: json['pos'],
-    beggageBelt: json['beggage_belt'],
+    callSign: json['call_sign'] ?? '',
+    gate: json['gate'] ?? '',
+    pos: json['pos'] ?? '',
+    beggageBelt: json['beggage_belt'] ?? '',
   );
 }
 

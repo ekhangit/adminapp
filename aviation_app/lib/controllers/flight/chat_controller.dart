@@ -72,10 +72,14 @@ class ChatController extends GetxController {
   RxList<ChatMessage> messages = <ChatMessage>[].obs;
   TextEditingController messageController = TextEditingController();
 
+  var flightDetailLoading = false.obs;
+
   Rxn<FlightDetailModel> flightDetail = Rxn<FlightDetailModel>();
 
   Future<void> fetchFlightChatDetail(int flightId) async {
     log('[fetchFlightChatDetail] flightId : $flightId');
+
+    flightDetailLoading.value = true;
 
     try {
       final response = await FlightChatService.instance.flightChatDetail(
@@ -91,6 +95,8 @@ class ChatController extends GetxController {
     } catch (e, stack) {
       log('[fetchFlightChatDetail] Exception: $e');
       log('[fetchFlightChatDetail] Stack: $stack');
+    } finally {
+      flightDetailLoading.value = false;
     }
   }
 

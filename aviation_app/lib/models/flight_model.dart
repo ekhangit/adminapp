@@ -1,3 +1,5 @@
+import 'package:get/get.dart';
+
 import '../constant.dart';
 
 class FlightsModel {
@@ -21,7 +23,7 @@ class FlightsModel {
   final Airport arrivalAirport;
   final Aircraft? aircraft;
   final List<FlightDelay> flightDelays;
-  final bool isFavorite;
+  final RxBool isFavorite;
   final int departureDelayMinutes;
   final String departureDelayColor;
   final int arrivalDelayMinutes;
@@ -48,12 +50,12 @@ class FlightsModel {
     required this.arrivalAirport,
     this.aircraft,
     required this.flightDelays,
-    required this.isFavorite,
+    required bool isFavorite,
     required this.departureDelayMinutes,
     required this.departureDelayColor,
     required this.arrivalDelayMinutes,
     required this.arrivalDelayColor,
-  });
+  }) : isFavorite = isFavorite.obs;
 
   factory FlightsModel.fromJson(Map<String, dynamic> json) {
     final delaysJson = json['flight_delays'] as List?;
@@ -85,7 +87,7 @@ class FlightsModel {
       aircraft:
           json['aircraft'] != null ? Aircraft.fromJson(json['aircraft']) : null,
       flightDelays: delays,
-      isFavorite: json['is_favorite'] ?? false,
+      isFavorite: (json['is_favorite'] ?? false),
       departureDelayMinutes: json['departure_delay_minutes'] ?? 0,
       departureDelayColor: json['departure_delay_color'] ?? 'green',
       arrivalDelayMinutes: json['arrival_delay_minutes'] ?? 0,

@@ -38,14 +38,14 @@ class FlightCommController extends GetxController {
     formattedDateTime.value = formatter.format(now);
   }
 
-  var selectedFilter = 'All'.obs;
+  var selectedFilter = 'Departures'.obs;
 
   final List<String> filters = [
-    'My Flights',
     'All',
     'Arrivals',
     'Departures',
     'Cancelled',
+    'My Flights',
   ];
 
   void selectFilter(String filter) {
@@ -119,11 +119,53 @@ class FlightCommController extends GetxController {
     super.onClose();
   }
 
-  void toggleFavorite(int index) {
-    if (favoriteFlights.contains(index)) {
-      favoriteFlights.remove(index);
-    } else {
-      favoriteFlights.add(index);
+  Future<void> toggleFlightFavorite(int index) async {
+    final flight = flightList[index];
+    final wasFavorite = flight.isFavorite.value;
+
+    // Optimistically toggle UI
+    flight.isFavorite.toggle();
+
+    final success = await addToFavourite(flight.id);
+
+    if (!success) {
+      flight.isFavorite.value = wasFavorite; // Revert if failed
+      return;
+    }
+
+    final isNowFavorite = flight.isFavorite.value;
+
+    // 🟢 Add to My Flights
+    if (isNowFavorite) {
+      if (!myFlightList.any((f) => f.id == flight.id)) {
+        myFlightList.add(flight);
+      }
+    }
+    // 🔴 Remove from My Flights
+    else {
+      myFlightList.removeWhere((f) => f.id == flight.id);
+    }
+  }
+
+  Future<bool> addToFavourite(int flightId) async {
+    log("[addToFavourite] flightId: $flightId");
+
+    try {
+      final response = await FlightCommService.instance.flightAddToFavourite(
+        flightId: flightId,
+      );
+
+      if (response.isSuccess) {
+        log("[addToFavourite] Flight added to favorites successfully.");
+        return true;
+      } else {
+        log("[addToFavourite] API Error: ${response.errorMessage}");
+        return false;
+      }
+    } catch (e, stack) {
+      log("[addToFavourite] Exception: $e");
+      log("[addToFavourite] Stack: $stack");
+      return false;
     }
   }
 }

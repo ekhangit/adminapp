@@ -1,6 +1,8 @@
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
+import '../../models/leave_model.dart';
+import '../../services/leave_service.dart';
 
 class LeaveRequestController extends GetxController {
   // Input fields
@@ -12,8 +14,94 @@ class LeaveRequestController extends GetxController {
 
   var totalDays = 0.obs;
 
-  // Leave options
-  final List<String> leaveModes = ['Annual Leave', 'new'];
+  @override
+  void onInit() {
+    super.onInit();
+    fetchLeaveTypes();
+
+    everAll([fromDate, toDate], (_) {
+      if (fromDate.isNotEmpty && toDate.isNotEmpty) {
+        calculateTotalDays();
+      } else {
+        totalDays.value = 0;
+      }
+    });
+  }
+
+  // Observable variables for leave types
+  RxList<LeaveTypeModel> leaveModes = <LeaveTypeModel>[].obs;
+
+  // Method to fetch leave types
+  Future<void> fetchLeaveTypes() async {
+    isLoading.value = true;
+    try {
+      final response = await LeaveService.instance.leaveTypes();
+      if (response.isSuccess) {
+        leaveModes.assignAll(response.data!);
+      } else {
+        Get.snackbar('Error', 'Failed to fetch leave types');
+      }
+    } catch (e) {
+      Get.snackbar('Error', 'Failed to fetch leave types');
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  // Calculate total days when dates from api
+  Future<void> calculateTotalDays() async {
+    if (fromDate.isNotEmpty && toDate.isNotEmpty) {
+      String formattedFromDate = _reformatDate(fromDate.value);
+      String formattedToDate = _reformatDate(toDate.value);
+
+      print(
+        'Calculating total days from $formattedFromDate to $formattedToDate',
+      );
+
+      // Validate dates to prevent invalid API calls
+      try {
+        final fromDateTime = DateTime.parse(formattedFromDate);
+        final toDateTime = DateTime.parse(formattedToDate);
+        if (toDateTime.isBefore(fromDateTime)) {
+          Get.snackbar('Error', 'To date cannot be before From date');
+          totalDays.value = 0;
+          return;
+        }
+      } catch (e) {
+        Get.snackbar('Error', 'Invalid date format: $e');
+        totalDays.value = 0;
+        return;
+      }
+
+      try {
+        final response = await LeaveService.instance.calculateTotalDays(
+          fromDate: formattedFromDate,
+          toDate: formattedToDate,
+        );
+        print(
+          'API Response: isSuccess=${response.isSuccess}, data=${response.data}',
+        );
+
+        if (response.isSuccess) {
+          totalDays.value =
+              response.data! as String == '0'
+                  ? 0
+                  : int.tryParse(response.data!) ?? 0;
+        } else {
+          Get.snackbar(
+            'Error',
+            'Failed to calculate total days: ${response.isSuccess ? "Invalid data" : "API error"}',
+          );
+          totalDays.value = 0;
+        }
+      } catch (e) {
+        Get.snackbar('Error', 'Failed to calculate total days: $e');
+        totalDays.value = 0;
+      }
+    } else {
+      totalDays.value = 0;
+    }
+  }
 
   // Button state
   var isLoading = false.obs;
@@ -29,40 +117,40 @@ class LeaveRequestController extends GetxController {
     selectedLeaveType.value = type;
   }
 
-  Future<void> submitRequest() async {
-    // Defensive validation
-    if (!canContinue) {
-      Get.snackbar("Validation Error", "Please complete all required fields.");
-      return;
-    }
+  // Future<void> submitRequest() async {
+  //   // Defensive validation
+  //   if (!canContinue) {
+  //     Get.snackbar("Validation Error", "Please complete all required fields.");
+  //     return;
+  //   }
 
-    final from =
-        DateTime.tryParse(fromDate.value) ??
-        DateTime.parse(_reformatDate(fromDate.value));
-    final to =
-        DateTime.tryParse(toDate.value) ??
-        DateTime.parse(_reformatDate(toDate.value));
+  //   final from =
+  //       DateTime.tryParse(fromDate.value) ??
+  //       DateTime.parse(_reformatDate(fromDate.value));
+  //   final to =
+  //       DateTime.tryParse(toDate.value) ??
+  //       DateTime.parse(_reformatDate(toDate.value));
 
-    if (to.isBefore(from)) {
-      Get.snackbar("Validation Error", "To date cannot be before From date.");
-      return;
-    }
+  //   if (to.isBefore(from)) {
+  //     Get.snackbar("Validation Error", "To date cannot be before From date.");
+  //     return;
+  //   }
 
-    isLoading.value = true;
+  //   isLoading.value = true;
 
-    await Future.delayed(const Duration(seconds: 2)); // simulate API call
+  //   await Future.delayed(const Duration(seconds: 2)); // simulate API call
 
-    // Success
-    Get.snackbar("Success", "Leave request submitted successfully!");
+  //   // Success
+  //   Get.snackbar("Success", "Leave request submitted successfully!");
 
-    // Reset all fields
-    description.value = '';
-    reason.value = '';
-    selectedLeaveType.value = '';
-    fromDate.value = '';
-    toDate.value = '';
-    isLoading.value = false;
-  }
+  //   // Reset all fields
+  //   description.value = '';
+  //   reason.value = '';
+  //   selectedLeaveType.value = '';
+  //   fromDate.value = '';
+  //   toDate.value = '';
+  //   isLoading.value = false;
+  // }
 
   // Helper to parse dd MMM, yyyy into yyyy-MM-dd
   String _reformatDate(String input) {
@@ -92,13 +180,42 @@ class LeaveRequestController extends GetxController {
     return months[month] ?? '01';
   }
 
-  void calculateTotalDays() {
-    if (fromDate.value.isNotEmpty && toDate.value.isNotEmpty) {
-      final from = DateFormat('dd MMM, yyyy').parse(fromDate.value);
-      final to = DateFormat('dd MMM, yyyy').parse(toDate.value);
+  // Submit leave request from api
+  Future<void> submitLeaveRequest() async {
+    // if (!canContinue) {
+    //   Get.snackbar("Validation Error", "Please complete all required fields.");
+    //   return;
+    // }
 
-      final days = to.difference(from).inDays + 1; // inclusive
-      totalDays.value = days.clamp(0, 999);
+    isLoading.value = true;
+
+    try {
+      final response = await LeaveService.instance.submitLeaveRequest(
+        leaveTypeId:
+            leaveModes
+                .firstWhere((type) => type.title == selectedLeaveType.value)
+                .id,
+        fromDate: _reformatDate(fromDate.value),
+        toDate: _reformatDate(toDate.value),
+        totalLeaveDays: totalDays.value,
+        leaveReason: reason.value,
+      );
+
+      if (response.isSuccess) {
+        Get.snackbar("Success", "Leave request submitted successfully!");
+        // Reset fields after successful submission
+        description.value = '';
+        reason.value = '';
+        selectedLeaveType.value = '';
+        fromDate.value = '';
+        toDate.value = '';
+      } else {
+        Get.snackbar("Error", response.errorMessage);
+      }
+    } catch (e) {
+      Get.snackbar("Error", "An error occurred while submitting request: $e");
+    } finally {
+      isLoading.value = false;
     }
   }
 }

@@ -34,10 +34,6 @@ class FlightCommScreen extends StatelessWidget {
           ),
           actions: [
             Obx(() {
-              final isFavorite = controller.favoriteFlights.contains(
-                controller.selectedFlightIndex.value,
-              );
-
               return controller.selectedFlightIndex.value != -1
                   ? PopupMenuButton<int>(
                     position: PopupMenuPosition.under,
@@ -46,24 +42,18 @@ class FlightCommScreen extends StatelessWidget {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    onSelected: (value) {
+                    onSelected: (value) async {
                       if (value == 0) {
-                        controller.toggleFavorite(
-                          controller.selectedFlightIndex.value,
-                        );
-
-                        // Utils.showFlushbar(
-                        //   Get.context!,
-                        //   "Added to My Flight!",
-                        //   backgroundColor: AppColors.colorSuccess,
-                        // );
+                        final index = controller.selectedFlightIndex.value;
+                        await controller.toggleFlightFavorite(index);
                         controller.selectedFlightIndex.value = -1;
                       }
                     },
                     itemBuilder: (context) {
-                      final isFavorite = controller.favoriteFlights.contains(
-                        controller.selectedFlightIndex.value,
-                      );
+                      final index = controller.selectedFlightIndex.value;
+                      final isFavorite =
+                          controller.flightList[index].isFavorite.value;
+
                       return [
                         PopupMenuItem(
                           value: 0,
@@ -113,7 +103,7 @@ class FlightCommScreen extends StatelessWidget {
                               width: 50,
                               decoration: BoxDecoration(
                                 shape: BoxShape.circle,
-                                color: Colors.white.withOpacity(0.85),
+                                color: Colors.white.withValues(alpha: 0.85),
                                 boxShadow: kElevationToShadow[1],
                                 border: Border.all(
                                   color: AppColors.matteBlackColor,
@@ -176,7 +166,7 @@ class FlightCommScreen extends StatelessWidget {
               Obx(() {
                 return controller.isFlightCommLoading2.value
                     ? Container(
-                      color: Colors.black.withOpacity(0.1),
+                      color: Colors.black.withValues(alpha: 0.1),
                       child: Center(
                         child: Container(
                           padding: const EdgeInsets.all(12.0),
@@ -184,7 +174,7 @@ class FlightCommScreen extends StatelessWidget {
                           width: 50,
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            color: Colors.white.withOpacity(0.85),
+                            color: Colors.white.withValues(alpha: 0.85),
                             boxShadow: kElevationToShadow[1],
                             border: Border.all(
                               color: AppColors.matteBlackColor,

@@ -37,7 +37,6 @@ class FlightCard extends StatelessWidget {
                   : Colors.white,
           border: Border(
             left: BorderSide(
-              // color: flight.flightDelayStatus ? Colors.red : Colors.green,
               color:
                   flight.isDeparture
                       ? flight.departureDelayColor == 'green'
@@ -146,12 +145,12 @@ class FlightCard extends StatelessWidget {
                           // Star Icon
                           Obx(
                             () => Icon(
-                              controller.favoriteFlights.contains(index)
+                              flight.isFavorite.value
                                   ? Icons.star
                                   : Icons.star_border,
                               size: 2.0.h,
                               color:
-                                  controller.favoriteFlights.contains(index)
+                                  flight.isFavorite.value
                                       ? Colors.orange
                                       : Colors.black45,
                             ),
@@ -250,11 +249,8 @@ class FlightCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-
-                      if (!(flight.isDeparture &&
-                              flight.departureDelayMinutes != 0) ||
-                          (!flight.isDeparture &&
-                              flight.arrivalDelayMinutes != 0))
+                      if (flight.departureDelayMinutes == 0 ||
+                          flight.arrivalDelayMinutes == 0)
                         if (flight.unseenChatsCount != 0)
                           _seenCount(
                             ' ${flight.unseenChatsCount} ',

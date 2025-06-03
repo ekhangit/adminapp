@@ -26,7 +26,7 @@ class ChatInfo extends StatelessWidget {
               return Container(
                 margin: EdgeInsets.only(
                   top: index == 0 ? 16 : 8,
-                  bottom: index == controller.messages.length - 1 ? 70 : 0,
+                  bottom: index == controller.messages.length - 1 ? 32 : 0,
                 ),
                 padding: const EdgeInsets.symmetric(
                   horizontal: 10,

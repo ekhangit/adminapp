@@ -40,6 +40,14 @@ class ChatScreen extends StatelessWidget {
                 children: [
                   // 🔵 Top Info Header (Fixed)
                   Obx(() {
+                    if (controller.flightDetailLoading.value) {
+                      return const LinearProgressIndicator(
+                        backgroundColor: Colors.white,
+                        color: AppColors.colorPrimary,
+                        minHeight: 2.5,
+                      );
+                    }
+
                     final flight = controller.flightDetail.value;
                     if (flight == null) return const SizedBox.shrink();
 
@@ -129,87 +137,127 @@ class ChatScreen extends StatelessWidget {
                                     const SizedBox(height: 2),
 
                                     // 🔽 Row 2: Operational Details
-                                    SingleChildScrollView(
-                                      scrollDirection: Axis.horizontal,
-                                      child: Row(
-                                        children: [
-                                          InfoBadge(
-                                            label: "ATD",
-                                            color: Colors.green,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          InfoText(
-                                            formatFlightTime(
-                                              flight.basicDetails.atd!,
-                                            ),
-                                            textColor: Colors.black87,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          InfoText(
-                                            flight.aircraft.aircraftType.icao,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          _divider(Colors.blue),
-                                          const SizedBox(width: 6),
-                                          InfoText(flight.aircraft.name),
-                                          const SizedBox(width: 6),
-                                          _divider(Colors.blue),
-                                          const SizedBox(width: 6),
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
+                                            if (flight
+                                                .basicDetails
+                                                .atd!
+                                                .isNotEmpty) ...[
+                                              InfoBadge(
+                                                label: "ATD",
+                                                color: Colors.green,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                formatFlightTime(
+                                                  flight.basicDetails.atd!,
+                                                ),
+                                                textColor: Colors.black87,
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
 
-                                          InfoBadge(
-                                            label: "CFG",
-                                            color: AppColors.colorPrimary,
-                                          ),
-                                          const SizedBox(width: 6),
-                                          InfoText(
-                                            [
-                                                  flight.capacity.f,
-                                                  flight.capacity.j,
-                                                  flight.capacity.c,
-                                                  flight.capacity.s,
-                                                  flight.capacity.w,
-                                                  flight.capacity.y,
-                                                  flight.capacity.m,
-                                                ]
-                                                .where(
-                                                  (e) =>
-                                                      e != null && e.isNotEmpty,
-                                                )
-                                                .join(' '),
-                                          ),
-                                          const SizedBox(width: 6),
-                                          _divider(Colors.blue),
-                                          const SizedBox(width: 6),
-                                          InfoBadge(
-                                            label: "ACT",
-                                            color: AppColors.colorPrimary,
-                                          ),
-                                          if (flight.actualPax.paxC!.isNotEmpty)
-                                            const SizedBox(width: 6),
-                                          if (flight.actualPax.paxC!.isNotEmpty)
-                                            InfoText(
-                                              "J${flight.actualPax.paxC}",
-                                            ),
-                                          if (flight.actualPax.paxY!.isNotEmpty)
-                                            const SizedBox(width: 6),
-                                          if (flight.actualPax.paxY!.isNotEmpty)
-                                            InfoText(
-                                              "Y${flight.actualPax.paxY}",
-                                            ),
+                                            if (flight.aircraft != null) ...[
+                                              InfoText(
+                                                flight
+                                                    .aircraft!
+                                                    .aircraftType
+                                                    .icao,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              _divider(Colors.blue),
+                                              const SizedBox(width: 6),
+                                              InfoText(flight.aircraft!.name),
+                                              const SizedBox(width: 6),
+                                              _divider(Colors.blue),
+                                              const SizedBox(width: 6),
+                                            ],
 
-                                          if (flight
-                                              .actualPax
-                                              .paxInf!
-                                              .isNotEmpty)
-                                            const SizedBox(width: 6),
-                                          if (flight
-                                              .actualPax
-                                              .paxInf!
-                                              .isNotEmpty)
-                                            InfoText(
-                                              "+${flight.actualPax.paxInf} INF",
-                                            ),
-                                        ],
+                                            if ([
+                                              flight.capacity.f,
+                                              flight.capacity.j,
+                                              flight.capacity.c,
+                                              flight.capacity.s,
+                                              flight.capacity.w,
+                                              flight.capacity.y,
+                                              flight.capacity.m,
+                                            ].any(
+                                              (e) => e != null && e.isNotEmpty,
+                                            )) ...[
+                                              InfoBadge(
+                                                label: "CFG",
+                                                color: AppColors.colorPrimary,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                [
+                                                      flight.capacity.f,
+                                                      flight.capacity.j,
+                                                      flight.capacity.c,
+                                                      flight.capacity.s,
+                                                      flight.capacity.w,
+                                                      flight.capacity.y,
+                                                      flight.capacity.m,
+                                                    ]
+                                                    .where(
+                                                      (e) =>
+                                                          e != null &&
+                                                          e.isNotEmpty,
+                                                    )
+                                                    .join(' '),
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
+
+                                            if ([
+                                              flight.actualPax.paxC,
+                                              flight.actualPax.paxY,
+                                              flight.actualPax.paxInf,
+                                            ].any(
+                                              (e) => e != null && e.isNotEmpty,
+                                            )) ...[
+                                              _divider(Colors.blue),
+                                              const SizedBox(width: 6),
+                                              InfoBadge(
+                                                label: "ACT",
+                                                color: AppColors.colorPrimary,
+                                              ),
+                                              if (flight
+                                                  .actualPax
+                                                  .paxC!
+                                                  .isNotEmpty) ...[
+                                                const SizedBox(width: 6),
+                                                InfoText(
+                                                  "J${flight.actualPax.paxC}",
+                                                ),
+                                              ],
+                                              if (flight
+                                                  .actualPax
+                                                  .paxY!
+                                                  .isNotEmpty) ...[
+                                                const SizedBox(width: 6),
+                                                InfoText(
+                                                  "Y${flight.actualPax.paxY}",
+                                                ),
+                                              ],
+                                              if (flight
+                                                  .actualPax
+                                                  .paxInf!
+                                                  .isNotEmpty) ...[
+                                                const SizedBox(width: 6),
+                                                InfoText(
+                                                  "+ ${flight.actualPax.paxInf} INF",
+                                                ),
+                                              ],
+                                            ],
+                                          ],
+                                        ),
                                       ),
                                     ),
                                   ],

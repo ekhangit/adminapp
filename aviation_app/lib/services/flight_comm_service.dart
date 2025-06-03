@@ -25,6 +25,8 @@ class FlightCommService {
 
       final body = response.data['body'];
 
+      log("[allFlightComm] All Response : ${body['all_flights']}");
+
       Map<String, List<FlightsModel>> flightsMap = {
         'all_flights':
             (body['all_flights'] as List?)
@@ -61,4 +63,29 @@ class FlightCommService {
     }
   }
 
+  Future<ResponseClass> flightAddToFavourite({required int flightId}) async {
+    try {
+      log("[flightAddToFavourite] apiUrl : ${ApiConfig.favFlightComm}");
+      log("[flightAddToFavourite] flight_id : $flightId");
+
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.favFlightComm,
+        data: {"flight_id": flightId},
+      );
+
+      log("[flightAddToFavourite] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        return ResponseClass.success('Flight added to favorites successfully');
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
 }
