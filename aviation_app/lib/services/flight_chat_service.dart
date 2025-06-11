@@ -27,7 +27,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[allFlightComm] response : ${response.data}");
+      // log("[flightChatDetail] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&

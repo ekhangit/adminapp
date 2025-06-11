@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:aviation_app/services/attendance_service.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
@@ -47,6 +48,15 @@ class AttendanceController extends GetxController {
       }
 
       // ✅ First clock in
+      final clockInResponse = await clockIn(); // Call clockIn API
+      if (!clockInResponse) {
+        Get.snackbar(
+          "Clock In Failed",
+          "Failed to clock in. Please try again.",
+        );
+        return false;
+      }
+
       clockInTime.value = now;
       isClockedIn.value = true;
       clockOutTime.value = null;
@@ -62,6 +72,15 @@ class AttendanceController extends GetxController {
       }
 
       // ✅ Clocking out
+      final clockOutResponse = await clockOut(); // Call clockOut API
+      if (!clockOutResponse) {
+        Get.snackbar(
+          "Clock Out Failed",
+          "Failed to clock out. Please try again.",
+        );
+        return false;
+      }
+
       clockOutTime.value = now;
       isClockedIn.value = false;
 
@@ -90,5 +109,41 @@ class AttendanceController extends GetxController {
   void onClose() {
     _timer.cancel();
     super.onClose();
+  }
+
+  Future<bool> clockIn() async {
+    try {
+      final response = await AttendanceService.instance.clockIn();
+      
+
+      if (response) {
+        print("Clock-in API call successful");
+        return true;
+      } else {
+        print("Clock-in API call failed");
+        return false;
+      }
+    } catch (e) {
+      print("Error during clock-in: $e");
+      return false;
+    }
+  }
+
+  Future<bool> clockOut() async {
+    try {
+      final response =
+          await AttendanceService.instance
+              .clockOut(); // Corrected to call clockOut
+      if (response) {
+        print("Clock-out API call successful");
+        return true;
+      } else {
+        print("Clock-out API call failed");
+        return false;
+      }
+    } catch (e) {
+      print("Error during clock-out: $e");
+      return false;
+    }
   }
 }

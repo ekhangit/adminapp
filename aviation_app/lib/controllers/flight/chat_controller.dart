@@ -1,7 +1,9 @@
+import 'dart:async';
 import 'dart:developer';
 
 import 'package:aviation_app/controllers/flight/flight_info_controller.dart';
 import 'package:aviation_app/services/flight_chat_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -9,11 +11,13 @@ import '../../models/chat_model.dart';
 import 'package:intl/intl.dart';
 
 import '../../models/flight_detail_model.dart';
+import '../storage/data_storage_controller.dart';
 
 class ChatController extends GetxController {
   var argument = Get.arguments;
 
   final ScrollController scrollController = ScrollController();
+  StreamSubscription<QuerySnapshot>? _messagesSubscription;
 
   @override
   void onInit() {
@@ -22,7 +26,8 @@ class ChatController extends GetxController {
     log('[ChatController] argument : $argument');
 
     fetchFlightChatDetail(argument);
-    fetchFlightChats(argument);
+    // fetchFlightChats(argument);
+    fetchFlightChatsWithFirebase(argument);
 
     // Scroll to bottom when messages change
     ever(messages, (_) {
@@ -46,6 +51,7 @@ class ChatController extends GetxController {
 
   @override
   void onClose() {
+    _messagesSubscription?.cancel();
     scrollController.dispose(); // Dispose ScrollController
     super.onClose();
   }
@@ -88,7 +94,7 @@ class ChatController extends GetxController {
 
       if (response.isSuccess && response.data != null) {
         flightDetail.value = response.data!;
-        log('[fetchFlightChatDetail] Flight detail fetched successfully.');
+        // log('[fetchFlightChatDetail] Flight detail fetched successfully.');
       } else {
         log('[fetchFlightChatDetail] API Error: ${response.errorMessage}');
       }
@@ -108,6 +114,44 @@ class ChatController extends GetxController {
 
   final RxBool isSendingMessage = false.obs;
 
+  // Future<void> sendMessage() async {
+  //   log("[sendMessage] sendMessage data...");
+
+  //   final text = messageController.text.trim();
+  //   if (text.isEmpty) return;
+
+  //   isSendingMessage.value = true;
+
+  //   final payload = {
+  //     "flight_id": argument,
+  //     "message": text,
+  //     "type": null,
+  //     "file": null,
+  //   };
+
+  //   log("[sendMessage] sendMessage Payload: $payload");
+
+  //   try {
+  //     final response = await FlightChatService.instance.sendMessage(payload);
+
+  //     if (response.isSuccess) {
+  //       log("[ChatController] sendMessage data submitted successfully.");
+
+  //       messageController.clear();
+  //       // fetchFlightChats(argument);
+  //     } else {
+  //       log(
+  //         "[ChatController] sendMessage submission failed: ${response.errorMessage}",
+  //       );
+  //     }
+  //   } catch (e, stack) {
+  //     log("[sendMessage] Exception while sending ARR: $e");
+  //     log("[sendMessage] Stack: $stack");
+  //   } finally {
+  //     isSendingMessage.value = false;
+  //   }
+  // }
+
   Future<void> sendMessage() async {
     log("[sendMessage] sendMessage data...");
 
@@ -116,30 +160,46 @@ class ChatController extends GetxController {
 
     isSendingMessage.value = true;
 
-    final payload = {
-      "flight_id": argument,
-      "message": text,
-      "type": null,
-      "file": null,
-    };
-
-    log("[sendMessage] sendMessage Payload: $payload");
-
     try {
-      final response = await FlightChatService.instance.sendMessage(payload);
+      final currentUser = DataStorageController.to.user;
+      final message = ChatMessage(
+        flightId: argument,
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        station: 'Munich',
+        message: text,
+        attachment: null,
+        fileName: null,
+        type: null,
+        messageFrom: null,
+        chatMetadata: null,
+        time: DateTime.now().toIso8601String(),
+        isOwn: true,
+      );
 
-      if (response.isSuccess) {
-        log("[ChatController] sendMessage data submitted successfully.");
+      // Save to Firestore
+      await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(argument.toString())
+          .collection('messages')
+          .add({
+            'flight_id': message.flightId,
+            'sender_id': message.senderId,
+            'sender_name': message.senderName,
+            'station': message.station,
+            'message': message.message,
+            'attachment': message.attachment,
+            'file_name': message.fileName,
+            'type': message.type,
+            'message_from': message.messageFrom,
+            'chat_metadata': message.chatMetadata,
+            'created_at': FieldValue.serverTimestamp(),
+          });
 
-        messageController.clear();
-        fetchFlightChats(argument);
-      } else {
-        log(
-          "[ChatController] sendMessage submission failed: ${response.errorMessage}",
-        );
-      }
+      log("[sendMessage] Message sent successfully.");
+      messageController.clear();
     } catch (e, stack) {
-      log("[sendMessage] Exception while sending ARR: $e");
+      log("[sendMessage] Exception while sending message: $e");
       log("[sendMessage] Stack: $stack");
     } finally {
       isSendingMessage.value = false;
@@ -148,23 +208,72 @@ class ChatController extends GetxController {
 
   // CHAT FORM
 
-  Future<void> fetchFlightChats(int flightId) async {
-    log('[ChatController] flightId : $flightId');
+  // Future<void> fetchFlightChats(int flightId) async {
+  //   log('[ChatController] flightId : $flightId');
+
+  //   try {
+  //     final response = await FlightChatService.instance.flightChats(
+  //       flightId: flightId,
+  //     );
+
+  //     if (response.isSuccess && response.data != null) {
+  //       log('[ChatController] Flight chats fetched successfully.');
+  //       messages.assignAll(response.data!);
+  //     } else {
+  //       log('[ChatController] API Error: ${response.errorMessage}');
+  //     }
+  //   } catch (e, stack) {
+  //     log('[ChatController] Exception: $e');
+  //     log('[ChatController] Stack: $stack');
+  //   }
+  // }
+
+  Future<void> fetchFlightChatsWithFirebase(int flightId) async {
+    log('[fetchFlightChatsWithFirebase] flightId : $flightId');
 
     try {
-      final response = await FlightChatService.instance.flightChats(
-        flightId: flightId,
-      );
+      _messagesSubscription?.cancel(); // Cancel any existing subscription
 
-      if (response.isSuccess && response.data != null) {
-        log('[ChatController] Flight chats fetched successfully.');
-        messages.assignAll(response.data!);
-      } else {
-        log('[ChatController] API Error: ${response.errorMessage}');
-      }
+      _messagesSubscription = FirebaseFirestore.instance
+          .collection('chats')
+          .doc(flightId.toString())
+          .collection('messages')
+          .orderBy('created_at', descending: false)
+          .snapshots()
+          .listen(
+            (snapshot) {
+              final fetchedMessages =
+                  snapshot.docs.map((doc) {
+                    log(
+                      '[fetchFlightChatsWithFirebase] Document ID: ${doc.id}',
+                    );
+                    final data = doc.data();
+
+                    log('[fetchFlightChatsWithFirebase] Data: $data');
+
+                    return ChatMessage.fromJson({
+                      ...data,
+                      'created_at':
+                          (data['created_at'] as Timestamp?)
+                              ?.toDate()
+                              .toIso8601String() ??
+                          '',
+                    });
+                  }).toList();
+
+              messages.assignAll(fetchedMessages);
+              log(
+                '[fetchFlightChatsWithFirebase] Flight chats fetched successfully: ${messages.length} messages',
+              );
+            },
+            onError: (e, stack) {
+              log('[fetchFlightChatsWithFirebase] Firestore stream error: $e');
+              log('[fetchFlightChatsWithFirebase] Stack: $stack');
+            },
+          );
     } catch (e, stack) {
-      log('[ChatController] Exception: $e');
-      log('[ChatController] Stack: $stack');
+      log('[fetchFlightChatsWithFirebase] Exception: $e');
+      log('[fetchFlightChatsWithFirebase] Stack: $stack');
     }
   }
 

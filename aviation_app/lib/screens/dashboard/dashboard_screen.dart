@@ -44,7 +44,7 @@ class DashboardScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 24,
-                      backgroundColor: AppColors.colorPrimary.withOpacity(0.2),
+                      backgroundColor: AppColors.colorPrimary.withValues(alpha:  0.2),
                       child: Text(
                         user.name.isNotEmpty ? user.name[0] : "?",
                         style: TextStyle(

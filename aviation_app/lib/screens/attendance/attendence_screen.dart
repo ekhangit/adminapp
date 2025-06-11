@@ -1,4 +1,3 @@
-
 import 'package:aviation_app/screens/attendance/widget/attendance_info.dart';
 import 'package:aviation_app/screens/attendance/widget/check_in_button.dart';
 import 'package:dotted_line/dotted_line.dart';
@@ -6,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import '../../controllers/dashboard/attendance_controller.dart';
+import '../../controllers/storage/data_storage_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_image.dart';
 
@@ -16,7 +16,8 @@ class AttendenceScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final AttendanceController controller = Get.put(AttendanceController());
+    final user = DataStorageController.to.user;
+    final controller = Get.put(AttendanceController());
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -46,7 +47,6 @@ class AttendenceScreen extends StatelessWidget {
                         color: Colors.transparent,
                         child: InkWell(
                           onTap: () {
-                            print("Back tapped");
                             Get.back();
                           },
                           borderRadius: BorderRadius.circular(30),
@@ -74,10 +74,10 @@ class AttendenceScreen extends StatelessWidget {
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               Text(
-                                "Mr. Muhammad Haseeb",
+                                user.name.isNotEmpty ? user.name : "",
                                 style: TextStyle(
-                                  color: AppColors.colorSecondary.withOpacity(
-                                    0.75,
+                                  color: AppColors.colorSecondary.withValues(
+                                    alpha: 0.75,
                                   ),
                                   fontSize: 16.0,
                                   fontWeight: FontWeight.w500,
@@ -162,8 +162,8 @@ class AttendenceScreen extends StatelessWidget {
 
                       DottedLine(
                         dashLength: 4.0,
-                        dashColor: AppColors.lightGreyTextColor.withOpacity(
-                          0.5,
+                        dashColor: AppColors.lightGreyTextColor.withValues(
+                          alpha: 0.5,
                         ),
                       ),
 
