@@ -4,6 +4,7 @@ import 'package:aviation_app/models/aircraft_model.dart';
 import 'package:aviation_app/models/airline_model.dart';
 import 'package:aviation_app/models/chat_model.dart';
 import 'package:aviation_app/models/flight_no_model.dart';
+import 'package:aviation_app/models/staff_model.dart';
 import 'package:aviation_app/services/base_service.dart';
 
 import '../models/flight_detail_model.dart';
@@ -17,7 +18,6 @@ class FlightChatService {
   static FlightChatService get instance => _instance;
 
   // CHAT
-
   Future<ResponseClass<FlightDetailModel>> flightChatDetail({
     required int flightId,
   }) async {
@@ -34,6 +34,33 @@ class FlightChatService {
           response.data['body'] != null) {
         final flightDetail = FlightDetailModel.fromJson(response.data['body']);
         return ResponseClass.success(flightDetail);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  Future<ResponseClass<List<StaffModel>>> flightStaff() async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getFlightStaff,
+      );
+
+      // log("[flightStaff] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
+
+        final List<StaffModel> flightStaff =
+            rawList.map((e) => StaffModel.fromJson(e)).toList();
+
+        return ResponseClass.success(flightStaff);
       } else {
         return ResponseClass.error(
           response.data['message'] ?? 'Unknown error occurred',

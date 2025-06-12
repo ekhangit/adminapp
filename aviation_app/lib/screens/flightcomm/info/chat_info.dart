@@ -60,7 +60,7 @@ class ChatInfo extends StatelessWidget {
                         ),
                       ),
                     if (!isSentMe) const SizedBox(width: 8),
-                    if (isSentMe) const SizedBox(width: 40),
+                    if (isSentMe) const SizedBox(width: 60),
                     // Chat bubble
                     Flexible(
                       child: Column(
@@ -143,7 +143,7 @@ class ChatInfo extends StatelessWidget {
                                     ],
                                   ),
                                 if (!isSentMe) SizedBox(height: 4),
-                                if (message.type == null) ...[
+                                if (message.type == 'simple') ...[
                                   Text(
                                     message.message,
                                     style: TextStyle(
@@ -233,7 +233,7 @@ class ChatInfo extends StatelessWidget {
                           ),
                         ),
                       ),
-                    if (!isSentMe) const SizedBox(width: 40),
+                    if (!isSentMe) const SizedBox(width: 60),
                   ],
                 ),
               );
@@ -246,7 +246,13 @@ class ChatInfo extends StatelessWidget {
 
   String _getInitials(String name) {
     final parts = name.trim().split(' ');
-    if (parts.length == 1) return parts[0][0].toUpperCase();
+
+    if (parts.length == 1) {
+      return parts[0][0].toUpperCase();
+    }
+    if (parts.length > 2) {
+      return (parts[0][0] + parts[1][0]).toUpperCase();
+    }
     return (parts[0][0] + parts.last[0]).toUpperCase();
   }
 }

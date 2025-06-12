@@ -17,6 +17,7 @@ class ApiConfig {
   static const favFlightComm = '/api/v1/flight-comm/mark-favourite';
 
   static const getFlightDetail = '/api/v1/flight-comm/get-flight-details';
+  static const getFlightStaff = '/api/v1/flight-comm/get-all-users';
   static const getFlightChats = '/api/v1/flight-comm/get-chat';
 
   static const getAllFlightNo = '/api/v1/flight-comm/all-flight-numbers';

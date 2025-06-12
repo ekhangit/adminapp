@@ -25,16 +25,16 @@ class UserModel {
     this.type,
   });
 
-  factory UserModel.fromMap(Map<String, dynamic> map) {
+  factory UserModel.fromJson(Map<String, dynamic> map) {
     return UserModel(
       id: map['id'],
-      airportId: map['airport_id'],
       name: map['name'] ?? '',
+      avatar: map['avatar'],
+      airportId: map['airport_id'],
       email: map['email'] ?? '',
       gender: map['gender'],
       fcmToken: map['fcm_token'],
       profilePhotoPath: map['profile_photo_path'],
-      avatar: map['avatar'],
       lastLoginAt: map['last_login_at'],
       lastLoginIp: map['last_login_ip'],
       type: map['type'],

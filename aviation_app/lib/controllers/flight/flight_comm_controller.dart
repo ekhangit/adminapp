@@ -5,6 +5,8 @@ import 'package:aviation_app/models/flight_model.dart';
 import 'package:get/get.dart';
 
 import 'package:intl/intl.dart';
+import '../../models/staff_model.dart';
+import '../../services/flight_chat_service.dart';
 import '../../services/flight_comm_service.dart';
 
 class FlightCommController extends GetxController {
@@ -25,6 +27,7 @@ class FlightCommController extends GetxController {
     super.onInit();
     _startDateTimeUpdater();
     fetchFlightComm();
+    fetchFlightStaff();
   }
 
   void _startDateTimeUpdater() {
@@ -166,6 +169,26 @@ class FlightCommController extends GetxController {
       log("[addToFavourite] Exception: $e");
       log("[addToFavourite] Stack: $stack");
       return false;
+    }
+  }
+
+  // All Flight Staffs
+
+  final RxList<StaffModel> flightStaff = <StaffModel>[].obs;
+
+  Future<void> fetchFlightStaff() async {
+    try {
+      final response = await FlightChatService.instance.flightStaff();
+
+      if (response.isSuccess && response.data != null) {
+        flightStaff.assignAll(response.data!);
+        log('[fetchFlightStaff] Flight staff fetched successfully.');
+      } else {
+        log('[fetchFlightStaff] API Error: ${response.errorMessage}');
+      }
+    } catch (e, stack) {
+      log('[fetchFlightStaff] Exception: $e');
+      log('[fetchFlightStaff] Stack: $stack');
     }
   }
 }
