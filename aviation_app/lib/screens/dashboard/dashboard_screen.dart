@@ -120,7 +120,7 @@ class DashboardScreen extends StatelessWidget {
                               title: 'Attendance',
                               iconPath: 'assets/images/hr_final.png',
                               onTap:
-                                  () => Get.to(() => const AttendenceScreen()),
+                                  () => Get.to(() => const AttendanceScreen()),
                             ),
                             CustomBox2(
                               title: 'Flight Comm',

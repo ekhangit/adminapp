@@ -1,12 +1,32 @@
+import 'dart:developer';
+
 import 'package:aviation_app/services/base_service.dart';
 
 import '../utils/api_config.dart';
+import '../utils/response_class.dart';
 
 class AttendanceService {
   AttendanceService._privateConstructor();
   static final AttendanceService _instance =
       AttendanceService._privateConstructor();
   static AttendanceService get instance => _instance;
+
+  /// 🔐 Track Attendance API
+  Future<ResponseClass<Map<String, dynamic>?>> trackAttendance() async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.trackAttendenceAPI,
+      );
+
+      log("[trackAttendance] Response: ${response.data}");
+
+      var data = response.data['body'] as Map<String, dynamic>?;
+
+      return ResponseClass.success(data);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
 
   /// 🔐 Clock In API
   Future<bool> clockIn() async {

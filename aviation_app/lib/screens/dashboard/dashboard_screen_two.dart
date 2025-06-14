@@ -229,7 +229,7 @@ class DashboardScreenTwo extends StatelessWidget {
                           CustomBox2(
                             title: 'Attendance',
                             iconPath: 'assets/svg/attendance_new.svg',
-                            onTap: () => Get.to(() => const AttendenceScreen()),
+                            onTap: () => Get.to(() => const AttendanceScreen()),
                           ),
                           CustomBox2(
                             title: 'Flight Comm',

@@ -16,11 +16,10 @@ class FlightsModel {
   final String? atd;
   final String? sta;
   final String? ata;
-  final int chatsCount;
-  final int unseenChatsCount;
+  final RxInt unReadCount;
   final Airline? airline;
-  final Airport departureAirport;
-  final Airport arrivalAirport;
+  final Airport? departureAirport;
+  final Airport? arrivalAirport;
   final Aircraft? aircraft;
   final List<FlightDelay> flightDelays;
   final RxBool isFavorite;
@@ -43,11 +42,10 @@ class FlightsModel {
     required this.atd,
     required this.sta,
     this.ata,
-    required this.chatsCount,
-    required this.unseenChatsCount,
+    int unReadCount = 0, // Accept regular int parameter
     this.airline,
-    required this.departureAirport,
-    required this.arrivalAirport,
+    this.departureAirport,
+    this.arrivalAirport,
     this.aircraft,
     required this.flightDelays,
     required bool isFavorite,
@@ -55,7 +53,8 @@ class FlightsModel {
     required this.departureDelayColor,
     required this.arrivalDelayMinutes,
     required this.arrivalDelayColor,
-  }) : isFavorite = isFavorite.obs;
+  }) : unReadCount = RxInt(unReadCount),
+       isFavorite = isFavorite.obs;
 
   factory FlightsModel.fromJson(Map<String, dynamic> json) {
     final delaysJson = json['flight_delays'] as List?;
@@ -78,12 +77,16 @@ class FlightsModel {
       atd: json['atd'] ?? '',
       sta: json['sta'] ?? '',
       ata: json['ata'] ?? '',
-      chatsCount: json['chats_count'],
-      unseenChatsCount: json['unseen_chats_count'],
       airline:
           json['airline'] != null ? Airline.fromJson(json['airline']) : null,
-      departureAirport: Airport.fromJson(json['departure_airport']),
-      arrivalAirport: Airport.fromJson(json['arrival_airport']),
+      departureAirport:
+          json['departure_airport'] != null
+              ? Airport.fromJson(json['departure_airport'])
+              : null,
+      arrivalAirport:
+          json['arrival_airport'] != null
+              ? Airport.fromJson(json['arrival_airport'])
+              : null,
       aircraft:
           json['aircraft'] != null ? Aircraft.fromJson(json['aircraft']) : null,
       flightDelays: delays,
@@ -96,7 +99,7 @@ class FlightsModel {
   }
 
   bool get isDeparture =>
-      ['FRA', 'MUC', 'DUS', 'HAM', 'STR'].contains(departureAirport.iataCode);
+      ['FRA', 'MUC', 'DUS', 'HAM', 'STR'].contains(departureAirport?.iataCode);
 
   bool get flightDelayStatus => flightDelays.isNotEmpty;
 

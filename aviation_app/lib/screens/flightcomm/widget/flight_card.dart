@@ -19,6 +19,7 @@ class FlightCard extends StatelessWidget {
 
     return Obx(() {
       final isSelected = controller.selectedFlightIndex.value == index;
+      final unreadCount = flight.unReadCount.value;
 
       return AnimatedContainer(
         duration: const Duration(milliseconds: 150),
@@ -30,7 +31,7 @@ class FlightCard extends StatelessWidget {
           color:
               isSelected
                   ? AppColors.colorPrimary.withValues(alpha: 0.15)
-                  : flight.unseenChatsCount != 0
+                  : unreadCount != 0
                   ? Colors.yellow.shade100.withValues(alpha: 0.85)
                   : flight.status == "late"
                   ? Colors.red.withValues(alpha: 0.25)
@@ -98,7 +99,7 @@ class FlightCard extends StatelessWidget {
                             ),
                             _divider(),
                             Text(
-                              '${flight.departureAirport.iataCode}-${flight.arrivalAirport.iataCode}',
+                              '${flight.departureAirport?.iataCode}-${flight.arrivalAirport?.iataCode}',
                               style: TextStyle(
                                 fontSize: 15.sp,
                                 fontWeight: FontWeight.w600,
@@ -135,11 +136,8 @@ class FlightCard extends StatelessWidget {
                                   flight.departureDelayMinutes != 0) ||
                               (!flight.isDeparture &&
                                   flight.arrivalDelayMinutes != 0))
-                            if (flight.unseenChatsCount != 0)
-                              _seenCount(
-                                ' ${flight.unseenChatsCount} ',
-                                Colors.green,
-                              ),
+                            if (unreadCount != 0)
+                              _seenCount(' $unreadCount ', Colors.green),
                           SizedBox(width: 0.2.h),
 
                           // Star Icon
@@ -249,13 +247,13 @@ class FlightCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
-                      if (flight.departureDelayMinutes == 0 ||
-                          flight.arrivalDelayMinutes == 0)
-                        if (flight.unseenChatsCount != 0)
-                          _seenCount(
-                            ' ${flight.unseenChatsCount} ',
-                            Colors.green,
-                          ),
+                      // if (flight.departureDelayMinutes == 0 ||
+                      //     flight.arrivalDelayMinutes == 0)
+                      //   if (unreadCount != 0)
+                      //     _seenCount(
+                      //       ' $unreadCount ',
+                      //       Colors.green,
+                      //     ),
                     ],
                   ),
                 ],

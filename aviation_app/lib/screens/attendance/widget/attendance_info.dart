@@ -23,6 +23,7 @@ class AttendanceInfoTile extends StatelessWidget {
           Text(
             value,
             style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+            maxLines: 1,
           ),
           const SizedBox(height: 4),
           Text(

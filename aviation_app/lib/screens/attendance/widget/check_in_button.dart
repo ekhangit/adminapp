@@ -4,7 +4,8 @@ import 'package:flutter_svg/flutter_svg.dart';
 class CheckInButton extends StatelessWidget {
   final String iconPath;
   final String title;
-  final VoidCallback onTap;
+  final VoidCallback? onTap;
+  final bool disabled;
   final bool isClockedIn;
 
   const CheckInButton({
@@ -12,40 +13,52 @@ class CheckInButton extends StatelessWidget {
     required this.iconPath,
     required this.title,
     required this.onTap,
+    required this.disabled,
     this.isClockedIn = false,
   });
 
   @override
   Widget build(BuildContext context) {
-    final Gradient gradient =
-        isClockedIn
+    final Gradient gradient = disabled
+        ? const LinearGradient(
+            colors: [
+              Color(0xFFB0BEC5), // Grey 300
+              Color(0xFF78909C), // Grey 500
+            ],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          )
+        : isClockedIn
             ? const LinearGradient(
-              colors: [
-                Color(0xFFFF8A65),
-                Color(0xFFD84315),
-              ], // Orange → Deep Orange
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            )
+                colors: [
+                  Color(0xFFFF8A65), // Orange
+                  Color(0xFFD84315), // Deep Orange
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
             : const LinearGradient(
-              colors: [
-                Color(0xFF4FC3F7),
-                Color(0xFF1976D2),
-              ], // Light Blue → Dark Blue
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-            );
+                colors: [
+                  Color(0xFF4FC3F7), // Light Blue
+                  Color(0xFF1976D2), // Dark Blue
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              );
 
-    final shadowColor =
-        isClockedIn
+    final shadowColor = disabled
+        ? Colors.grey.withOpacity(0.2)
+        : isClockedIn
             ? Colors.deepOrangeAccent.withOpacity(0.4)
             : Colors.blueAccent.withOpacity(0.4);
 
+    final iconAndTextColor = disabled ? Colors.grey[300]! : Colors.white;
+
     return GestureDetector(
-      onTap: onTap,
+      onTap: disabled ? null : onTap,
       child: Container(
-        width: 130,
-        height: 130,
+        width: 140,
+        height: 140,
         decoration: BoxDecoration(
           shape: BoxShape.circle,
           gradient: gradient,
@@ -65,13 +78,13 @@ class CheckInButton extends StatelessWidget {
               iconPath,
               width: 40,
               height: 40,
-              color: Colors.white,
+              color: iconAndTextColor,
             ),
             const SizedBox(height: 12),
             Text(
               title,
-              style: const TextStyle(
-                color: Colors.white,
+              style: TextStyle(
+                color: iconAndTextColor,
                 fontWeight: FontWeight.bold,
                 fontSize: 16,
                 shadows: [

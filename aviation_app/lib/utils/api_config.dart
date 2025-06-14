@@ -4,6 +4,7 @@ class ApiConfig {
   static const logoutAPI = '/api/v1/logout';
 
   // ATTENDANCE
+  static const trackAttendenceAPI = '/api/v1/attendance/track-attendance';
   static const clockInAPI = '/api/v1/attendance/time-in';
   static const clockOutAPI = '/api/v1/attendance/time-out';
 

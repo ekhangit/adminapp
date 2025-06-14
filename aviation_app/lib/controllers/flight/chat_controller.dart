@@ -7,6 +7,7 @@ import 'package:aviation_app/services/flight_chat_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
 
 import '../../models/chat_model.dart';
 import 'package:intl/intl.dart';
@@ -39,10 +40,14 @@ class ChatController extends GetxController {
       staffList.assignAll(flightCommController.flightStaff);
       log("[ChatController] staffList : ${staffList.length} staff members");
       if (staffList.isNotEmpty) {
+        // Initialize listeners
         fetchFlightChatsWithFirebase(argument);
+        markAllMessagesAsRead(argument);
       } else {
         log("[ChatController] Staff members loaded successfully");
       }
+
+      listenForUnreadMessages(argument);
     } else {
       log("[ChatController] FlightInfoController not registered");
     }
@@ -204,23 +209,77 @@ class ChatController extends GetxController {
     }
   }
 
-  Future<void> markMessageAsRead(String messageId) async {
-    try {
-      final currentUserId = DataStorageController.to.user.id;
+  Future<void> markAllMessagesAsRead(int flightId) async {
+    final currentUserId = DataStorageController.to.user.id;
 
-      await FirebaseFirestore.instance
+    try {
+      // Get all unread messages (where current user is not in read_by)
+      var query = FirebaseFirestore.instance
           .collection('chats')
-          .doc(argument.toString())
+          .doc(flightId.toString())
           .collection('messages')
-          .doc(messageId)
-          .update({
+          .where('read_by', whereNotIn: [currentUserId]);
+
+      // Get the first batch
+      QuerySnapshot snapshot = await query.get();
+
+      while (snapshot.docs.isNotEmpty) {
+        final batch = FirebaseFirestore.instance.batch();
+
+        for (final doc in snapshot.docs) {
+          batch.update(doc.reference, {
             'read_by': FieldValue.arrayUnion([currentUserId]),
           });
+        }
 
-      log("[markMessageAsRead] Message marked as read successfully.");
-    } catch (e, stack) {
-      log("[markMessageAsRead] Exception: $e");
-      log("[markMessageAsRead] Stack: $stack");
+        await batch.commit();
+      }
+
+      // // Immediately update count
+      // if (Get.isRegistered<FlightCommController>()) {
+      //   log("[markAllMessagesAsRead] FlightCommController $flightId");
+      //   Get.find<FlightCommController>().updateFlightUnreadCount(flightId, 0);
+      // }
+    } catch (e) {
+      log('Error marking all messages as read: $e');
+    }
+  }
+
+  void listenForUnreadMessages(int flightId) {
+    FirebaseFirestore.instance
+        .collection('chats')
+        .doc(flightId.toString())
+        .collection('messages')
+        .where('read_by', arrayContains: DataStorageController.to.user.id)
+        .snapshots()
+        .listen((snapshot) {
+          // When messages are marked as read, update the unread count
+          updateUnreadCountForFlight(flightId);
+        });
+  }
+
+  Future<void> updateUnreadCountForFlight(int flightId) async {
+    try {
+      // Single query to count unread messages
+      final unreadQuery =
+          FirebaseFirestore.instance
+              .collection('chats')
+              .doc(flightId.toString())
+              .collection('messages')
+              .where('read_by', arrayContains: DataStorageController.to.user.id)
+              .count();
+
+      final unreadSnapshot = await unreadQuery.get();
+      final unreadCount = unreadSnapshot.count!;
+
+      if (Get.isRegistered<FlightCommController>()) {
+        Get.find<FlightCommController>().updateFlightUnreadCount(
+          flightId,
+          unreadCount,
+        );
+      }
+    } catch (e) {
+      log('Error updating unread count: $e');
     }
   }
 
@@ -284,7 +343,7 @@ class ChatController extends GetxController {
                     return ChatMessage.fromJson({
                       ...data,
                       'sender_name': matchedStaff?.name ?? 'User',
-                      'station': matchedStaff?.airport.iataCode ?? 'Unknown', 
+                      'station': matchedStaff?.airport.iataCode ?? 'Unknown',
                       'created_at':
                           (data['created_at'] as Timestamp?)
                               ?.toDate()
@@ -297,7 +356,6 @@ class ChatController extends GetxController {
               log(
                 '[fetchFlightChatsWithFirebase] Loaded ${messages.length} messages',
               );
-
             },
             onError: (e, stack) {
               log('[fetchFlightChatsWithFirebase] Firestore stream error: $e');

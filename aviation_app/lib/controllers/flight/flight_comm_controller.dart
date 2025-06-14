@@ -2,16 +2,20 @@ import 'dart:async';
 import 'dart:developer';
 
 import 'package:aviation_app/models/flight_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:get/get.dart';
 
 import 'package:intl/intl.dart';
 import '../../models/staff_model.dart';
 import '../../services/flight_chat_service.dart';
 import '../../services/flight_comm_service.dart';
+import '../storage/data_storage_controller.dart';
 
 class FlightCommController extends GetxController {
   RxString formattedDateTime = ''.obs;
   late Timer _timer;
+
+  final Map<int, StreamSubscription> _flightChatSubscriptions = {};
 
   var myFlightList = <FlightsModel>[].obs;
   var allFlightList = <FlightsModel>[].obs;
@@ -28,6 +32,7 @@ class FlightCommController extends GetxController {
     _startDateTimeUpdater();
     fetchFlightComm();
     fetchFlightStaff();
+    _setupFlightChatListeners();
   }
 
   void _startDateTimeUpdater() {
@@ -88,6 +93,8 @@ class FlightCommController extends GetxController {
 
         // show complete list of flights with json
         // log('[FlightCommController]: ${arrivalFlightList.map((f) => f.id)}');
+
+        _setupFlightChatListeners();
       } else {
         log('[FlightCommController] API Error: ${response.errorMessage}');
       }
@@ -119,6 +126,7 @@ class FlightCommController extends GetxController {
   @override
   void onClose() {
     _timer.cancel();
+    _cleanupFlightChatListeners();
     super.onClose();
   }
 
@@ -190,5 +198,92 @@ class FlightCommController extends GetxController {
       log('[fetchFlightStaff] Exception: $e');
       log('[fetchFlightStaff] Stack: $stack');
     }
+  }
+
+  // In FlightCommController
+  void updateFlightUnreadCount(int flightId, int unreadCount) {
+    void updateList(List<FlightsModel> list) {
+      final index = list.indexWhere((f) => f.id == flightId);
+      if (index != -1 && list[index].unReadCount.value != unreadCount) {
+        list[index].unReadCount.value = unreadCount;
+      }
+    }
+
+    updateList(allFlightList);
+    updateList(arrivalFlightList);
+    updateList(departureFlightList);
+    updateList(cancelledFlightList);
+    updateList(myFlightList);
+  }
+
+  void _setupFlightChatListeners() {
+    _cleanupFlightChatListeners();
+
+    // Setup listeners for all current flights
+    for (final flight in allFlightList) {
+      _setupFlightChatListener(flight.id);
+    }
+  }
+
+  void _setupFlightChatListener(int flightId) {
+    if (_flightChatSubscriptions.containsKey(flightId)) {
+      log('[FlightCommController] Already listening to flight $flightId');
+    }
+    final currentUserId = DataStorageController.to.user.id;
+
+    _flightChatSubscriptions[flightId] = FirebaseFirestore.instance
+        .collection('chats')
+        .doc(flightId.toString())
+        .collection('messages')
+        .where('sender_id', isNotEqualTo: currentUserId)
+        .snapshots()
+        .listen(
+          (snapshot) {
+            try {
+              int unreadCount = 0;
+
+              for (final doc in snapshot.docs) {
+                final data = doc.data();
+
+                // Safe handling of read_by field
+                final readBy = _parseReadByList(data['read_by']);
+
+                if (!readBy.contains(currentUserId)) {
+                  unreadCount++;
+                }
+              }
+
+              log(
+                '[FlightCommController] Unread messages for flight $flightId: $unreadCount',
+              );
+              updateFlightUnreadCount(flightId, unreadCount);
+            } catch (e, stack) {
+              log('Error processing messages for flight $flightId: $e\n$stack');
+            }
+          },
+          onError: (error) {
+            log('Error listening to messages for flight $flightId: $error');
+          },
+        );
+  }
+
+  // Helper method to safely parse read_by list
+  List<int> _parseReadByList(dynamic readByData) {
+    if (readByData == null) return [];
+
+    try {
+      if (readByData is List) {
+        return readByData.whereType<int>().toList();
+      }
+      return [];
+    } catch (e) {
+      log('Error parsing read_by list: $e');
+      return [];
+    }
+  }
+
+  void _cleanupFlightChatListeners() {
+    _flightChatSubscriptions.values.forEach((sub) => sub.cancel());
+    _flightChatSubscriptions.clear();
   }
 }

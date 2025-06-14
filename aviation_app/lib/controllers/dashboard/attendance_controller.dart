@@ -1,21 +1,30 @@
 import 'dart:async';
 
 import 'package:aviation_app/services/attendance_service.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
 
 import '../../services/local_auth_service.dart';
 
 class AttendanceController extends GetxController {
-  final LocalAuthService _authService = LocalAuthService();
+  final LocalAuthService authService = LocalAuthService();
 
   var isClockedIn = false.obs;
   var currentTime = ''.obs;
   var currentDate = ''.obs;
+  var isLoading = true.obs;
 
   var clockInTime = Rxn<DateTime>();
   var clockOutTime = Rxn<DateTime>();
   var totalWorkedHours = ''.obs;
+
+  // Computed observable to determine if CheckInButton should be disabled
+  bool get isButtonDisabled =>
+      clockInTime.value != null &&
+      clockOutTime.value != null &&
+      totalWorkedHours.value.isNotEmpty &&
+      totalWorkedHours.value != "--:--";
 
   late Timer _timer;
 
@@ -24,6 +33,9 @@ class AttendanceController extends GetxController {
     super.onInit();
     updateTime();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => updateTime());
+    Future.delayed(Duration(milliseconds: 100), () {
+      _initializeAttendance();
+    });
   }
 
   void updateTime() {
@@ -32,23 +44,188 @@ class AttendanceController extends GetxController {
     currentDate.value = DateFormat('MMMM dd, yyyy - EEEE').format(now);
   }
 
-  /// ✅ Restrict clock in/out to once per day
-  Future<bool> handleBiometricClockAction() async {
-    final isAuthenticated = await _authService.authenticateWithBiometrics();
-    if (!isAuthenticated) return false;
+  Future<void> _initializeAttendance() async {
+    try {
+      isLoading.value = true;
+      print("Initializing attendance...");
+      final response = await AttendanceService.instance.trackAttendance();
+      print("TrackAttendance response received: ${response.data}");
 
+      if (response.isSuccess && response.data != null) {
+        Map<String, dynamic> attendanceData;
+
+        if (response.data!.containsKey('body')) {
+          attendanceData = response.data!['body'];
+          print("Using response body: $attendanceData");
+        } else {
+          attendanceData = response.data!;
+          print("Using direct response data: $attendanceData");
+        }
+
+        if (attendanceData['clock_in'] != null &&
+            attendanceData['clock_in'] != 'null') {
+          try {
+            final timeString = attendanceData['clock_in'].toString();
+            print("Parsing clock_in time: $timeString");
+
+            if (timeString.contains(':')) {
+              final now = DateTime.now();
+              final timeParts = timeString.split(':');
+              if (timeParts.length == 2) {
+                final hour = int.parse(timeParts[0]);
+                final minute = int.parse(timeParts[1]);
+                clockInTime.value = DateTime(
+                  now.year,
+                  now.month,
+                  now.day,
+                  hour,
+                  minute,
+                );
+                print("Clock-in time set: ${clockInTime.value}");
+              }
+            } else {
+              clockInTime.value = DateTime.parse(timeString);
+            }
+          } catch (e) {
+            print("Error parsing clock_in time: $e");
+            clockInTime.value = null;
+          }
+        } else {
+          clockInTime.value = null;
+          print("Clock-in is null");
+        }
+
+        if (attendanceData['clock_out'] != null &&
+            attendanceData['clock_out'] != 'null') {
+          try {
+            final timeString = attendanceData['clock_out'].toString();
+            print("Parsing clock_out time: $timeString");
+
+            if (timeString.contains(':')) {
+              final now = DateTime.now();
+              final timeParts = timeString.split(':');
+              if (timeParts.length == 2) {
+                final hour = int.parse(timeParts[0]);
+                final minute = int.parse(timeParts[1]);
+                clockOutTime.value = DateTime(
+                  now.year,
+                  now.month,
+                  now.day,
+                  hour,
+                  minute,
+                );
+                print("Clock-out time set: ${clockOutTime.value}");
+              }
+            } else {
+              clockOutTime.value = DateTime.parse(timeString);
+            }
+          } catch (e) {
+            print("Error parsing clock_out time: $e");
+            clockOutTime.value = null;
+          }
+        } else {
+          clockOutTime.value = null;
+          print("Clock-out is null");
+        }
+
+        if (attendanceData['total_hours'] != null &&
+            attendanceData['total_hours'] != 'null') {
+          totalWorkedHours.value = attendanceData['total_hours'].toString();
+          print("Total hours set: ${totalWorkedHours.value}");
+        } else {
+          totalWorkedHours.value = "--:--";
+          print("Total hours is null, set to --:--");
+        }
+
+        _updateUIState();
+      } else {
+        print("Failed to load attendance data or response is not successful");
+        _resetAttendanceState();
+      }
+    } catch (e) {
+      print("Error loading attendance data: $e");
+      _resetAttendanceState();
+    } finally {
+      isLoading.value = false;
+    }
+  }
+
+  void _updateUIState() {
+    print("Updating UI state...");
+    print("clockInTime: ${clockInTime.value}");
+    print("clockOutTime: ${clockOutTime.value}");
+
+    if (clockInTime.value == null) {
+      isClockedIn.value = false;
+      totalWorkedHours.value = "--:--";
+      print("UI State: Ready for CLOCK IN");
+    } else if (clockInTime.value != null && clockOutTime.value == null) {
+      isClockedIn.value = true;
+      if (totalWorkedHours.value == 'null' || totalWorkedHours.value.isEmpty) {
+        totalWorkedHours.value = "--:--";
+      }
+      print(
+        "UI State: Ready for CLOCK OUT (Currently clocked in) - isClockedIn: ${isClockedIn.value}",
+      );
+    } else if (clockInTime.value != null && clockOutTime.value != null) {
+      isClockedIn.value = false;
+      print("UI State: Attendance completed for today");
+    }
+
+    update();
+  }
+
+  void _resetAttendanceState() {
+    clockInTime.value = null;
+    clockOutTime.value = null;
+    isClockedIn.value = false;
+    totalWorkedHours.value = "--:--";
+  }
+
+  /// Handle clock action with biometric or fallback
+  Future<bool> handleClockAction() async {
     final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
 
-    // 🕐 Block if already clocked in today
-    if (!isClockedIn.value) {
-      if (clockInTime.value != null && _isSameDay(clockInTime.value!, today)) {
-        Get.snackbar("Already Clocked In", "You've already clocked in today.");
+    // Check if attendance is already completed
+    if (clockInTime.value != null && clockOutTime.value != null) {
+      Get.snackbar(
+        "Already Completed",
+        "You've already completed your attendance for today.",
+      );
+      return false;
+    }
+
+    // Check if biometrics are available
+    bool canUseBiometrics = await authService.canAuthenticateWithBiometrics();
+    bool isAuthenticated = false;
+
+    if (canUseBiometrics) {
+      // Try biometric authentication
+      isAuthenticated = await authService.authenticateWithBiometrics();
+      if (!isAuthenticated) {
+        Get.snackbar(
+          "Authentication Failed",
+          "Biometric authentication failed. Please try again or use manual clock-in/out.",
+        );
         return false;
       }
+    }
 
-      // ✅ First clock in
-      final clockInResponse = await clockIn(); // Call clockIn API
+    // If biometrics are unavailable or user chooses fallback, proceed with clock action
+    if (canUseBiometrics && isAuthenticated || !canUseBiometrics) {
+      if (clockInTime.value == null) {
+        return await _performClockIn(now);
+      } else if (clockInTime.value != null && clockOutTime.value == null) {
+        return await _performClockOut(now);
+      }
+    }
+
+    return false;
+  }
+
+  Future<bool> _performClockIn(DateTime now) async {
+    try {
+      final clockInResponse = await clockIn();
       if (!clockInResponse) {
         Get.snackbar(
           "Clock In Failed",
@@ -61,18 +238,25 @@ class AttendanceController extends GetxController {
       isClockedIn.value = true;
       clockOutTime.value = null;
       totalWorkedHours.value = "--:--";
-    } else {
-      if (clockOutTime.value != null &&
-          _isSameDay(clockOutTime.value!, today)) {
-        Get.snackbar(
-          "Already Clocked Out",
-          "You've already clocked out today.",
-        );
-        return false;
-      }
 
-      // ✅ Clocking out
-      final clockOutResponse = await clockOut(); // Call clockOut API
+      Get.snackbar(
+        "Success",
+        "Clocked in successfully!",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      return true;
+    } catch (e) {
+      print("Error during clock-in: $e");
+      Get.snackbar("Error", "An error occurred during clock-in.");
+      return false;
+    }
+  }
+
+  Future<bool> _performClockOut(DateTime now) async {
+    try {
+      final clockOutResponse = await clockOut();
       if (!clockOutResponse) {
         Get.snackbar(
           "Clock Out Failed",
@@ -88,15 +272,22 @@ class AttendanceController extends GetxController {
         final duration = now.difference(clockInTime.value!);
         totalWorkedHours.value = _formatDuration(duration);
       }
+
+      await _initializeAttendance();
+
+      Get.snackbar(
+        "Success",
+        "Clocked out successfully!",
+        backgroundColor: Colors.green,
+        colorText: Colors.white,
+      );
+
+      return true;
+    } catch (e) {
+      print("Error during clock-out: $e");
+      Get.snackbar("Error", "An error occurred during clock-out.");
+      return false;
     }
-
-    return true;
-  }
-
-  bool _isSameDay(DateTime date, DateTime compareTo) {
-    return date.year == compareTo.year &&
-        date.month == compareTo.month &&
-        date.day == compareTo.day;
   }
 
   String _formatDuration(Duration duration) {
@@ -114,7 +305,6 @@ class AttendanceController extends GetxController {
   Future<bool> clockIn() async {
     try {
       final response = await AttendanceService.instance.clockIn();
-      
 
       if (response) {
         print("Clock-in API call successful");
@@ -131,9 +321,7 @@ class AttendanceController extends GetxController {
 
   Future<bool> clockOut() async {
     try {
-      final response =
-          await AttendanceService.instance
-              .clockOut(); // Corrected to call clockOut
+      final response = await AttendanceService.instance.clockOut();
       if (response) {
         print("Clock-out API call successful");
         return true;

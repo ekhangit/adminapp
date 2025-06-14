@@ -23,6 +23,7 @@ class ChatInfo extends StatelessWidget {
 
               final isSentMe = message.isOwn;
 
+
               return Container(
                 margin: EdgeInsets.only(
                   top: index == 0 ? 16 : 8,
