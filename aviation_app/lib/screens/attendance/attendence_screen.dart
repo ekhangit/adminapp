@@ -138,63 +138,77 @@ class AttendanceScreen extends StatelessWidget {
                       Obx(
                         () => CheckInButton(
                           iconPath: 'assets/svg/clockin.svg',
-                          title: controller.isClockedIn.value
-                              ? 'CLOCK OUT'
-                              : 'CLOCK IN',
+                          title:
+                              controller.isClockedIn.value
+                                  ? 'CLOCK OUT'
+                                  : 'CLOCK IN',
                           isClockedIn: controller.isClockedIn.value,
-                          disabled: controller.isButtonDisabled,
-                          onTap: controller.isButtonDisabled
-                              ? null
-                              : () async {
-                                  // Check if biometrics are available
-                                  bool canUseBiometrics = await controller
-                                      .authService
-                                      .canAuthenticateWithBiometrics();
-                                  if (!canUseBiometrics) {
-                                    // Show confirmation dialog for fallback
-                                    bool? confirmed = await Get.dialog<bool>(
-                                      AlertDialog(
-                                        title: Text(
-                                          controller.isClockedIn.value
-                                              ? 'Confirm Clock Out'
-                                              : 'Confirm Clock In',
-                                        ),
-                                        content: Text(
-                                          'Biometric authentication is not available. Do you want to ${controller.isClockedIn.value ? 'clock out' : 'clock in'} manually?',
-                                        ),
-                                        actions: [
-                                          TextButton(
-                                            onPressed: () =>
-                                                Get.back(result: false),
-                                            child: Text('Cancel'),
+                          disabled:
+                              controller.isButtonDisabled ||
+                              (controller.locationRequired.value &&
+                                  (!controller.locationServiceEnabled.value ||
+                                      !controller
+                                          .locationPermissionGranted
+                                          .value)),
+                          onTap:
+                              controller.isButtonDisabled
+                                  ? null
+                                  : () async {
+                                    // Check if biometrics are available
+                                    bool canUseBiometrics =
+                                        await controller.authService
+                                            .canAuthenticateWithBiometrics();
+                                    if (!canUseBiometrics) {
+                                      // Show confirmation dialog for fallback
+                                      bool? confirmed = await Get.dialog<bool>(
+                                        AlertDialog(
+                                          title: Text(
+                                            controller.isClockedIn.value
+                                                ? 'Confirm Clock Out'
+                                                : 'Confirm Clock In',
                                           ),
-                                          TextButton(
-                                            onPressed: () =>
-                                                Get.back(result: true),
-                                            child: Text('Confirm'),
+                                          content: Text(
+                                            'Biometric authentication is not available. Do you want to ${controller.isClockedIn.value ? 'clock out' : 'clock in'} manually?',
                                           ),
-                                        ],
-                                      ),
-                                    );
-                                    if (confirmed != true) return;
-                                  }
-                                  // Proceed with clock action
-                                  final success =
-                                      await controller.handleClockAction();
-                                  if (!success && canUseBiometrics) {
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      const SnackBar(
-                                        content: Text('Authentication failed'),
-                                      ),
-                                    );
-                                  }
-                                },
+                                          actions: [
+                                            TextButton(
+                                              onPressed:
+                                                  () => Get.back(result: false),
+                                              child: Text('Cancel'),
+                                            ),
+                                            TextButton(
+                                              onPressed:
+                                                  () => Get.back(result: true),
+                                              child: Text('Confirm'),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                      if (confirmed != true) return;
+                                    }
+                                    // Proceed with clock action
+                                    final success =
+                                        await controller.handleClockAction();
+                                    if (!success && canUseBiometrics) {
+                                      ScaffoldMessenger.of(
+                                        context,
+                                      ).showSnackBar(
+                                        const SnackBar(
+                                          content: Text(
+                                            'Authentication failed',
+                                          ),
+                                        ),
+                                      );
+                                    }
+                                  },
                         ),
                       ),
                       const SizedBox(height: 30),
                       DottedLine(
                         dashLength: 4.0,
-                        dashColor: AppColors.lightGreyTextColor.withOpacity(0.5),
+                        dashColor: AppColors.lightGreyTextColor.withOpacity(
+                          0.5,
+                        ),
                       ),
                       const SizedBox(height: 30),
                       Row(
@@ -203,29 +217,34 @@ class AttendanceScreen extends StatelessWidget {
                           Obx(
                             () => AttendanceInfoTile(
                               title: "Clock In",
-                              value: controller.clockInTime.value != null
-                                  ? DateFormat('hh:mm a')
-                                      .format(controller.clockInTime.value!)
-                                  : "--:--",
+                              value:
+                                  controller.clockInTime.value != null
+                                      ? DateFormat(
+                                        'hh:mm a',
+                                      ).format(controller.clockInTime.value!)
+                                      : "--:--",
                               iconPath: 'assets/svg/timer.svg',
                             ),
                           ),
                           Obx(
                             () => AttendanceInfoTile(
                               title: "Clock Out",
-                              value: controller.clockOutTime.value != null
-                                  ? DateFormat('hh:mm a')
-                                      .format(controller.clockOutTime.value!)
-                                  : "--:--",
+                              value:
+                                  controller.clockOutTime.value != null
+                                      ? DateFormat(
+                                        'hh:mm a',
+                                      ).format(controller.clockOutTime.value!)
+                                      : "--:--",
                               iconPath: 'assets/svg/timer.svg',
                             ),
                           ),
                           Obx(
                             () => AttendanceInfoTile(
                               title: "Total Hrs",
-                              value: controller.totalWorkedHours.value.isNotEmpty
-                                  ? controller.totalWorkedHours.value
-                                  : "--:--",
+                              value:
+                                  controller.totalWorkedHours.value.isNotEmpty
+                                      ? controller.totalWorkedHours.value
+                                      : "--:--",
                               iconPath: 'assets/svg/timer.svg',
                             ),
                           ),
@@ -239,33 +258,34 @@ class AttendanceScreen extends StatelessWidget {
 
             // 🌀 Loading Overlay
             Obx(
-              () => controller.isLoading.value
-                  ? Container(
-                      color: Colors.black.withValues(alpha: 0.5),
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(12.0),
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.85),
-                            boxShadow: kElevationToShadow[1],
-                            border: Border.all(
-                              color: AppColors.matteBlackColor,
-                              width: 0.05,
+              () =>
+                  controller.isLoading.value
+                      ? Container(
+                        color: Colors.black.withValues(alpha: 0.5),
+                        child: Center(
+                          child: Container(
+                            padding: const EdgeInsets.all(12.0),
+                            height: 50,
+                            width: 50,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: Colors.white.withValues(alpha: 0.85),
+                              boxShadow: kElevationToShadow[1],
+                              border: Border.all(
+                                color: AppColors.matteBlackColor,
+                                width: 0.05,
+                              ),
                             ),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3.0,
-                              color: AppColors.colorPrimary,
+                            child: const Center(
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3.0,
+                                color: AppColors.colorPrimary,
+                              ),
                             ),
                           ),
                         ),
-                      ),
-                    )
-                  : SizedBox.shrink(),
+                      )
+                      : SizedBox.shrink(),
             ),
           ],
         ),

@@ -121,14 +121,20 @@ class FlightsModel {
 class Airline {
   final int id;
   final String picture;
+  final String mobilePicture;
 
-  Airline({required this.id, required this.picture});
+  Airline({
+    required this.id,
+    required this.picture,
+    required this.mobilePicture,
+  });
 
   factory Airline.fromJson(Map<String, dynamic> json) {
     return Airline(
       id: json['id'],
 
       picture: "$apiUrl/storage/airline_img/${json['picture'] ?? ''}",
+      mobilePicture: "$apiUrl/storage/airline_img/${json['mobile_logo'] ?? ''}",
     );
   }
 }

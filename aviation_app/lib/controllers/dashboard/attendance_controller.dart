@@ -2,10 +2,13 @@ import 'dart:async';
 
 import 'package:aviation_app/services/attendance_service.dart';
 import 'package:flutter/material.dart';
+import 'package:geolocator/geolocator.dart';
 import 'package:get/get.dart';
 import 'package:intl/intl.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 import '../../services/local_auth_service.dart';
+import '../../services/user_location_service.dart';
 
 class AttendanceController extends GetxController {
   final LocalAuthService authService = LocalAuthService();
@@ -28,9 +31,14 @@ class AttendanceController extends GetxController {
 
   late Timer _timer;
 
+  var locationPermissionGranted = false.obs;
+  var locationServiceEnabled = false.obs;
+  var locationRequired = false.obs;
+
   @override
   void onInit() {
     super.onInit();
+    _initializeLocation();
     updateTime();
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => updateTime());
     Future.delayed(Duration(milliseconds: 100), () {
@@ -38,10 +46,98 @@ class AttendanceController extends GetxController {
     });
   }
 
+  // void updateTime() {
+  //   final now = DateTime.now();
+  //   currentTime.value = DateFormat('hh : mm a').format(now);
+  //   currentDate.value = DateFormat('MMMM dd, yyyy - EEEE').format(now);
+  // }
+
   void updateTime() {
-    final now = DateTime.now();
+    final now = DateTime.now().toUtc(); // Convert to UTC
     currentTime.value = DateFormat('hh : mm a').format(now);
     currentDate.value = DateFormat('MMMM dd, yyyy - EEEE').format(now);
+  }
+
+  Future<void> _initializeLocation() async {
+    try {
+      // 1. Check if location is required from API
+      final locationResponse =
+          await UserLocationService.instance.checkLocation();
+      locationRequired.value =
+          locationResponse.isSuccess &&
+          locationResponse.data != null &&
+          locationResponse.data!['location_required'] == "yes";
+
+      if (!locationRequired.value) return;
+
+      // 2. Check current location status
+      await _checkLocationStatus();
+
+      // 3. If required but not enabled, show prompt
+      if (locationRequired.value &&
+          (!locationServiceEnabled.value || !locationPermissionGranted.value)) {
+        await _requestLocationAccess();
+      }
+    } catch (e) {
+      print("Error initializing location: $e");
+    }
+  }
+
+  Future<void> _checkLocationStatus() async {
+    locationServiceEnabled.value = await Geolocator.isLocationServiceEnabled();
+    final permission = await Geolocator.checkPermission();
+    locationPermissionGranted.value =
+        permission == LocationPermission.always ||
+        permission == LocationPermission.whileInUse;
+  }
+
+  // check local permissions
+  Future<bool> _requestLocationAccess() async {
+    try {
+      // 1. Check if service is enabled
+      if (!locationServiceEnabled.value) {
+        locationServiceEnabled.value = await Geolocator.openLocationSettings();
+        if (!locationServiceEnabled.value) {
+          Get.snackbar(
+            "Location Required",
+            "Please enable location services",
+            duration: Duration(seconds: 3),
+          );
+          return false;
+        }
+      }
+
+      // 2. Check permissions
+      var permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) {
+          Get.snackbar(
+            "Permission Required",
+            "Location permission is required",
+            duration: Duration(seconds: 3),
+          );
+          return false;
+        }
+      }
+
+      if (permission == LocationPermission.deniedForever) {
+        Get.snackbar(
+          "Permission Denied",
+          "Please enable location in app settings",
+          duration: Duration(seconds: 3),
+        );
+        await openAppSettings();
+        return false;
+      }
+
+      // 3. Update status after successful request
+      await _checkLocationStatus();
+      return locationPermissionGranted.value;
+    } catch (e) {
+      print("Error requesting location access: $e");
+      return false;
+    }
   }
 
   Future<void> _initializeAttendance() async {
@@ -184,6 +280,27 @@ class AttendanceController extends GetxController {
 
   /// Handle clock action with biometric or fallback
   Future<bool> handleClockAction() async {
+    // First check location requirements
+    if (locationRequired.value) {
+      await _checkLocationStatus();
+
+      if (!locationServiceEnabled.value || !locationPermissionGranted.value) {
+        final success = await _requestLocationAccess();
+        if (!success) return false;
+      }
+
+      // Final verification after potential changes
+      await _checkLocationStatus();
+      if (!locationServiceEnabled.value || !locationPermissionGranted.value) {
+        Get.snackbar(
+          "Location Required",
+          "Cannot proceed without location access",
+          duration: Duration(seconds: 3),
+        );
+        return false;
+      }
+    }
+
     final now = DateTime.now();
 
     // Check if attendance is already completed

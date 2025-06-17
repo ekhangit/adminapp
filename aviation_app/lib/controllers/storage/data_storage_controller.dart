@@ -57,7 +57,7 @@ class DataStorageController extends GetxController {
 
     header.value = await getHeaders();
 
-    log("[currentSession] CURRENT SESSION VALUE ${currentSession.value}");
+    // log("[currentSession] CURRENT SESSION VALUE ${currentSession.value}");
     log("[currentSession] SESSION VALUE ${session.value}");
     log("[currentSession] Header Value ${header.value}");
   }

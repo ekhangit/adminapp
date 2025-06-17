@@ -79,7 +79,7 @@ class FlightCard extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       CustomCircularImage(
-                        imageUrl: flight.airline?.picture ?? "",
+                        imageUrl: flight.airline?.mobilePicture ?? "",
                         size: 3.0.h,
                       ),
                       SizedBox(width: 1.8.w),

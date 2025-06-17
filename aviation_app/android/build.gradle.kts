@@ -4,7 +4,7 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:8.3.1") // Fixed AGP version
+        classpath("com.android.tools.build:gradle:8.6.0") // Fixed AGP version
     }
 }
 

@@ -253,9 +253,9 @@ class FlightCommController extends GetxController {
                 }
               }
 
-              log(
-                '[FlightCommController] Unread messages for flight $flightId: $unreadCount',
-              );
+              // log(
+              //   '[FlightCommController] Unread messages for flight $flightId: $unreadCount',
+              // );
               updateFlightUnreadCount(flightId, unreadCount);
             } catch (e, stack) {
               log('Error processing messages for flight $flightId: $e\n$stack');

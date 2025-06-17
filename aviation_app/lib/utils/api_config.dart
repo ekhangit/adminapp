@@ -3,6 +3,9 @@ class ApiConfig {
   static const loginAPI = '/api/v1/login';
   static const logoutAPI = '/api/v1/logout';
 
+  // Location
+  static const checkLocationPermissionAPI = '/api/v1/attendance/check-location';
+
   // ATTENDANCE
   static const trackAttendenceAPI = '/api/v1/attendance/track-attendance';
   static const clockInAPI = '/api/v1/attendance/time-in';
