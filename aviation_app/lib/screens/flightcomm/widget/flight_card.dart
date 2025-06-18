@@ -43,6 +43,8 @@ class FlightCard extends StatelessWidget {
                       ? flight.departureDelayColor == 'green'
                           ? Colors.green.shade700
                           : Colors.red.shade700
+                      : flight.ata!.isEmpty
+                      ? Colors.white
                       : flight.arrivalDelayColor == 'green'
                       ? Colors.green.shade700
                       : Colors.red.shade700,
@@ -57,15 +59,15 @@ class FlightCard extends StatelessWidget {
             isSelected
                 ? Icon(
                   Icons.check_circle,
-                  size: 2.8.h,
+                  size: 2.4.h,
                   color: AppColors.colorPrimary,
                 )
                 : Image.asset(
                   flight.isDeparture
                       ? "assets/images/outbound.png"
                       : "assets/images/inbound.png",
-                  height: 2.8.h,
-                  width: 2.8.h,
+                  height: 2.4.h,
+                  width: 2.4.h,
                 ),
             SizedBox(width: 1.5.w),
 
@@ -80,9 +82,9 @@ class FlightCard extends StatelessWidget {
                     children: [
                       CustomCircularImage(
                         imageUrl: flight.airline?.mobilePicture ?? "",
-                        size: 3.0.h,
+                        size: 2.8.h,
                       ),
-                      SizedBox(width: 1.8.w),
+                      SizedBox(width: 2.0.w),
 
                       // Flight Details
                       Expanded(
@@ -90,24 +92,34 @@ class FlightCard extends StatelessWidget {
                           crossAxisAlignment: WrapCrossAlignment.center,
                           spacing: 1.6.w,
                           children: [
-                            Text(
-                              flight.flightInfo,
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w700,
+                            SizedBox(
+                              width: 14.w, // or appropriate width
+                              child: Text(
+                                formatFlightInfo(
+                                  flight.flightInfo,
+                                ), // use formatted version
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            _divider(),
-                            Text(
-                              '${flight.departureAirport?.iataCode}-${flight.arrivalAirport?.iataCode}',
-                              style: TextStyle(
-                                fontSize: 15.sp,
-                                fontWeight: FontWeight.w600,
+                            _divider(opacity: .7),
+                            SizedBox(
+                              width: 18.w,
+                              child: Text(
+                                '${flight.departureAirport?.iataCode}-${flight.arrivalAirport?.iataCode}',
+                                style: TextStyle(
+                                  fontSize: 15.sp,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                                overflow: TextOverflow.ellipsis,
                               ),
                             ),
                             if (flight.aircraft != null &&
                                 flight.aircraft!.aircraftType != null)
-                              _divider(),
+                              _divider(height: 1.7),
                             if (flight.aircraft != null &&
                                 flight.aircraft!.aircraftType != null)
                               Text(
@@ -117,7 +129,7 @@ class FlightCard extends StatelessWidget {
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
-                            if (flight.aircraft != null) _divider(),
+                            if (flight.aircraft != null) _divider(height: 1.7),
                             if (flight.aircraft != null)
                               Text(
                                 flight.aircraft!.name,
@@ -170,6 +182,7 @@ class FlightCard extends StatelessWidget {
                             formatFlightTime(flight.std!),
                             Colors.blue.shade700,
                           ),
+
                         if (flight.std != null && flight.std!.isNotEmpty)
                           SizedBox(width: 2.5.w),
                         if (flight.atd != null && flight.atd!.isNotEmpty)
@@ -183,6 +196,12 @@ class FlightCard extends StatelessWidget {
                                 : flight.arrivalDelayColor == 'green'
                                 ? Colors.green.shade700
                                 : Colors.red.shade700,
+                          ),
+                        if (flight.atd!.isEmpty && flight.sta!.isNotEmpty)
+                          _timeBlock(
+                            "STA",
+                            formatFlightTime(flight.sta!),
+                            Colors.blue.shade700,
                           ),
                       ] else ...[
                         if (flight.sta != null && flight.sta!.isNotEmpty)
@@ -205,27 +224,31 @@ class FlightCard extends StatelessWidget {
                                 ? Colors.green.shade700
                                 : Colors.red.shade700,
                           ),
+                        if (flight.ata!.isEmpty)
+                          _timeBlock(
+                            "ETA",
+                            formatFlightTime(flight.sta!),
+                            Colors.amber.shade700,
+                          ),
                       ],
                       SizedBox(width: 2.0.w),
                       if (flight.flightDelays.isNotEmpty &&
                           flight.flightDelays[0].delayType != '-' &&
                           flight.flightDelays[0].delayCode != '-' &&
                           flight.flightDelays[0].delayDate != '-')
-                        Expanded(
-                          child: Text(
-                            "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}/${flight.flightDelays[0].delayDate}",
-                            style: TextStyle(
-                              fontSize: 13.5.sp,
-                              fontWeight: FontWeight.w600,
-                              color: Colors.red,
-                            ),
-                            overflow: TextOverflow.ellipsis,
-                            maxLines: 1,
-                            softWrap: false,
+                        Text(
+                          "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}/${flight.flightDelays[0].delayDate}",
+                          style: TextStyle(
+                            fontSize: 13.5.sp,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.red,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
+                          softWrap: false,
                         ),
 
-                      Spacer(),
+                      Expanded(child: SizedBox()),
                       if ((flight.isDeparture &&
                               flight.departureDelayMinutes != 0) ||
                           (!flight.isDeparture &&
@@ -265,18 +288,22 @@ class FlightCard extends StatelessWidget {
     });
   }
 
-  Widget _divider() => Container(
-    width: 0.35.w,
-    height: 2.0.h,
-    color: Colors.black.withValues(alpha: .5),
+  Widget _divider({
+    double width = 0.35,
+    double height = 2.0,
+    double opacity = .5,
+  }) => Container(
+    width: width.w,
+    height: height.h,
+    color: Colors.black.withValues(alpha: opacity),
   );
 
   Widget _timeBlock(String label, String time, Color color) {
     return Row(
       children: [
         Container(
-          width: 7.0.w,
-          height: 1.9.h,
+          width: 6.8.w,
+          height: 1.8.h,
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: color,
@@ -285,7 +312,7 @@ class FlightCard extends StatelessWidget {
           child: Text(
             label,
             style: TextStyle(
-              fontSize: 12.sp,
+              fontSize: 11.5.sp,
               color: Colors.white,
               fontWeight: FontWeight.w600,
             ),
@@ -318,5 +345,24 @@ class FlightCard extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  String formatFlightInfo(String info) {
+    final regex = RegExp(r'^([A-Z]+)\s?(\d+)$', caseSensitive: false);
+    final match = regex.firstMatch(info.trim());
+
+    if (match != null) {
+      final airline = match.group(1);
+      final number = match.group(2);
+      final spaceCount =
+          number!.length == 3
+              ? 0
+              : number.length == 4
+              ? 0
+              : 0;
+      return '$airline $number${' ' * spaceCount}';
+    }
+
+    return info; // fallback if pattern doesn't match
   }
 }

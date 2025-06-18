@@ -40,11 +40,21 @@ class ChatMessage {
       return 0;
     }
 
-    // Helper function to safely convert read_by array
+    // Updated helper function to safely convert read_by array with string handling
     List<int>? _toIntList(dynamic value) {
       if (value == null) return null;
       if (value is List) {
-        return value.map((item) => _toInt(item)).toList();
+        return value.map((item) {
+          // Handle both string and int values in the array
+          if (item is String) {
+            return int.tryParse(item) ?? 0;
+          } else if (item is int) {
+            return item;
+          } else if (item is double) {
+            return item.toInt();
+          }
+          return 0; // Default fallback
+        }).toList();
       }
       return null;
     }

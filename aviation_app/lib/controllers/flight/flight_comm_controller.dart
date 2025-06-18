@@ -202,18 +202,26 @@ class FlightCommController extends GetxController {
 
   // In FlightCommController
   void updateFlightUnreadCount(int flightId, int unreadCount) {
-    void updateList(List<FlightsModel> list) {
-      final index = list.indexWhere((f) => f.id == flightId);
-      if (index != -1 && list[index].unReadCount.value != unreadCount) {
-        list[index].unReadCount.value = unreadCount;
+    log('Updating unread count for flight $flightId to $unreadCount');
+
+    final listsToUpdate = [
+      allFlightList,
+      arrivalFlightList,
+      departureFlightList,
+      cancelledFlightList,
+      myFlightList,
+    ];
+
+    for (final list in listsToUpdate) {
+      try {
+        final flight = list.firstWhereOrNull((f) => f.id == flightId);
+        if (flight != null && flight.unReadCount.value != unreadCount) {
+          flight.unReadCount.value = unreadCount;
+        }
+      } catch (e) {
+        log('Error updating unread count in ${list.runtimeType}: $e');
       }
     }
-
-    updateList(allFlightList);
-    updateList(arrivalFlightList);
-    updateList(departureFlightList);
-    updateList(cancelledFlightList);
-    updateList(myFlightList);
   }
 
   void _setupFlightChatListeners() {
@@ -229,13 +237,15 @@ class FlightCommController extends GetxController {
     if (_flightChatSubscriptions.containsKey(flightId)) {
       log('[FlightCommController] Already listening to flight $flightId');
     }
+
     final currentUserId = DataStorageController.to.user.id;
+    final currentUserIdStr = currentUserId.toString();
 
     _flightChatSubscriptions[flightId] = FirebaseFirestore.instance
         .collection('chats')
         .doc(flightId.toString())
         .collection('messages')
-        .where('sender_id', isNotEqualTo: currentUserId)
+        .where('sender_id', isNotEqualTo: currentUserIdStr)
         .snapshots()
         .listen(
           (snapshot) {
@@ -273,7 +283,17 @@ class FlightCommController extends GetxController {
 
     try {
       if (readByData is List) {
-        return readByData.whereType<int>().toList();
+        // return readByData.map((e) => e.toString()).toList();
+        return readByData.map((item) {
+          if (item is String) {
+            return int.tryParse(item) ?? 0; // Convert string to int
+          } else if (item is int) {
+            return item; // Already an int
+          } else if (item is double) {
+            return item.toInt(); // Convert double to int
+          }
+          return 0; // Default fallback
+        }).toList();
       }
       return [];
     } catch (e) {

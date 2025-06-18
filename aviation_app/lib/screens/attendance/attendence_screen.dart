@@ -189,17 +189,17 @@ class AttendanceScreen extends StatelessWidget {
                                     // Proceed with clock action
                                     final success =
                                         await controller.handleClockAction();
-                                    if (!success && canUseBiometrics) {
-                                      ScaffoldMessenger.of(
-                                        context,
-                                      ).showSnackBar(
-                                        const SnackBar(
-                                          content: Text(
-                                            'Authentication failed',
-                                          ),
-                                        ),
-                                      );
-                                    }
+                                    // if (!success && canUseBiometrics) {
+                                    //   ScaffoldMessenger.of(
+                                    //     context,
+                                    //   ).showSnackBar(
+                                    //     const SnackBar(
+                                    //       content: Text(
+                                    //         'Authentication failed',
+                                    //       ),
+                                    //     ),
+                                    //   );
+                                    // }
                                   },
                         ),
                       ),

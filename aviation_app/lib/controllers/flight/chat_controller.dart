@@ -185,6 +185,7 @@ class ChatController extends GetxController {
 
     try {
       final currentUser = DataStorageController.to.user;
+      final currentUserIdStr = currentUser.id.toString();
 
       // Save to Firestore with only required fields
       await FirebaseFirestore.instance
@@ -192,10 +193,10 @@ class ChatController extends GetxController {
           .doc(argument.toString())
           .collection('messages')
           .add({
-            'sender_id': currentUser.id,
+            'sender_id': currentUserIdStr,
             'message': text,
             'message_type': 'simple',
-            'read_by': [currentUser.id], // Initialize with sender's ID
+            'read_by': [currentUserIdStr],
             'created_at': FieldValue.serverTimestamp(),
           });
 
@@ -207,10 +208,12 @@ class ChatController extends GetxController {
     } finally {
       isSendingMessage.value = false;
     }
+
+    print('isSendingMessage: ${isSendingMessage.value}');
   }
 
   Future<void> markAllMessagesAsRead(int flightId) async {
-    final currentUserId = DataStorageController.to.user.id;
+    final currentUserIdStr = DataStorageController.to.user.id.toString();
 
     try {
       // Get all unread messages (where current user is not in read_by)
@@ -218,7 +221,7 @@ class ChatController extends GetxController {
           .collection('chats')
           .doc(flightId.toString())
           .collection('messages')
-          .where('read_by', whereNotIn: [currentUserId]);
+          .where('read_by', whereNotIn: [currentUserIdStr]);
 
       // Get the first batch
       QuerySnapshot snapshot = await query.get();
@@ -228,7 +231,7 @@ class ChatController extends GetxController {
 
         for (final doc in snapshot.docs) {
           batch.update(doc.reference, {
-            'read_by': FieldValue.arrayUnion([currentUserId]),
+            'read_by': FieldValue.arrayUnion([currentUserIdStr]),
           });
         }
 
@@ -246,11 +249,12 @@ class ChatController extends GetxController {
   }
 
   void listenForUnreadMessages(int flightId) {
+    final currentUserIdStr = DataStorageController.to.user.id.toString();
     FirebaseFirestore.instance
         .collection('chats')
         .doc(flightId.toString())
         .collection('messages')
-        .where('read_by', arrayContains: DataStorageController.to.user.id)
+        .where('read_by', arrayContains: currentUserIdStr)
         .snapshots()
         .listen((snapshot) {
           // When messages are marked as read, update the unread count
@@ -260,23 +264,25 @@ class ChatController extends GetxController {
 
   Future<void> updateUnreadCountForFlight(int flightId) async {
     try {
+      final currentUserIdStr = DataStorageController.to.user.id.toString();
       // Single query to count unread messages
       final unreadQuery =
           FirebaseFirestore.instance
               .collection('chats')
               .doc(flightId.toString())
               .collection('messages')
-              .where('read_by', arrayContains: DataStorageController.to.user.id)
+              .where('read_by', whereNotIn: [currentUserIdStr])
               .count();
 
       final unreadSnapshot = await unreadQuery.get();
-      final unreadCount = unreadSnapshot.count!;
+      final unreadCount = unreadSnapshot.count ?? 0;
+
+      log(
+        '[updateUnreadCountForFlight] Flight $flightId has $unreadCount unread messages',
+      );
 
       if (Get.isRegistered<FlightCommController>()) {
-        Get.find<FlightCommController>().updateFlightUnreadCount(
-          flightId,
-          unreadCount,
-        );
+        Get.find<FlightCommController>().updateFlightUnreadCount(flightId, 0);
       }
     } catch (e) {
       log('Error updating unread count: $e');
@@ -328,14 +334,10 @@ class ChatController extends GetxController {
                     print('[fetchedMessages] data $data');
 
                     // // Try matching senderId with a staff member
-                    final matchedStaff = staffList.firstWhereOrNull((staff) {
-                      final sender = data['sender_id'];
-                      final senderInt =
-                          sender is int
-                              ? sender
-                              : int.tryParse(sender.toString());
-                      return staff.id == senderInt;
-                    });
+                    final senderIdStr = data['sender_id'].toString();
+                    final matchedStaff = staffList.firstWhereOrNull(
+                      (staff) => staff.id.toString() == senderIdStr,
+                    );
 
                     print('[matchedStaff] id ${matchedStaff?.id}');
                     print('[matchedStaff] name ${matchedStaff?.name}');
@@ -349,6 +351,7 @@ class ChatController extends GetxController {
                               ?.toDate()
                               .toIso8601String() ??
                           '',
+                      'sender_id': senderIdStr,
                     });
                   }).toList();
 

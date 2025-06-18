@@ -320,10 +320,10 @@ class AttendanceController extends GetxController {
       // Try biometric authentication
       isAuthenticated = await authService.authenticateWithBiometrics();
       if (!isAuthenticated) {
-        Get.snackbar(
-          "Authentication Failed",
-          "Biometric authentication failed. Please try again or use manual clock-in/out.",
-        );
+        // Get.snackbar(
+        //   "Authentication Failed",
+        //   "Biometric authentication failed. Please try again or use manual clock-in/out.",
+        // );
         return false;
       }
     }
