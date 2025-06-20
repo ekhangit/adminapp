@@ -16,6 +16,8 @@ class FlightsModel {
   final String? atd;
   final String? sta;
   final String? ata;
+  final String? eta;
+  final String? etd;
   final RxInt unReadCount;
   final Airline? airline;
   final Airport? departureAirport;
@@ -25,8 +27,10 @@ class FlightsModel {
   final RxBool isFavorite;
   final int departureDelayMinutes;
   final String departureDelayColor;
+  final String departureColor;
   final int arrivalDelayMinutes;
   final String arrivalDelayColor;
+  final String arrivalColor;
 
   FlightsModel({
     required this.id,
@@ -38,10 +42,12 @@ class FlightsModel {
     required this.scheduledDepartureTime,
     required this.scheduledArrivalTime,
     required this.status,
-    required this.std,
-    required this.atd,
-    required this.sta,
+    this.std,
+    this.atd,
+    this.sta,
     this.ata,
+    this.eta,
+    this.etd,
     int unReadCount = 0, // Accept regular int parameter
     this.airline,
     this.departureAirport,
@@ -51,8 +57,10 @@ class FlightsModel {
     required bool isFavorite,
     required this.departureDelayMinutes,
     required this.departureDelayColor,
+    required this.departureColor,
     required this.arrivalDelayMinutes,
     required this.arrivalDelayColor,
+    required this.arrivalColor,
   }) : unReadCount = RxInt(unReadCount),
        isFavorite = isFavorite.obs;
 
@@ -77,6 +85,8 @@ class FlightsModel {
       atd: json['atd'] ?? '',
       sta: json['sta'] ?? '',
       ata: json['ata'] ?? '',
+      eta: json['eta'] ?? '',
+      etd: json['etd'] ?? '',
       airline:
           json['airline'] != null ? Airline.fromJson(json['airline']) : null,
       departureAirport:
@@ -91,10 +101,13 @@ class FlightsModel {
           json['aircraft'] != null ? Aircraft.fromJson(json['aircraft']) : null,
       flightDelays: delays,
       isFavorite: (json['is_favorite'] ?? false),
-      departureDelayMinutes: json['departure_delay_minutes'] ?? 0,
-      departureDelayColor: json['departure_delay_color'] ?? 'green',
-      arrivalDelayMinutes: json['arrival_delay_minutes'] ?? 0,
-      arrivalDelayColor: json['arrival_delay_color'] ?? 'green',
+      departureDelayMinutes: _parseDelay(json['departure_delay']),
+      departureDelayColor: json['departure_delay_color'] ?? '',
+      departureColor: json['departure_color'] ?? '',
+      
+      arrivalDelayMinutes: _parseDelay(json['arrival_delay']),
+      arrivalDelayColor: json['arrival_delay_color'] ?? '',
+      arrivalColor: json['arrival_color'] ?? '',
     );
   }
 
@@ -115,6 +128,21 @@ class FlightsModel {
     final hours = minutes ~/ 60;
     final mins = minutes % 60;
     return "${hours.toString().padLeft(2, '0')}:${mins.toString().padLeft(2, '0')}";
+  }
+
+  static int _parseDelay(dynamic delayString) {
+    if (delayString is! String || delayString.isEmpty) return 0;
+
+    try {
+      final parts = delayString.split(':');
+      if (parts.length == 2) {
+        final hours = int.tryParse(parts[0]) ?? 0;
+        final minutes = int.tryParse(parts[1]) ?? 0;
+        return hours * 60 + minutes;
+      }
+    } catch (_) {}
+
+    return 0;
   }
 }
 

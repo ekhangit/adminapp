@@ -238,7 +238,7 @@ class ChatController extends GetxController {
         await batch.commit();
       }
 
-      // // Immediately update count
+      //  Immediately update count
       // if (Get.isRegistered<FlightCommController>()) {
       //   log("[markAllMessagesAsRead] FlightCommController $flightId");
       //   Get.find<FlightCommController>().updateFlightUnreadCount(flightId, 0);

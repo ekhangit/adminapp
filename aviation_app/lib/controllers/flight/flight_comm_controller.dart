@@ -202,7 +202,9 @@ class FlightCommController extends GetxController {
 
   // In FlightCommController
   void updateFlightUnreadCount(int flightId, int unreadCount) {
-    log('Updating unread count for flight $flightId to $unreadCount');
+    log(
+      '[updateFlightUnreadCount] unread count for flight $flightId to $unreadCount',
+    );
 
     final listsToUpdate = [
       allFlightList,
@@ -218,10 +220,13 @@ class FlightCommController extends GetxController {
         if (flight != null && flight.unReadCount.value != unreadCount) {
           flight.unReadCount.value = unreadCount;
         }
+        // log('Updated unread count for flight $flightId in ${list.runtimeType}');
       } catch (e) {
         log('Error updating unread count in ${list.runtimeType}: $e');
       }
     }
+
+    update();
   }
 
   void _setupFlightChatListeners() {
@@ -263,9 +268,9 @@ class FlightCommController extends GetxController {
                 }
               }
 
-              // log(
-              //   '[FlightCommController] Unread messages for flight $flightId: $unreadCount',
-              // );
+              log(
+                '[FlightCommController] Unread messages for flight $flightId: $unreadCount',
+              );
               updateFlightUnreadCount(flightId, unreadCount);
             } catch (e, stack) {
               log('Error processing messages for flight $flightId: $e\n$stack');

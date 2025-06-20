@@ -40,12 +40,14 @@ class FlightCard extends StatelessWidget {
             left: BorderSide(
               color:
                   flight.isDeparture
-                      ? flight.departureDelayColor == 'green'
+                      ? flight.sta!.isEmpty && flight.std!.isEmpty
+                          ? Colors.white
+                          : flight.departureColor == 'greenBtn'
                           ? Colors.green.shade700
                           : Colors.red.shade700
                       : flight.ata!.isEmpty
                       ? Colors.white
-                      : flight.arrivalDelayColor == 'green'
+                      : flight.arrivalColor == 'greenBtn'
                       ? Colors.green.shade700
                       : Colors.red.shade700,
               width: 1.2.w,
@@ -93,7 +95,7 @@ class FlightCard extends StatelessWidget {
                           spacing: 1.6.w,
                           children: [
                             SizedBox(
-                              width: 14.w, // or appropriate width
+                              width: 16.w, // or appropriate width
                               child: Text(
                                 formatFlightInfo(
                                   flight.flightInfo,
@@ -144,12 +146,12 @@ class FlightCard extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          if ((flight.isDeparture &&
-                                  flight.departureDelayMinutes != 0) ||
-                              (!flight.isDeparture &&
-                                  flight.arrivalDelayMinutes != 0))
-                            if (unreadCount != 0)
-                              _seenCount(' $unreadCount ', Colors.green),
+                          // if ((flight.isDeparture &&
+                          //         flight.departureDelayMinutes != 0) ||
+                          //     (!flight.isDeparture &&
+                          //         flight.arrivalDelayMinutes != 0))
+                          if (unreadCount != 0)
+                            _seenCount(' $unreadCount ', Colors.green),
                           SizedBox(width: 0.2.h),
 
                           // Star Icon
@@ -190,10 +192,12 @@ class FlightCard extends StatelessWidget {
                             "ATD",
                             formatFlightTime(flight.atd!),
                             flight.isDeparture
-                                ? flight.departureDelayColor == 'green'
+                                ? (flight.std != null && flight.std!.isEmpty)
+                                    ? Colors.blue.shade700
+                                    : flight.departureColor == 'greenBtn'
                                     ? Colors.green.shade700
                                     : Colors.red.shade700
-                                : flight.arrivalDelayColor == 'green'
+                                : flight.arrivalColor == 'greenBtn'
                                 ? Colors.green.shade700
                                 : Colors.red.shade700,
                           ),
@@ -204,6 +208,22 @@ class FlightCard extends StatelessWidget {
                             Colors.blue.shade700,
                           ),
                       ] else ...[
+                        if (flight.ata!.isEmpty &&
+                            flight.std != null &&
+                            flight.std!.isNotEmpty &&
+                            flight.eta != null &&
+                            flight.eta!.isEmpty)
+                          _timeBlock(
+                            "STD",
+                            formatFlightTime(flight.std!),
+                            Colors.blue.shade700,
+                          ),
+                        if (flight.ata!.isEmpty &&
+                            flight.std != null &&
+                            flight.std!.isNotEmpty &&
+                            flight.eta != null &&
+                            flight.eta!.isEmpty)
+                          SizedBox(width: 2.5.w),
                         if (flight.sta != null && flight.sta!.isNotEmpty)
                           _timeBlock(
                             "STA",
@@ -217,17 +237,19 @@ class FlightCard extends StatelessWidget {
                             "ATA",
                             formatFlightTime(flight.ata!),
                             flight.isDeparture
-                                ? flight.departureDelayColor == 'green'
+                                ? flight.departureColor == 'greenBtn'
                                     ? Colors.green.shade700
                                     : Colors.red.shade700
-                                : flight.arrivalDelayColor == 'green'
+                                : flight.arrivalColor == 'greenBtn'
                                 ? Colors.green.shade700
                                 : Colors.red.shade700,
                           ),
-                        if (flight.ata!.isEmpty)
+                        if (flight.ata!.isEmpty &&
+                            flight.eta != null &&
+                            flight.eta!.isNotEmpty)
                           _timeBlock(
                             "ETA",
-                            formatFlightTime(flight.sta!),
+                            formatFlightTime(flight.eta!),
                             Colors.amber.shade700,
                           ),
                       ],
@@ -261,10 +283,11 @@ class FlightCard extends StatelessWidget {
                             fontSize: 14.sp,
                             color:
                                 flight.isDeparture
-                                    ? flight.departureDelayColor == 'green'
+                                    ? flight.departureDelayColor ==
+                                            'text-success'
                                         ? Colors.green
                                         : Colors.red
-                                    : flight.arrivalDelayColor == 'green'
+                                    : flight.arrivalDelayColor == 'text-success'
                                     ? Colors.green
                                     : Colors.red,
                             fontWeight: FontWeight.w600,
