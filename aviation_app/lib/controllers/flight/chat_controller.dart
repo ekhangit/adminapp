@@ -7,7 +7,7 @@ import 'package:aviation_app/services/flight_chat_service.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
+// import 'package:get/get_rx/src/rx_workers/utils/debouncer.dart';
 
 import '../../models/chat_model.dart';
 import 'package:intl/intl.dart';
@@ -35,10 +35,8 @@ class ChatController extends GetxController {
 
     if (Get.isRegistered<FlightCommController>()) {
       final flightCommController = Get.find<FlightCommController>();
-      log("[ChatController] flightInfoController is registered");
 
       staffList.assignAll(flightCommController.flightStaff);
-      log("[ChatController] staffList : ${staffList.length} staff members");
       if (staffList.isNotEmpty) {
         // Initialize listeners
         fetchFlightChatsWithFirebase(argument);
@@ -54,12 +52,12 @@ class ChatController extends GetxController {
 
     // Scroll to bottom when messages change
     ever(messages, (_) {
-      log("[ChatController] Messages updated, scrolling to bottom");
+      // log("[ChatController] Messages updated, scrolling to bottom");
       WidgetsBinding.instance.addPostFrameCallback((_) {
         if (scrollController.hasClients) {
-          log(
-            "[ChatController] Scrolling to ${scrollController.position.maxScrollExtent}",
-          );
+          // log(
+          //   "[ChatController] Scrolling to ${scrollController.position.maxScrollExtent}",
+          // );
           scrollController.animateTo(
             scrollController.position.maxScrollExtent,
             duration: const Duration(milliseconds: 300),
@@ -116,8 +114,8 @@ class ChatController extends GetxController {
       );
 
       if (response.isSuccess && response.data != null) {
-        flightDetail.value = response.data!;
         // log('[fetchFlightChatDetail] Flight detail fetched successfully.');
+        flightDetail.value = response.data!;
       } else {
         log('[fetchFlightChatDetail] API Error: ${response.errorMessage}');
       }
@@ -312,6 +310,7 @@ class ChatController extends GetxController {
   // }
 
   Future<void> fetchFlightChatsWithFirebase(int flightId) async {
+    flightId = 65139;
     log('[fetchFlightChatsWithFirebase] flightId : $flightId');
 
     try {
@@ -331,16 +330,35 @@ class ChatController extends GetxController {
                   snapshot.docs.map((doc) {
                     final data = doc.data();
 
-                    print('[fetchedMessages] data $data');
+                    // Log message metadata (without sensitive content)
+                    log(
+                      '[FirebaseChat] Message ID: ${doc.id} | '
+                      'Sender: ${data['sender_id']} | '
+                      'Type: ${data['message_type']} | '
+                      'Timestamp: ${data['created_at']}',
+                    );
+
+                    if (data['message'] != null &&
+                        data['message_type'] == 'simple') {
+                      log('[FirebaseChat] Simple message detected');
+
+                      final msg = data['message'] as String;
+                      log(
+                        '[FirebaseChat] Message preview: ${msg.length > 20 ? '${msg.substring(0, 20)}...' : msg}',
+                      );
+                    } else if (data['message'] != null &&
+                        data['message_type'] == 'staff') {
+                      log('[FirebaseChat] Staff message detected');
+
+                      final staffMsg = data['message'] as Map<String, dynamic>;
+                      log('[FirebaseChat] Staff message: $staffMsg');
+                    }
 
                     // // Try matching senderId with a staff member
                     final senderIdStr = data['sender_id'].toString();
                     final matchedStaff = staffList.firstWhereOrNull(
                       (staff) => staff.id.toString() == senderIdStr,
                     );
-
-                    print('[matchedStaff] id ${matchedStaff?.id}');
-                    print('[matchedStaff] name ${matchedStaff?.name}');
 
                     return ChatMessage.fromJson({
                       ...data,

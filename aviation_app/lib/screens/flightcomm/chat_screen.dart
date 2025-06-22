@@ -2,8 +2,14 @@ import 'package:aviation_app/controllers/flight/chat_controller.dart';
 import 'package:aviation_app/screens/flightcomm/info/arr_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/chat_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/chkin_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/cpm_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/ldm_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/lds_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/lir_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/mvt_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/psm_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/ptm_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/sod_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/trc_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/widget/chat_bottom_view.dart';
 import 'package:aviation_app/screens/flightcomm/info/widget/into_widget.dart';
@@ -327,6 +333,34 @@ class ChatScreen extends StatelessWidget {
 
                         case 'LDM':
                           return LdmInfo();
+
+                        case 'LIR':
+                          return LirInfo();
+
+                        case 'LDS':
+                          return LdsInfo();
+
+                        case 'NOTOC':
+                          return const Center(
+                            child: Text("NOTOC view not implemented yet"),
+                          );
+
+                        case 'CPM':
+                          return CPMInfo();
+
+                        case 'PAL/CAL':
+                          return const Center(
+                            child: Text("PAL/CAL view not implemented yet"),
+                          );
+
+                        case 'PSM':
+                          return PsmInfo();
+
+                        case 'PTM':
+                          return PtmInfo();
+
+                        case 'SOD':
+                          return SodInfo();
 
                         default:
                           return const Center(

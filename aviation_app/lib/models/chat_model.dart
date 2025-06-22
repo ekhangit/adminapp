@@ -1,3 +1,5 @@
+import 'dart:developer';
+
 import '../controllers/storage/data_storage_controller.dart';
 
 class ChatMessage {
@@ -9,10 +11,10 @@ class ChatMessage {
   final String? fileName;
   final String? type;
   final String? messageFrom;
-  final Map<String, dynamic>? chatMetadata;
   final String time;
   final bool isOwn;
   final List<int>? readBy;
+  final List<StaffService>? staffServicesMessage;
 
   ChatMessage({
     required this.senderId,
@@ -23,17 +25,17 @@ class ChatMessage {
     this.fileName,
     this.type,
     this.messageFrom,
-    this.chatMetadata,
     required this.time,
     required this.isOwn,
     this.readBy,
+    this.staffServicesMessage,
   });
 
   factory ChatMessage.fromJson(Map<String, dynamic> json) {
     final currentUserId = DataStorageController.to.user.id;
 
     // Helper function to safely convert to int
-    int _toInt(dynamic value) {
+    int toInt(dynamic value) {
       if (value is int) return value;
       if (value is String) return int.tryParse(value) ?? 0;
       if (value is double) return value.toInt();
@@ -41,7 +43,7 @@ class ChatMessage {
     }
 
     // Updated helper function to safely convert read_by array with string handling
-    List<int>? _toIntList(dynamic value) {
+    List<int>? toIntList(dynamic value) {
       if (value == null) return null;
       if (value is List) {
         return value.map((item) {
@@ -59,23 +61,44 @@ class ChatMessage {
       return null;
     }
 
-    final senderId = _toInt(json['sender_id']);
+    // Parse staff services if message type is 'staff'
+    List<StaffService>? parseStaffServices(dynamic messageData) {
+      if (messageData is! Map<String, dynamic>) return null;
+
+      try {
+        final servicesData =
+            messageData['servicesData'] as Map<String, dynamic>?;
+        final services = servicesData?['services'] as List<dynamic>?;
+
+        return services?.map((service) {
+          return StaffService(
+            service: service['service'] as String,
+            employeeNames: service['employeeNames'] as String,
+          );
+        }).toList();
+      } catch (e) {
+        log('[ChatMessage] Error parsing staff services: $e');
+        return null;
+      }
+    }
+
+    final senderId = toInt(json['sender_id']);
 
     return ChatMessage(
       senderId: senderId,
       senderName: json['sender_name']?.toString() ?? 'User',
-      station:
-          json['station']?.toString() ?? 'Unknown', // Use station from JSON
+      station: json['station']?.toString() ?? 'Unknown',
       message: json['message']?.toString() ?? '',
       attachment: json['attachment']?.toString(),
-      fileName: json['file_name']?.toString(),
       type: json['message_type']?.toString(),
       messageFrom: json['message_from']?.toString(),
-      chatMetadata:
-          json['chat'] != null ? Map<String, dynamic>.from(json['chat']) : null,
       time: json['created_at']?.toString() ?? '',
       isOwn: senderId == currentUserId,
-      readBy: _toIntList(json['read_by']),
+      readBy: toIntList(json['read_by']),
+      staffServicesMessage:
+          json['message_type']?.toString() == 'staff'
+              ? parseStaffServices(json['message'])
+              : null,
     );
   }
 
@@ -84,4 +107,11 @@ class ChatMessage {
     final currentUserId = DataStorageController.to.user.id;
     return readBy?.contains(currentUserId) ?? false;
   }
+}
+
+class StaffService {
+  final String service;
+  final String employeeNames;
+
+  StaffService({required this.service, required this.employeeNames});
 }

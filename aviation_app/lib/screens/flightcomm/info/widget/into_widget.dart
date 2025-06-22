@@ -48,6 +48,8 @@ class InfoBadge extends StatelessWidget {
 class InfoSection extends StatelessWidget {
   String? title;
   Color? backgroundColor;
+  Color? keyColor;
+  Color? valueColor;
   final Map<String, String> data;
 
   InfoSection({
@@ -55,6 +57,8 @@ class InfoSection extends StatelessWidget {
     this.title,
     required this.data,
     this.backgroundColor = Colors.white,
+    this.keyColor = Colors.black87,
+    this.valueColor = Colors.black,
   });
 
   @override
@@ -86,13 +90,25 @@ class InfoSection extends StatelessWidget {
               ),
             ),
           if (title != null) const SizedBox(height: 10),
-          ...data.entries.map((entry) => _infoRow(entry.key, entry.value)),
+          ...data.entries.map(
+            (entry) => _infoRow(
+              entry.key,
+              entry.value,
+              keyColor: keyColor,
+              valueColor: valueColor,
+            ),
+          ),
         ],
       ),
     );
   }
 
-  Widget _infoRow(String label, String value) {
+  Widget _infoRow(
+    String label,
+    String value, {
+    Color? keyColor,
+    Color? valueColor,
+  }) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 6),
       child: Row(
@@ -102,15 +118,10 @@ class InfoSection extends StatelessWidget {
             width: 130,
             child: Text(
               label,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                color: Colors.black87,
-              ),
+              style: TextStyle(fontWeight: FontWeight.w600, color: keyColor),
             ),
           ),
-          Expanded(
-            child: Text(value, style: const TextStyle(color: Colors.black)),
-          ),
+          Expanded(child: Text(value, style: TextStyle(color: valueColor))),
         ],
       ),
     );

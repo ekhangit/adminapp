@@ -77,7 +77,55 @@ class ChkinInfo extends StatelessWidget {
             },
           ),
           SizedBox(height: 12),
-          InfoSection(title: "Total Onboard", data: {"": ""}),
+          InfoSection(
+            keyColor: Colors.red,
+            valueColor: Colors.red,
+
+            title: "Total Onboard",
+
+            data: {
+              "PAX":
+                  controller.flightDetail.value?.actualPax.totalPax
+                      .toString() ??
+                  "--",
+            },
+          ),
+          SizedBox(height: 12),
+          InfoSection(
+            title: "Configuration",
+            data: {"C": "--", "M": "--", "Total": "--"},
+          ),
+          SizedBox(height: 12),
+          InfoSection(
+            title: "Booked Pax",
+            data: {"C": "--", "M": "--", "INF": "--"},
+          ),
+          SizedBox(height: 12),
+          InfoSection(
+            title: "Actual Pax",
+            data: {"C": "--", "M": "--", "INF": "--", "JMP": "--"},
+          ),
+          SizedBox(height: 12),
+          InfoSection(
+            title: "Pax Type",
+            data: {"A": "--", "M": "--", "F": "--", "C": "--", "INF": "--"},
+          ),
+          SizedBox(height: 12),
+          InfoSection(
+            title: "Seat Area",
+            data: {"OA": "--", "OB": "--", "OC": "--", "OD": "--", "OE": "--"},
+          ),
+          SizedBox(height: 12),
+          InfoSection(
+            title: "Baggage At Gate",
+            data: {"PCs": "--", "WT": "--"},
+          ),
+          SizedBox(height: 12),
+          InfoSection(
+            title: "Baggage At CKIN",
+            data: {"PCs": "--", "WT": "--"},
+          ),
+          SizedBox(height: 12),
         ],
       ),
     );

@@ -44,7 +44,9 @@ class DashboardScreen extends StatelessWidget {
                   children: [
                     CircleAvatar(
                       radius: 24,
-                      backgroundColor: AppColors.colorPrimary.withValues(alpha:  0.2),
+                      backgroundColor: AppColors.colorPrimary.withValues(
+                        alpha: 0.2,
+                      ),
                       child: Text(
                         user.name.isNotEmpty ? user.name[0] : "?",
                         style: TextStyle(
@@ -109,63 +111,69 @@ class DashboardScreen extends StatelessWidget {
                     ),
                   ),
                   child: Center(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Wrap(
-                          spacing: 12,
-                          children: [
-                            CustomBox2(
-                              title: 'Attendance',
-                              iconPath: 'assets/images/hr_final.png',
-                              onTap:
-                                  () => Get.to(() => const AttendanceScreen()),
-                            ),
-                            CustomBox2(
-                              title: 'Flight Comm',
-                              iconPath: 'assets/images/flight_comm_final.png',
-                              onTap:
-                                  () => Get.to(() => const FlightCommScreen()),
-                            ),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Wrap(
+                            spacing: 12,
+                            children: [
+                              CustomBox2(
+                                title: 'Attendance',
+                                iconPath: 'assets/images/hr_final.png',
+                                onTap:
+                                    () =>
+                                        Get.to(() => const AttendanceScreen()),
+                              ),
+                              CustomBox2(
+                                title: 'Flight Comm',
+                                iconPath: 'assets/images/flight_comm_final.png',
+                                onTap:
+                                    () =>
+                                        Get.to(() => const FlightCommScreen()),
+                              ),
 
-                            CustomBox2(
-                              title: 'My Roster',
-                              iconPath: 'assets/images/my_duties_final.png',
-                              onTap: () => (),
-                            ),
-                            CustomBox2(
-                              title: 'PTS',
-                              iconPath: 'assets/images/airlines_final.png',
-                              onTap: () => (),
-                            ),
+                              CustomBox2(
+                                title: 'My Roster',
+                                iconPath: 'assets/images/my_duties_final.png',
+                                onTap: () => (),
+                              ),
+                              CustomBox2(
+                                title: 'PTS',
+                                iconPath: 'assets/images/airlines_final.png',
+                                onTap: () => (),
+                              ),
 
-                            CustomBox2(
-                              title: 'Flight Tracker',
-                              iconPath:
-                                  'assets/images/flight_tracker_final.png',
-                              onTap: () => (),
-                            ),
-                            CustomBox2(
-                              title: 'Flight Watch',
-                              iconPath: 'assets/images/flight_watch_final.png',
-                              onTap: () => (),
-                            ),
-                            CustomBox2(
-                              title: 'Leave Request',
-                              iconPath: 'assets/images/airlines_final.png',
-                              onTap:
-                                  () =>
-                                      Get.to(() => const LeaveRequestScreen()),
-                            ),
-                            CustomBox2(
-                              title: 'Staff Watch',
-                              iconPath: 'assets/images/staff_watch_final.png',
-                              onTap: () => (),
-                            ),
-                          ],
-                        ),
-                      ],
+                              CustomBox2(
+                                title: 'Flight Tracker',
+                                iconPath:
+                                    'assets/images/flight_tracker_final.png',
+                                onTap: () => (),
+                              ),
+                              CustomBox2(
+                                title: 'Flight Watch',
+                                iconPath:
+                                    'assets/images/flight_watch_final.png',
+                                onTap: () => (),
+                              ),
+                              CustomBox2(
+                                title: 'Leave Request',
+                                iconPath: 'assets/images/airlines_final.png',
+                                onTap:
+                                    () => Get.to(
+                                      () => const LeaveRequestScreen(),
+                                    ),
+                              ),
+                              CustomBox2(
+                                title: 'Staff Watch',
+                                iconPath: 'assets/images/staff_watch_final.png',
+                                onTap: () => (),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -5,9 +5,9 @@ class FlightDetailModel {
   final Aircraft? aircraft;
   final Capacity capacity;
   final ActualPax actualPax;
-  // final String inboundFlight;
-  // final String outboundFlight;
-  // final FlightMessages messages;
+  final ArrData? arrData;
+  final FlightMessages messages;
+  final List<SodData> sodData;
 
   FlightDetailModel({
     required this.basicDetails,
@@ -16,9 +16,9 @@ class FlightDetailModel {
     this.aircraft,
     required this.capacity,
     required this.actualPax,
-    // required this.inboundFlight,
-    // required this.outboundFlight,
-    // required this.messages,
+    this.arrData,
+    required this.messages,
+    required this.sodData,
   });
 
   factory FlightDetailModel.fromJson(Map<String, dynamic> json) {
@@ -31,10 +31,9 @@ class FlightDetailModel {
           info['aircraft'] != null ? Aircraft.fromJson(info['aircraft']) : null,
       capacity: Capacity.fromJson(info['capacity']),
       actualPax: ActualPax.fromJson(info['actual_pax']),
-      // inboundFlight: info['inbound_flight'] ?? '',
-      // outboundFlight: info['outbound_flight'] ?? '',
-      // messages: FlightMessages.fromJson(json['messages']
-      // ),
+      arrData: json['arr'] != null ? ArrData.fromJson(json['arr']) : null,
+      messages: FlightMessages.fromJson(json['messages']),
+      sodData: (json['sod'] as List).map((e) => SodData.fromJson(e)).toList(),
     );
   }
 }
@@ -162,6 +161,51 @@ class ActualPax {
     paxInf: json['pax_inf_actual'] ?? '',
     paxJmp: json['pax_jmp_actual'] ?? '',
   );
+
+  int get totalPax {
+    // Helper function to parse string to int (handling empty/null)
+    int parsePax(String? value) {
+      if (value == null || value.isEmpty) return 0;
+      return int.tryParse(value) ?? 0;
+    }
+
+    return parsePax(paxA) +
+        parsePax(paxC) +
+        parsePax(paxW) +
+        parsePax(paxY) +
+        parsePax(paxInf) +
+        parsePax(paxJmp);
+  }
+}
+
+class ArrData {
+  final String? staff;
+  final String? remarks;
+  final String? startTime;
+  final String? endTime;
+  final String? mhb;
+  final String? ohd;
+  final String? dpr;
+
+  ArrData({
+    this.staff,
+    this.remarks,
+    this.startTime,
+    this.endTime,
+    this.mhb,
+    this.ohd,
+    this.dpr,
+  });
+
+  factory ArrData.fromJson(Map<String, dynamic> json) => ArrData(
+    staff: json['staff'] ?? '',
+    remarks: json['remarks'] ?? '',
+    startTime: json['start_time'] ?? '',
+    endTime: json['end_time'] ?? '',
+    mhb: json['mhb'] ?? '',
+    ohd: json['ohd'] ?? '',
+    dpr: json['dpr'] ?? '',
+  );
 }
 
 class FlightMessages {
@@ -239,5 +283,32 @@ class MessageData {
     source: json['source'],
     receivedDatetime: json['received_datetime'],
     updatedAt: json['updated_at'],
+  );
+}
+
+class SodData {
+  final int flightId;
+  final String abbr;
+  final String slaType;
+  final String startTime;
+  final String endTime;
+  final String duration;
+
+  SodData({
+    required this.flightId,
+    required this.abbr,
+    required this.slaType,
+    required this.startTime,
+    required this.endTime,
+    required this.duration,
+  });
+
+  factory SodData.fromJson(Map<String, dynamic> json) => SodData(
+    flightId: json['flight_id'],
+    abbr: json['abbr'],
+    slaType: json['sla_type'],
+    startTime: json['start_time'],
+    endTime: json['end_time'],
+    duration: json['duration'],
   );
 }

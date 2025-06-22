@@ -24,7 +24,7 @@ class TrcInfo extends StatelessWidget {
               "Callsign":
                   controller.flightDetail.value?.basicDetails.callSign ?? '--',
               "Date": formatDate(
-                controller.flightDetail.value?.basicDetails.date ?? '',
+                controller.flightDetail.value?.basicDetails.date ?? '--',
               ),
               "A/C Type":
                   controller.flightDetail.value?.aircraft!.aircraftType.icao ??
@@ -78,7 +78,19 @@ class TrcInfo extends StatelessWidget {
             },
           ),
           SizedBox(height: 12),
-          InfoSection(title: "Total Onboard", data: {"PAX": "--"}),
+          InfoSection(
+            keyColor: Colors.red,
+            valueColor: Colors.red,
+
+            title: "Total Onboard",
+
+            data: {
+              "PAX":
+                  controller.flightDetail.value?.actualPax.totalPax
+                      .toString() ??
+                  "--",
+            },
+          ),
         ],
       ),
     );

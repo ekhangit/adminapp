@@ -70,6 +70,7 @@ class FlightCard extends StatelessWidget {
                       : "assets/images/inbound.png",
                   height: 2.4.h,
                   width: 2.4.h,
+                  fit: BoxFit.fill,
                 ),
             SizedBox(width: 1.5.w),
 

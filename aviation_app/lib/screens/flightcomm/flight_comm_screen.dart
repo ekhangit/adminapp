@@ -32,6 +32,7 @@ class FlightCommScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () => Get.back(),
           ),
+
           actions: [
             Obx(() {
               return controller.selectedFlightIndex.value != -1

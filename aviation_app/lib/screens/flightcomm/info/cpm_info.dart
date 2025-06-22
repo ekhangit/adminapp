@@ -4,8 +4,8 @@ import 'package:get/get.dart';
 import '../../../controllers/flight/chat_controller.dart';
 import 'widget/message_card.dart';
 
-class LdmInfo extends StatelessWidget {
-  const LdmInfo({super.key});
+class CPMInfo extends StatelessWidget {
+  const CPMInfo({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -17,8 +17,8 @@ class LdmInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (messages?.ldm.isNotEmpty ?? false) ...[
-            ...messages!.ldm.map(
+          if (messages?.cpm.isNotEmpty ?? false) ...[
+            ...messages!.cpm.map(
               (msg) => buildMessageCard(msg, Colors.yellow.shade100),
             ),
           ],

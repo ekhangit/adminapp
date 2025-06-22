@@ -1,3 +1,5 @@
+import 'package:aviation_app/screens/flightcomm/info/widget/chat_message_card.dart';
+import 'package:aviation_app/screens/flightcomm/info/widget/message_card.dart';
 import 'package:aviation_app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -22,7 +24,6 @@ class ChatInfo extends StatelessWidget {
               final message = controller.messages[index];
 
               final isSentMe = message.isOwn;
-
 
               return Container(
                 margin: EdgeInsets.only(
@@ -144,52 +145,53 @@ class ChatInfo extends StatelessWidget {
                                     ],
                                   ),
                                 if (!isSentMe) SizedBox(height: 4),
-                                if (message.type == 'simple') ...[
-                                  Text(
-                                    message.message,
-                                    style: TextStyle(
-                                      color: Colors.black87,
-                                      fontSize: 15,
-                                    ),
-                                  ),
-                                ],
+                                // if (message.type == 'simple') ...[
+                                //   Text(
+                                //     message.message,
+                                //     style: TextStyle(
+                                //       color: Colors.black87,
+                                //       fontSize: 15,
+                                //     ),
+                                //   ),
+                                // ],
+                                buildMessageContent(message),
                                 // 🟡 Metadata if exists
-                                if (message.chatMetadata != null &&
-                                    message.chatMetadata!.isNotEmpty) ...[
-                                  const SizedBox(height: 8),
-                                  ...message.chatMetadata!.entries.map(
-                                    (entry) => Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Padding(
-                                          padding: const EdgeInsets.only(
-                                            bottom: 2.0,
-                                          ),
-                                          child: Text(
-                                            "${entry.key}: ${entry.value}",
-                                            style: const TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.black87,
-                                              fontWeight: FontWeight.w600,
-                                            ),
-                                          ),
-                                        ),
-                                        if (entry.key !=
-                                            message
-                                                .chatMetadata!
-                                                .entries
-                                                .last
-                                                .key)
-                                          const Divider(
-                                            color: Colors.grey,
-                                            thickness: 0.4,
-                                            height: 8,
-                                          ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                                // if (message.chatMetadata != null &&
+                                //     message.chatMetadata!.isNotEmpty) ...[
+                                //   const SizedBox(height: 8),
+                                //   ...message.chatMetadata!.entries.map(
+                                //     (entry) => Column(
+                                //       crossAxisAlignment:
+                                //           CrossAxisAlignment.start,
+                                //       children: [
+                                //         Padding(
+                                //           padding: const EdgeInsets.only(
+                                //             bottom: 2.0,
+                                //           ),
+                                //           child: Text(
+                                //             "${entry.key}: ${entry.value}",
+                                //             style: const TextStyle(
+                                //               fontSize: 13,
+                                //               color: Colors.black87,
+                                //               fontWeight: FontWeight.w600,
+                                //             ),
+                                //           ),
+                                //         ),
+                                //         if (entry.key !=
+                                //             message
+                                //                 .chatMetadata!
+                                //                 .entries
+                                //                 .last
+                                //                 .key)
+                                //           const Divider(
+                                //             color: Colors.grey,
+                                //             thickness: 0.4,
+                                //             height: 8,
+                                //           ),
+                                //       ],
+                                //     ),
+                                //   ),
+                                // ],
                                 Container(
                                   alignment: Alignment.centerRight,
                                   padding: const EdgeInsets.only(
