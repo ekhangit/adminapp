@@ -10,7 +10,7 @@ class SodInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
-    final sodData = controller.flightDetail.value?.sodData ?? [];
+    final sodData = [];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
@@ -53,14 +53,14 @@ class SodInfo extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                sod.abbr,
+                sod.serviceAbbr,
                 style: const TextStyle(
                   fontWeight: FontWeight.bold,
                   fontSize: 16,
                 ),
               ),
               Text(
-                sod.slaType,
+                sod.type,
                 style: TextStyle(
                   color: Colors.grey.shade700,
                   fontStyle: FontStyle.italic,
@@ -69,9 +69,9 @@ class SodInfo extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 12),
-          _buildTimeRow('Start Time', sod.startTime),
-          _buildTimeRow('End Time', sod.endTime),
-          _buildTimeRow('Duration', sod.duration),
+          // _buildTimeRow('Start Time', sod.startTime),
+          // _buildTimeRow('End Time', sod.endTime),
+          // _buildTimeRow('Duration', sod.duration),
         ],
       ),
     );

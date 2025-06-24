@@ -40,7 +40,8 @@ class FlightCard extends StatelessWidget {
             left: BorderSide(
               color:
                   flight.isDeparture
-                      ? flight.sta!.isEmpty && flight.std!.isEmpty
+                      ? (flight.sta!.isEmpty && flight.std!.isEmpty) ||
+                              (flight.atd!.isEmpty && flight.ata!.isEmpty)
                           ? Colors.white
                           : flight.departureColor == 'greenBtn'
                           ? Colors.green.shade700
@@ -70,7 +71,6 @@ class FlightCard extends StatelessWidget {
                       : "assets/images/inbound.png",
                   height: 2.4.h,
                   width: 2.4.h,
-                  fit: BoxFit.fill,
                 ),
             SizedBox(width: 1.5.w),
 
@@ -86,6 +86,7 @@ class FlightCard extends StatelessWidget {
                       CustomCircularImage(
                         imageUrl: flight.airline?.mobilePicture ?? "",
                         size: 2.8.h,
+                        boxFit: BoxFit.fill,
                       ),
                       SizedBox(width: 2.0.w),
 
@@ -281,7 +282,7 @@ class FlightCard extends StatelessWidget {
                               ? flight.formattedDepartureDelay
                               : flight.formattedArrivalDelay,
                           style: TextStyle(
-                            fontSize: 14.sp,
+                            fontSize: 13.5.sp,
                             color:
                                 flight.isDeparture
                                     ? flight.departureDelayColor ==
@@ -294,6 +295,12 @@ class FlightCard extends StatelessWidget {
                             fontWeight: FontWeight.w600,
                           ),
                         ),
+                      if ((flight.isDeparture &&
+                              flight.departureDelayMinutes != 0) ||
+                          (!flight.isDeparture &&
+                              flight.arrivalDelayMinutes != 0))
+                        SizedBox(width: 1.0.w),
+
                       // if (flight.departureDelayMinutes == 0 ||
                       //     flight.arrivalDelayMinutes == 0)
                       //   if (unreadCount != 0)

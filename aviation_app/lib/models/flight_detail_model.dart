@@ -5,7 +5,9 @@ class FlightDetailModel {
   final Aircraft? aircraft;
   final Capacity capacity;
   final ActualPax actualPax;
-  final ArrData? arrData;
+  final TrcData? trc;
+  final CkinData? ckin;
+  final ArrData? arr;
   final FlightMessages messages;
   final List<SodData> sodData;
 
@@ -16,13 +18,21 @@ class FlightDetailModel {
     this.aircraft,
     required this.capacity,
     required this.actualPax,
-    this.arrData,
+    this.trc,
+    this.ckin,
+    this.arr,
     required this.messages,
     required this.sodData,
   });
 
   factory FlightDetailModel.fromJson(Map<String, dynamic> json) {
-    final info = json['flight_info'];
+    final info = json['flight_info'] ?? {};
+    final trcJson = json['trc'];
+    final ckinJson = json['ckin'];
+    final arrJson = json['arr'];
+    final messagesJson = json['messages'] ?? {};
+    final sodJson = json['sod'] ?? [];
+
     return FlightDetailModel(
       basicDetails: BasicDetails.fromJson(info['basic_details']),
       departureAirport: Airport.fromJson(info['departure_airport']),
@@ -31,9 +41,11 @@ class FlightDetailModel {
           info['aircraft'] != null ? Aircraft.fromJson(info['aircraft']) : null,
       capacity: Capacity.fromJson(info['capacity']),
       actualPax: ActualPax.fromJson(info['actual_pax']),
-      arrData: json['arr'] != null ? ArrData.fromJson(json['arr']) : null,
-      messages: FlightMessages.fromJson(json['messages']),
-      sodData: (json['sod'] as List).map((e) => SodData.fromJson(e)).toList(),
+      trc: trcJson != null ? TrcData.fromJson(trcJson) : null,
+      ckin: ckinJson != null ? CkinData.fromJson(ckinJson) : null,
+      arr: arrJson != null ? ArrData.fromJson(arrJson) : null,
+      messages: FlightMessages.fromJson(messagesJson),
+      sodData: List<SodData>.from(sodJson.map((x) => SodData.fromJson(x))),
     );
   }
 }
@@ -66,7 +78,7 @@ class BasicDetails {
   });
 
   factory BasicDetails.fromJson(Map<String, dynamic> json) => BasicDetails(
-    id: json['id'],
+    id: json['id'] ?? 0,
     flightInfo: json['flight_info'],
     std: json['std'] ?? '',
     atd: json['atd'] ?? '',
@@ -87,7 +99,7 @@ class Airport {
   Airport({required this.id, required this.iataCode});
 
   factory Airport.fromJson(Map<String, dynamic> json) =>
-      Airport(id: json['id'], iataCode: json['iata_code']);
+      Airport(id: json['id'] ?? 0, iataCode: json['iata_code'] ?? '');
 }
 
 class Aircraft {
@@ -98,7 +110,7 @@ class Aircraft {
   Aircraft({required this.id, required this.name, required this.aircraftType});
 
   factory Aircraft.fromJson(Map<String, dynamic> json) => Aircraft(
-    id: json['id'],
+    id: json['id'] ?? 0,
     name: json['name'],
     aircraftType: AircraftType.fromJson(json['aircraft_type']),
   );
@@ -111,7 +123,7 @@ class AircraftType {
   AircraftType({required this.id, required this.icao});
 
   factory AircraftType.fromJson(Map<String, dynamic> json) =>
-      AircraftType(id: json['id'], icao: json['icao']);
+      AircraftType(id: json['id'] ?? 0, icao: json['icao']);
 }
 
 class Capacity {
@@ -136,6 +148,48 @@ class Capacity {
   );
 }
 
+// class ActualPax {
+//   final String? paxA;
+//   final String? paxC;
+//   final String? paxW;
+//   final String? paxY;
+//   final String? paxInf;
+//   final String? paxJmp;
+
+//   ActualPax({
+//     this.paxA,
+//     this.paxC,
+//     this.paxW,
+//     this.paxY,
+//     this.paxInf,
+//     this.paxJmp,
+//   });
+
+//   factory ActualPax.fromJson(Map<String, dynamic> json) => ActualPax(
+//     paxA: json['pax_a_actual'] ?? '',
+//     paxC: json['pax_c_actual'] ?? '',
+//     paxW: json['pax_w_actual'] ?? '',
+//     paxY: json['pax_y_actual'] ?? '',
+//     paxInf: json['pax_inf_actual'] ?? '',
+//     paxJmp: json['pax_jmp_actual'] ?? '',
+//   );
+
+//   int get totalPax {
+//     // Helper function to parse string to int (handling empty/null)
+//     int parsePax(String? value) {
+//       if (value == null || value.isEmpty) return 0;
+//       return int.tryParse(value) ?? 0;
+//     }
+
+//     return parsePax(paxA) +
+//         parsePax(paxC) +
+//         parsePax(paxW) +
+//         parsePax(paxY) +
+//         parsePax(paxInf) +
+//         parsePax(paxJmp);
+//   }
+// }
+
 class ActualPax {
   final String? paxA;
   final String? paxC;
@@ -154,27 +208,381 @@ class ActualPax {
   });
 
   factory ActualPax.fromJson(Map<String, dynamic> json) => ActualPax(
-    paxA: json['pax_a_actual'] ?? '',
-    paxC: json['pax_c_actual'] ?? '',
-    paxW: json['pax_w_actual'] ?? '',
-    paxY: json['pax_y_actual'] ?? '',
-    paxInf: json['pax_inf_actual'] ?? '',
-    paxJmp: json['pax_jmp_actual'] ?? '',
+    paxA: json['pax_a_actual']?.toString(), // Convert to string if not null
+    paxC: json['pax_c_actual']?.toString(),
+    paxW: json['pax_w_actual']?.toString(),
+    paxY: json['pax_y_actual']?.toString(),
+    paxInf: json['pax_inf_actual']?.toString(),
+    paxJmp: json['pax_jmp_actual']?.toString(),
   );
 
-  int get totalPax {
-    // Helper function to parse string to int (handling empty/null)
-    int parsePax(String? value) {
-      if (value == null || value.isEmpty) return 0;
-      return int.tryParse(value) ?? 0;
-    }
+  // Parses a string value to int (handles empty strings and null)
+  static int _parsePaxValue(String? value) {
+    if (value == null || value.isEmpty) return 0;
+    return int.tryParse(value) ?? 0;
+  }
 
-    return parsePax(paxA) +
-        parsePax(paxC) +
-        parsePax(paxW) +
-        parsePax(paxY) +
-        parsePax(paxInf) +
-        parsePax(paxJmp);
+  // Getter for each value as integer
+  int get paxACount => _parsePaxValue(paxA);
+  int get paxCCount => _parsePaxValue(paxC);
+  int get paxWCount => _parsePaxValue(paxW);
+  int get paxYCount => _parsePaxValue(paxY);
+  int get paxInfCount => _parsePaxValue(paxInf);
+  int get paxJmpCount => _parsePaxValue(paxJmp);
+
+  // Total passengers calculation
+  int get totalPax =>
+      paxACount + paxCCount + paxWCount + paxYCount + paxInfCount + paxJmpCount;
+
+  // Helper to check if infants are present
+  bool get hasInfants => paxInfCount > 0;
+
+  // Helper to format passenger counts for display
+  String formatPaxCount(String? value) {
+    final count = _parsePaxValue(value);
+    return count > 0 ? count.toString() : '--';
+  }
+
+  // Convert back to JSON
+  Map<String, dynamic> toJson() => {
+    'pax_a_actual': paxA,
+    'pax_c_actual': paxC,
+    'pax_w_actual': paxW,
+    'pax_y_actual': paxY,
+    'pax_inf_actual': paxInf,
+    'pax_jmp_actual': paxJmp,
+  };
+}
+
+class TrcData {
+  final String? trc;
+  final String? mobile;
+  final String? remarks;
+  final String? beforeArrival;
+  final String? beforeDeparture;
+  final String? afterDeparture;
+  final String? crew;
+  final String? pantry;
+  final String? captain;
+  final String? dow;
+  final String? doi;
+  final String? mtow;
+  final String? rtow;
+  final String? taxi;
+  final String? block;
+  final String? trip;
+  final String? eet;
+  final String? takeOff;
+  final String? uplifted;
+  final String? altn;
+  // Add all other fields from the JSON
+
+  TrcData({
+    this.trc,
+    this.mobile,
+    this.remarks,
+    this.beforeArrival,
+    this.beforeDeparture,
+    this.afterDeparture,
+    this.crew,
+    this.pantry,
+    this.captain,
+    this.dow,
+    this.doi,
+    this.mtow,
+    this.rtow,
+    this.taxi,
+    this.block,
+    this.trip,
+    this.eet,
+    this.takeOff,
+    this.uplifted,
+    this.altn,
+  });
+
+  factory TrcData.fromJson(Map<String, dynamic> json) => TrcData(
+    trc: json['trc']?.toString() ?? '',
+    mobile: json['mobile']?.toString() ?? '',
+    remarks: json['remarks']?.toString() ?? '',
+    beforeArrival: json['before_arrival']?.toString() ?? '',
+    beforeDeparture: json['before_departure']?.toString() ?? '',
+    afterDeparture: json['after_departure']?.toString() ?? '',
+    crew: json['crew']?.toString() ?? '',
+    pantry: json['pantry']?.toString() ?? '',
+    captain: json['captain']?.toString() ?? '',
+    dow: json['dow']?.toString() ?? '',
+    doi: json['doi']?.toString() ?? '',
+    mtow: json['mtow']?.toString() ?? '',
+    rtow: json['rtow']?.toString() ?? '',
+    taxi: json['taxi']?.toString() ?? '',
+    block: json['block']?.toString() ?? '',
+    trip: json['trip']?.toString() ?? '',
+    eet: json['eet']?.toString() ?? '',
+    takeOff: json['take_off']?.toString() ?? '',
+    uplifted: json['uplifted']?.toString() ?? '',
+    altn: json['altn']?.toString() ?? '',
+  );
+}
+
+class CkinData {
+  final List<String> ckinStaffNames;
+  final List<String> gateStaffNames;
+  final List<String> gateSpvrStaffNames;
+  final List<String> spvrNames;
+  final String? spvrRemark;
+  final String? deskNo;
+  final String? deskUsed;
+  final String? ckinOpened;
+  final String? ckinClosed;
+  final String? gateOpened;
+  final String? gateClosed;
+  final String? bdgStarted;
+  final String? bdgCompleted;
+  final String? securedAtCkin;
+  final String? securedAtGate;
+  final String? special;
+  final String? bookingStatus;
+  final String? scheduleInfo;
+  final String? docsCheck;
+  final String? ramp;
+  final String? other;
+  final BookedPax? bookedPax;
+  final PaxType? paxType;
+  final String? seatArea;
+  final String? baggageGatePcs;
+  final String? baggageGateWt;
+  final String? baggageCkinPcs;
+  final String? baggageCkinWt;
+  final CargoData? cargo;
+  final CargoData? baggage;
+  final CargoData? mail;
+  final CargoData? eic;
+  final CargoData? transit;
+  final String? catering;
+
+  CkinData({
+    required this.ckinStaffNames,
+    required this.gateStaffNames,
+    required this.gateSpvrStaffNames,
+    required this.spvrNames,
+    this.spvrRemark,
+    this.deskNo,
+    this.deskUsed,
+    this.ckinOpened,
+    this.ckinClosed,
+    this.gateOpened,
+    this.gateClosed,
+    this.bdgStarted,
+    this.bdgCompleted,
+    this.securedAtCkin,
+    this.securedAtGate,
+    this.special,
+    this.bookingStatus,
+    this.scheduleInfo,
+    this.docsCheck,
+    this.ramp,
+    this.other,
+    this.bookedPax,
+    this.paxType,
+    this.seatArea,
+    this.baggageGatePcs,
+    this.baggageGateWt,
+    this.baggageCkinPcs,
+    this.baggageCkinWt,
+    this.cargo,
+    this.baggage,
+    this.mail,
+    this.eic,
+    this.transit,
+    this.catering,
+  });
+
+  factory CkinData.fromJson(Map<String, dynamic> json) {
+    return CkinData(
+      ckinStaffNames: List<String>.from(
+        (json['ckin_staff_names'] as List<dynamic>? ?? []).map(
+          (e) => e.toString(),
+        ),
+      ),
+      gateStaffNames: List<String>.from(
+        (json['gate_staff_names'] as List<dynamic>? ?? []).map(
+          (e) => e.toString(),
+        ),
+      ),
+      gateSpvrStaffNames: List<String>.from(
+        (json['gate_spvr_staff_names'] as List<dynamic>? ?? []).map(
+          (e) => e.toString(),
+        ),
+      ),
+      spvrNames: List<String>.from(
+        (json['spvr_names'] as List<dynamic>? ?? []).map((e) => e.toString()),
+      ),
+      spvrRemark: json['spvr_remark']?.toString(),
+      deskNo: json['desk_no']?.toString(),
+      deskUsed: json['desk_used']?.toString(),
+      ckinOpened: json['ckin_opened']?.toString(),
+      ckinClosed: json['ckin_closed']?.toString(),
+      gateOpened: json['gate_opened']?.toString(),
+      gateClosed: json['gate_closed']?.toString(),
+      bdgStarted: json['bdg_started']?.toString(),
+      bdgCompleted: json['bdg_completed']?.toString(),
+      securedAtCkin: json['secured_at_ckin']?.toString(),
+      securedAtGate: json['secured_at_gate']?.toString(),
+      special: json['special']?.toString(),
+      bookingStatus: json['booking_status']?.toString(),
+      scheduleInfo: json['schedule_info']?.toString(),
+      docsCheck: json['docs_check']?.toString(),
+      ramp: json['ramp']?.toString(),
+      other: json['other']?.toString(),
+      bookedPax:
+          json['booked_pax'] != null
+              ? BookedPax.fromJson(json['booked_pax'])
+              : null,
+      paxType:
+          json['pax_type'] != null ? PaxType.fromJson(json['pax_type']) : null,
+      seatArea: json['seat_area']?.toString(),
+      baggageGatePcs: json['baggage_gate_pcs']?.toString(),
+      baggageGateWt: json['baggage_gate_wt']?.toString(),
+      baggageCkinPcs: json['baggage_ckin_pcs']?.toString(),
+      baggageCkinWt: json['baggage_ckin_wt']?.toString(),
+      cargo: json['cargo'] != null ? CargoData.fromJson(json['cargo']) : null,
+      baggage:
+          json['baggage'] != null ? CargoData.fromJson(json['baggage']) : null,
+      mail: json['mail'] != null ? CargoData.fromJson(json['mail']) : null,
+      eic: json['eic'] != null ? CargoData.fromJson(json['eic']) : null,
+      transit:
+          json['transit'] != null ? CargoData.fromJson(json['transit']) : null,
+      catering: json['catering']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'ckin_staff_names': ckinStaffNames,
+      'gate_staff_names': gateStaffNames,
+      'gate_spvr_staff_names': gateSpvrStaffNames,
+      'spvr_names': spvrNames,
+      'spvr_remark': spvrRemark,
+      'desk_no': deskNo,
+      'desk_used': deskUsed,
+      'ckin_opened': ckinOpened,
+      'ckin_closed': ckinClosed,
+      'gate_opened': gateOpened,
+      'gate_closed': gateClosed,
+      'bdg_started': bdgStarted,
+      'bdg_completed': bdgCompleted,
+      'secured_at_ckin': securedAtCkin,
+      'secured_at_gate': securedAtGate,
+      'special': special,
+      'booking_status': bookingStatus,
+      'schedule_info': scheduleInfo,
+      'docs_check': docsCheck,
+      'ramp': ramp,
+      'other': other,
+      'booked_pax': bookedPax?.toJson(),
+      'pax_type': paxType?.toJson(),
+      'seat_area': seatArea,
+      'baggage_gate_pcs': baggageGatePcs,
+      'baggage_gate_wt': baggageGateWt,
+      'baggage_ckin_pcs': baggageCkinPcs,
+      'baggage_ckin_wt': baggageCkinWt,
+      'cargo': cargo?.toJson(),
+      'baggage': baggage?.toJson(),
+      'mail': mail?.toJson(),
+      'eic': eic?.toJson(),
+      'transit': transit?.toJson(),
+      'catering': catering,
+    };
+  }
+}
+
+class BookedPax {
+  final String? paxABooked;
+  final String? paxCBooked;
+  final String? paxWBooked;
+  final String? paxYBooked;
+  final String? paxInfBooked;
+
+  BookedPax({
+    this.paxABooked,
+    this.paxCBooked,
+    this.paxWBooked,
+    this.paxYBooked,
+    this.paxInfBooked,
+  });
+
+  factory BookedPax.fromJson(Map<String, dynamic> json) {
+    return BookedPax(
+      paxABooked: json['pax_a_booked']?.toString(),
+      paxCBooked: json['pax_c_booked']?.toString(),
+      paxWBooked: json['pax_w_booked']?.toString(),
+      paxYBooked: json['pax_y_booked']?.toString(),
+      paxInfBooked: json['pax_inf_booked']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'pax_a_booked': paxABooked,
+      'pax_c_booked': paxCBooked,
+      'pax_w_booked': paxWBooked,
+      'pax_y_booked': paxYBooked,
+      'pax_inf_booked': paxInfBooked,
+    };
+  }
+}
+
+class PaxType {
+  final String? paxAdultsActual;
+  final String? paxMActual;
+  final String? paxFActual;
+  final String? paxChActual;
+  final String? paxInfActual;
+
+  PaxType({
+    this.paxAdultsActual,
+    this.paxMActual,
+    this.paxFActual,
+    this.paxChActual,
+    this.paxInfActual,
+  });
+
+  factory PaxType.fromJson(Map<String, dynamic> json) {
+    return PaxType(
+      paxAdultsActual: json['pax_adults_actual']?.toString(),
+      paxMActual: json['pax_m_actual']?.toString(),
+      paxFActual: json['pax_f_actual']?.toString(),
+      paxChActual: json['pax_ch_actual']?.toString(),
+      paxInfActual: json['pax_inf_actual']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'pax_adults_actual': paxAdultsActual,
+      'pax_m_actual': paxMActual,
+      'pax_f_actual': paxFActual,
+      'pax_ch_actual': paxChActual,
+      'pax_inf_actual': paxInfActual,
+    };
+  }
+}
+
+class CargoData {
+  final int pcs;
+  final String wt;
+
+  CargoData({required this.pcs, required this.wt});
+
+  factory CargoData.fromJson(Map<String, dynamic> json) {
+    return CargoData(
+      pcs: (json['pcs'] as int?) ?? 0,
+      wt: json['wt']?.toString() ?? '0',
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'pcs': pcs, 'wt': wt};
   }
 }
 
@@ -287,28 +695,44 @@ class MessageData {
 }
 
 class SodData {
-  final int flightId;
-  final String abbr;
-  final String slaType;
-  final String startTime;
-  final String endTime;
-  final String duration;
+  final String serviceAbbr;
+  final String type;
+  final int requiredStaff;
+  final List<SodEmployee> employees;
 
   SodData({
-    required this.flightId,
-    required this.abbr,
-    required this.slaType,
-    required this.startTime,
-    required this.endTime,
-    required this.duration,
+    required this.serviceAbbr,
+    required this.type,
+    required this.requiredStaff,
+    required this.employees,
   });
 
   factory SodData.fromJson(Map<String, dynamic> json) => SodData(
-    flightId: json['flight_id'],
-    abbr: json['abbr'],
-    slaType: json['sla_type'],
-    startTime: json['start_time'],
-    endTime: json['end_time'],
-    duration: json['duration'],
+    serviceAbbr: json['service_abbr']?.toString() ?? '',
+    type: json['type']?.toString() ?? '',
+    requiredStaff: (json['required_staff'] as int?) ?? 0,
+    employees: List<SodEmployee>.from(
+      (json['employees'] as List<dynamic>? ?? []).map(
+        (x) => SodEmployee.fromJson(x as Map<String, dynamic>),
+      ),
+    ),
+  );
+}
+
+class SodEmployee {
+  final int employeeId;
+  final String name;
+  final String airport;
+
+  SodEmployee({
+    required this.employeeId,
+    required this.name,
+    required this.airport,
+  });
+
+  factory SodEmployee.fromJson(Map<String, dynamic> json) => SodEmployee(
+    employeeId: (json['employee_id'] as int?) ?? 0,
+    name: json['name']?.toString() ?? '',
+    airport: json['airport']?.toString() ?? '',
   );
 }

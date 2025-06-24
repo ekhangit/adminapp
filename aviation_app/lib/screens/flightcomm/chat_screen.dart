@@ -106,15 +106,6 @@ class ChatScreen extends StatelessWidget {
                                           ),
                                         ),
                                         const SizedBox(width: 6),
-
-                                        // Text(
-                                        //   "GATE: ${flight.basicDetails.gate ?? '--'}  |  POS: ${flight.basicDetails.pos ?? '--'}",
-                                        //   style: const TextStyle(
-                                        //     color: Colors.blue,
-                                        //     fontWeight: FontWeight.w500,
-                                        //     fontSize: 12.5,
-                                        //   ),
-                                        // ),
                                         Row(
                                           children: [
                                             Text(
@@ -181,10 +172,22 @@ class ChatScreen extends StatelessWidget {
                                               const SizedBox(width: 6),
                                               InfoText(flight.aircraft!.name),
                                               const SizedBox(width: 6),
-                                              _divider(Colors.blue),
-                                              const SizedBox(width: 6),
                                             ],
+                                          ],
+                                        ),
+                                      ),
+                                    ),
 
+                                    const SizedBox(height: 4),
+
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: SingleChildScrollView(
+                                        scrollDirection: Axis.horizontal,
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.start,
+                                          children: [
                                             if ([
                                               flight.capacity.f,
                                               flight.capacity.j,
@@ -252,10 +255,18 @@ class ChatScreen extends StatelessWidget {
                                                   "Y${flight.actualPax.paxY}",
                                                 ),
                                               ],
-                                              if (flight
-                                                  .actualPax
-                                                  .paxInf!
-                                                  .isNotEmpty) ...[
+                                              if (flight.actualPax.paxInf !=
+                                                      null &&
+                                                  flight
+                                                      .actualPax
+                                                      .paxInf!
+                                                      .isNotEmpty &&
+                                                  int.tryParse(
+                                                        flight
+                                                            .actualPax
+                                                            .paxInf!,
+                                                      ) !=
+                                                      0) ...[
                                                 const SizedBox(width: 6),
                                                 InfoText(
                                                   "+ ${flight.actualPax.paxInf} INF",
@@ -280,10 +291,10 @@ class ChatScreen extends StatelessWidget {
                   Container(
                     color: Colors.white,
                     padding: const EdgeInsets.only(
-                      top: 8,
+                      top: 6,
                       left: 12,
                       right: 0,
-                      bottom: 8,
+                      bottom: 6,
                     ),
                     child: SingleChildScrollView(
                       scrollDirection: Axis.horizontal,
@@ -386,6 +397,7 @@ class ChatScreen extends StatelessWidget {
 
     return Obx(() {
       final isSelected = controller.selectedTab.value == label;
+      final hasMessages = controller.hasMessages(label);
 
       return GestureDetector(
         onTap: () => controller.selectedTab.value = label,
@@ -393,11 +405,24 @@ class ChatScreen extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
           margin: const EdgeInsets.only(right: 10),
           decoration: BoxDecoration(
-            gradient: isSelected ? appThemeGradientSoft : null,
-            color: isSelected ? null : Colors.grey.shade100,
+            gradient:
+                isSelected
+                    ? hasMessages
+                        ? null
+                        : appThemeGradientSoft
+                    : null,
+            color:
+                hasMessages
+                    ? Colors.lightGreenAccent.shade400
+                    : Colors.grey.shade100,
             borderRadius: BorderRadius.circular(8),
             border: Border.all(
-              color: isSelected ? AppColors.colorPrimary : Colors.grey.shade300,
+              color:
+                  isSelected
+                      ? hasMessages
+                          ? Colors.transparent
+                          : AppColors.colorPrimary
+                      : Colors.grey.shade300,
             ),
           ),
           child: Text(

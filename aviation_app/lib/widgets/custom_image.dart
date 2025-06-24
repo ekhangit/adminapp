@@ -7,6 +7,7 @@ class CustomCircularImage extends StatelessWidget {
   final bool isNetwork;
   final Color? borderColor;
   final double borderWidth;
+  final BoxFit? boxFit;
 
   const CustomCircularImage({
     super.key,
@@ -15,6 +16,7 @@ class CustomCircularImage extends StatelessWidget {
     this.isNetwork = true,
     this.borderColor,
     this.borderWidth = 2.0,
+    this.boxFit = BoxFit.cover,
   });
 
   @override
@@ -22,6 +24,7 @@ class CustomCircularImage extends StatelessWidget {
     return Container(
       width: size,
       height: size,
+      padding: EdgeInsets.all(1.0),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         border:
@@ -34,7 +37,7 @@ class CustomCircularImage extends StatelessWidget {
             isNetwork
                 ? CachedNetworkImage(
                   imageUrl: imageUrl,
-                  fit: BoxFit.cover,
+                  fit: boxFit,
                   placeholder:
                       (context, url) => Center(
                         child: Container(

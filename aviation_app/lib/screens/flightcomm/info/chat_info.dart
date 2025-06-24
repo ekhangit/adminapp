@@ -1,5 +1,4 @@
 import 'package:aviation_app/screens/flightcomm/info/widget/chat_message_card.dart';
-import 'package:aviation_app/screens/flightcomm/info/widget/message_card.dart';
 import 'package:aviation_app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -99,51 +98,114 @@ class ChatInfo extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 if (!isSentMe)
-                                  Row(
-                                    children: [
-                                      Text(
-                                        "${message.senderName} - ${message.station}",
-                                        style: TextStyle(
-                                          color: controller.getAvatarColor(
-                                            _getInitials(message.senderName),
+                                  // Row(
+                                  //   children: [
+                                  //     Text(
+                                  //       // "${message.senderName} - ${message.station}",
+                                  //       "Muhammad Ahmed Farooqi Muhammad Ahmed Farooqi",
+                                  //       style: TextStyle(
+                                  //         color: controller.getAvatarColor(
+                                  //           _getInitials(message.senderName),
+                                  //         ),
+                                  //         fontSize: 15,
+                                  //         fontWeight: FontWeight.w600,
+                                  //       ),
+                                  //     ),
+                                  //     Spacer(),
+                                  //     if (message.messageFrom != null) ...[
+                                  //       const SizedBox(height: 8),
+                                  //       Container(
+                                  //         padding: const EdgeInsets.symmetric(
+                                  //           horizontal: 8,
+                                  //           vertical: 2.5,
+                                  //         ),
+                                  //         decoration: BoxDecoration(
+                                  //           border: Border.all(
+                                  //             color: controller.getAvatarColor(
+                                  //               _getInitials(
+                                  //                 message.senderName,
+                                  //               ),
+                                  //             ),
+                                  //             width: 1.0,
+                                  //           ),
+                                  //           borderRadius: BorderRadius.circular(
+                                  //             6,
+                                  //           ),
+                                  //         ),
+                                  //         child: Text(
+                                  //           message.messageFrom!,
+                                  //           style: TextStyle(
+                                  //             fontSize: 13,
+                                  //             color: Colors.black87,
+                                  //             fontWeight: FontWeight.w500,
+                                  //           ),
+                                  //         ),
+                                  //       ),
+                                  //     ],
+                                  //   ],
+                                  // ),
+                                  LayoutBuilder(
+                                    builder: (context, constraints) {
+                                      final maxWidth = constraints.maxWidth;
+
+                                      return Row(
+                                        children: [
+                                          ConstrainedBox(
+                                            constraints: BoxConstraints(
+                                              maxWidth: maxWidth * 0.9,
+                                            ),
+                                            child: Text(
+                                              "${message.senderName} - ${message.station}",
+                                              style: TextStyle(
+                                                color: controller
+                                                    .getAvatarColor(
+                                                      _getInitials(
+                                                        message.senderName,
+                                                      ),
+                                                    ),
+                                                fontSize: 14,
+                                                fontWeight: FontWeight.w600,
+                                              ),
+                                              overflow: TextOverflow.ellipsis,
+                                              maxLines: 1,
+                                            ),
                                           ),
-                                          fontSize: 15,
-                                          fontWeight: FontWeight.w600,
-                                        ),
-                                      ),
-                                      Spacer(),
-                                      if (message.messageFrom != null) ...[
-                                        const SizedBox(height: 8),
-                                        Container(
-                                          padding: const EdgeInsets.symmetric(
-                                            horizontal: 8,
-                                            vertical: 2.5,
-                                          ),
-                                          decoration: BoxDecoration(
-                                            border: Border.all(
-                                              color: controller.getAvatarColor(
-                                                _getInitials(
-                                                  message.senderName,
+                                          const Spacer(),
+                                          if (message.messageFrom != null) ...[
+                                            Container(
+                                              padding:
+                                                  const EdgeInsets.symmetric(
+                                                    horizontal: 8,
+                                                    vertical: 2.5,
+                                                  ),
+                                              decoration: BoxDecoration(
+                                                border: Border.all(
+                                                  color: controller
+                                                      .getAvatarColor(
+                                                        _getInitials(
+                                                          message.senderName,
+                                                        ),
+                                                      ),
+                                                  width: 1.0,
+                                                ),
+                                                borderRadius:
+                                                    BorderRadius.circular(6),
+                                              ),
+                                              child: Text(
+                                                message.messageFrom!,
+                                                style: TextStyle(
+                                                  fontSize: 13,
+                                                  color: Colors.black87,
+                                                  fontWeight: FontWeight.w500,
                                                 ),
                                               ),
-                                              width: 1.0,
                                             ),
-                                            borderRadius: BorderRadius.circular(
-                                              6,
-                                            ),
-                                          ),
-                                          child: Text(
-                                            message.messageFrom!,
-                                            style: TextStyle(
-                                              fontSize: 13,
-                                              color: Colors.black87,
-                                              fontWeight: FontWeight.w500,
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ],
+                                          ],
+                                        ],
+                                      );
+                                    },
                                   ),
+
                                 if (!isSentMe) SizedBox(height: 4),
                                 // if (message.type == 'simple') ...[
                                 //   Text(

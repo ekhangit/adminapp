@@ -24,6 +24,34 @@ class ChatController extends GetxController {
 
   var staffList = <StaffModel>[].obs;
 
+  // Add these variables
+  final Map<String, bool> _tabHasMessages =
+      {'MVT': false, 'LDM': false, 'PSM': false, 'PTM': false}.obs;
+
+  // Method to check initial messages
+  void checkTabMessages() {
+    if (flightDetail.value == null) return;
+
+    final messages = flightDetail.value!.messages;
+
+    _tabHasMessages['MVT'] =
+        messages.mvtArrival.isNotEmpty || messages.mvtDeparture.isNotEmpty;
+    _tabHasMessages['LDM'] = messages.ldm.isNotEmpty;
+    _tabHasMessages['PSM'] = messages.psm.isNotEmpty;
+    _tabHasMessages['PTM'] = messages.ptm.isNotEmpty;
+
+    log(
+      'Message status - MVT: ${_tabHasMessages['MVT']}, '
+      'LDM: ${_tabHasMessages['LDM']}, '
+      'PSM: ${_tabHasMessages['PSM']}, '
+      'PTM: ${_tabHasMessages['PTM']}',
+    );
+  }
+
+  bool hasMessages(String tabName) {
+    return _tabHasMessages[tabName] ?? false;
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -32,6 +60,13 @@ class ChatController extends GetxController {
 
     fetchFlightChatDetail(argument);
     // fetchFlightChats(argument);
+
+    // Add listener for flightDetail changes
+    ever(flightDetail, (FlightDetailModel? detail) {
+      if (detail != null) {
+        checkTabMessages();
+      }
+    });
 
     if (Get.isRegistered<FlightCommController>()) {
       final flightCommController = Get.find<FlightCommController>();
@@ -310,7 +345,7 @@ class ChatController extends GetxController {
   // }
 
   Future<void> fetchFlightChatsWithFirebase(int flightId) async {
-    flightId = 65139;
+    // flightId = 65139;
     log('[fetchFlightChatsWithFirebase] flightId : $flightId');
 
     try {
@@ -362,7 +397,7 @@ class ChatController extends GetxController {
 
                     return ChatMessage.fromJson({
                       ...data,
-                      'sender_name': matchedStaff?.name ?? 'User',
+                      'sender_name': matchedStaff?.displayName ?? 'User',
                       'station': matchedStaff?.airport.iataCode ?? 'Unknown',
                       'created_at':
                           (data['created_at'] as Timestamp?)

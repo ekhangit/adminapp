@@ -45,35 +45,50 @@ class ChkinInfo extends StatelessWidget {
               "GATE": "--",
               "GATE SPVR": "--",
               "SPVR": "--",
-              "SPVR RMKS": "--",
+              "SPVR RMKS":
+                  controller.flightDetail.value?.ckin?.spvrRemark ?? "--",
             },
           ),
           SizedBox(height: 12),
           InfoSection(
             title: "CKIN Info",
             data: {
-              "CKIN Desk No.": "--",
-              "CKIN OPENED": "--",
-              "GATE OPENED": "--",
-              "BOARDING STARTED": "--",
-              "ALL MATERIAL SECURED CKIN": "--",
-              "No OF CKIN DESK USED": "--",
-              "CKIN CLOSED": "--",
-              "GATE CLOSED": "--",
-              "BOARDING COMPLETED": "--",
-              "ALL MATERIAL SECURED GATE": "--",
+              "CKIN Desk No.":
+                  controller.flightDetail.value?.ckin?.deskNo ?? "--",
+              "CKIN OPENED":
+                  controller.flightDetail.value?.ckin?.ckinOpened ?? "--",
+              "GATE OPENED":
+                  controller.flightDetail.value?.ckin?.gateOpened ?? "--",
+              "BOARDING STARTED":
+                  controller.flightDetail.value?.ckin?.bdgStarted ?? "--",
+              "ALL MATERIAL SECURED CKIN":
+                  controller.flightDetail.value?.ckin?.securedAtCkin ?? "--",
+              "No OF CKIN DESK USED":
+                  controller.flightDetail.value?.ckin?.deskUsed ?? "--",
+              "CKIN CLOSED":
+                  controller.flightDetail.value?.ckin?.ckinClosed ?? "--",
+              "GATE CLOSED":
+                  controller.flightDetail.value?.ckin?.gateClosed ?? "--",
+              "BOARDING COMPLETED":
+                  controller.flightDetail.value?.ckin?.bdgCompleted ?? "--",
+              "ALL MATERIAL SECURED GATE":
+                  controller.flightDetail.value?.ckin?.securedAtGate ?? "--",
             },
           ),
           SizedBox(height: 12),
           InfoSection(
             title: "Flight Briefing",
             data: {
-              "SPECIALS": "--",
-              "BOOKING STATUS": "--",
-              "SCHEDULE INFO": "--",
-              "DOCS CHECK": "--",
-              "RAMP (SPECIAL)": "--",
-              "OTHERS": "--",
+              "SPECIALS": controller.flightDetail.value?.ckin?.special ?? "--",
+              "BOOKING STATUS":
+                  controller.flightDetail.value?.ckin?.bookingStatus ?? "--",
+              "SCHEDULE INFO":
+                  controller.flightDetail.value?.ckin?.scheduleInfo ?? "--",
+              "DOCS CHECK":
+                  controller.flightDetail.value?.ckin?.docsCheck ?? "--",
+              "RAMP (SPECIAL)":
+                  controller.flightDetail.value?.ckin?.ramp ?? "--",
+              "OTHERS": controller.flightDetail.value?.ckin?.other ?? "--",
             },
           ),
           SizedBox(height: 12),
