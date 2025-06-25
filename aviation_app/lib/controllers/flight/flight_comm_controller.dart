@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:aviation_app/models/flight_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:intl/intl.dart';
@@ -13,9 +14,10 @@ import '../storage/data_storage_controller.dart';
 
 class FlightCommController extends GetxController {
   RxString formattedDateTime = ''.obs;
-  late Timer _timer;
+  Timer? _timer;
 
   final Map<int, StreamSubscription> _flightChatSubscriptions = {};
+  final _lastUnreadCounts = <int, int>{};
 
   var myFlightList = <FlightsModel>[].obs;
   var allFlightList = <FlightsModel>[].obs;
@@ -30,9 +32,7 @@ class FlightCommController extends GetxController {
   void onInit() {
     super.onInit();
     _startDateTimeUpdater();
-    fetchFlightComm();
-    fetchFlightStaff();
-    _setupFlightChatListeners();
+    _fetchData();
   }
 
   void _startDateTimeUpdater() {
@@ -44,6 +44,11 @@ class FlightCommController extends GetxController {
     final now = DateTime.now().toUtc();
     final formatter = DateFormat('EEEE, dd MMMM yyyy HH:mm:ss \'UTC\'');
     formattedDateTime.value = formatter.format(now);
+  }
+
+  Future<void> _fetchData() async {
+    await fetchFlightComm();
+    fetchFlightStaff();
   }
 
   var selectedFilter = 'Departures'.obs;
@@ -125,7 +130,7 @@ class FlightCommController extends GetxController {
 
   @override
   void onClose() {
-    _timer.cancel();
+    _timer?.cancel();
     _cleanupFlightChatListeners();
     super.onClose();
   }
@@ -200,12 +205,12 @@ class FlightCommController extends GetxController {
     }
   }
 
-  // In FlightCommController
   void updateFlightUnreadCount(int flightId, int unreadCount) {
-    // log(
-    //   '[FlightCommController] updateFlightUnreadCount [flight] $flightId: [unread] $unreadCount',
-    // );
-    final listsToUpdate = [
+    log(
+      '[FlightCommController] Updating unread count for flight $flightId: $unreadCount',
+    );
+
+    final lists = [
       allFlightList,
       arrivalFlightList,
       departureFlightList,
@@ -213,19 +218,12 @@ class FlightCommController extends GetxController {
       myFlightList,
     ];
 
-    for (final list in listsToUpdate) {
-      try {
-        final flight = list.firstWhereOrNull((f) => f.id == flightId);
-        if (flight != null && flight.unReadCount.value != unreadCount) {
-          flight.unReadCount.value = unreadCount;
-        }
-        // log('Updated unread count for flight $flightId in ${list.runtimeType}');
-      } catch (e) {
-        log('Error updating unread count in ${list.runtimeType}: $e');
+    for (final list in lists) {
+      final flight = list.firstWhereOrNull((f) => f.id == flightId);
+      if (flight != null && flight.unReadCount.value != unreadCount) {
+        flight.unReadCount.value = unreadCount;
       }
     }
-
-    update();
   }
 
   void _setupFlightChatListeners() {
@@ -245,69 +243,40 @@ class FlightCommController extends GetxController {
     final currentUserId = DataStorageController.to.user.id;
     final currentUserIdStr = currentUserId.toString();
 
-    _flightChatSubscriptions[flightId] = FirebaseFirestore.instance
+    final flightRef = FirebaseFirestore.instance
         .collection('chats')
-        .doc(flightId.toString())
+        .doc(flightId.toString());
+
+    _flightChatSubscriptions[flightId] = flightRef
         .collection('messages')
         .where('sender_id', isNotEqualTo: currentUserIdStr)
         .snapshots()
-        .listen(
-          (snapshot) {
-            try {
-              int unreadCount = 0;
+        .listen((snapshot) {
+          final unreadCount = _calculateUnreadCount(snapshot, currentUserIdStr);
 
-              for (final doc in snapshot.docs) {
-                final data = doc.data();
-
-                // Safe handling of read_by field
-                final readBy = _parseReadByList(data['read_by']);
-
-                if (!readBy.contains(currentUserId)) {
-                  unreadCount++;
-                }
-              }
-
-              // log(
-              //   '[FlightCommController] _setupFlightChatListener [flight] $flightId: [unread] $unreadCount',
-              // );
-              updateFlightUnreadCount(flightId, unreadCount);
-            } catch (e, stack) {
-              log('Error processing messages for flight $flightId: $e\n$stack');
-            }
-          },
-          onError: (error) {
-            log('Error listening to messages for flight $flightId: $error');
-          },
-        );
+          if (unreadCount != _lastUnreadCounts[flightId]) {
+            _lastUnreadCounts[flightId] = unreadCount;
+            updateFlightUnreadCount(flightId, unreadCount);
+          }
+        }, onError: (e) => debugPrint('Flight $flightId listener error: $e'));
   }
 
-  // Helper method to safely parse read_by list
-  List<int> _parseReadByList(dynamic readByData) {
-    if (readByData == null) return [];
-
-    try {
-      if (readByData is List) {
-        // return readByData.map((e) => e.toString()).toList();
-        return readByData.map((item) {
-          if (item is String) {
-            return int.tryParse(item) ?? 0; // Convert string to int
-          } else if (item is int) {
-            return item; // Already an int
-          } else if (item is double) {
-            return item.toInt(); // Convert double to int
-          }
-          return 0; // Default fallback
-        }).toList();
+  int _calculateUnreadCount(QuerySnapshot snapshot, String currentUserIdStr) {
+    int count = 0;
+    for (final doc in snapshot.docs) {
+      final readBy = doc['read_by'] as List?;
+      if (readBy == null || !readBy.contains(currentUserIdStr)) {
+        count++;
       }
-      return [];
-    } catch (e) {
-      log('Error parsing read_by list: $e');
-      return [];
     }
+    return count;
   }
 
   void _cleanupFlightChatListeners() {
-    _flightChatSubscriptions.values.forEach((sub) => sub.cancel());
+    for (final sub in _flightChatSubscriptions.values) {
+      sub.cancel();
+    }
     _flightChatSubscriptions.clear();
+    _lastUnreadCounts.clear();
   }
 }

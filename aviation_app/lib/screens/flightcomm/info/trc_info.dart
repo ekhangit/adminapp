@@ -11,9 +11,10 @@ class TrcInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
+    final trc = controller.flightDetail.value?.trc;
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(top: 16, bottom: 24),
+      padding: const EdgeInsets.only(top: 16, bottom: 24),
       child: Column(
         children: [
           InfoSection(
@@ -27,9 +28,9 @@ class TrcInfo extends StatelessWidget {
                 controller.flightDetail.value?.basicDetails.date ?? '--',
               ),
               "A/C Type":
-                  controller.flightDetail.value?.aircraft!.aircraftType.icao ??
+                  controller.flightDetail.value?.aircraft?.aircraftType.icao ??
                   '--',
-              "A/C Regn": controller.flightDetail.value?.aircraft!.name ?? '--',
+              "A/C Regn": controller.flightDetail.value?.aircraft?.name ?? '--',
               "Gate": controller.flightDetail.value?.basicDetails.gate ?? '--',
               "Stand": controller.flightDetail.value?.basicDetails.pos ?? '--',
               "Baggage Belt":
@@ -37,57 +38,68 @@ class TrcInfo extends StatelessWidget {
                   '--',
             },
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           InfoSection(
             title: "TRC Info",
             data: {
-              "TRC": controller.flightDetail.value?.trc!.trc ?? "--",
-              "Mobile No": controller.flightDetail.value?.trc!.mobile ?? "--",
-              "TRC RMKS": controller.flightDetail.value?.trc!.remarks ?? "--",
+              "TRC": trc?.trc ?? "--",
+              "Mobile No": trc?.mobile ?? "--",
+              "TRC RMKS": trc?.remarks ?? "--",
             },
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           InfoSection(
             title: "A/Data",
-            data: {
-              "CREW": controller.flightDetail.value?.trc!.crew ?? "--",
-              "PANTRY": controller.flightDetail.value?.trc!.pantry ?? "--",
-              "CAPTAIN": controller.flightDetail.value?.trc!.captain ?? "--",
-              "DOW": controller.flightDetail.value?.trc!.captain ?? "--",
-              "DOI": controller.flightDetail.value?.trc!.dow ?? "--",
-              "MTOW": controller.flightDetail.value?.trc!.doi ?? "--",
-              "RTOW": controller.flightDetail.value?.trc!.rtow ?? "--",
-            },
+            data:
+                trc == null
+                    ? {"No TRC Data Available": "--"}
+                    : {
+                      "CREW": trc.crew ?? "--",
+                      "PANTRY": trc.pantry ?? "--",
+                      "CAPTAIN": trc.captain ?? "--",
+                      "DOW":
+                          trc.captain ??
+                          "--", // Note: This seems duplicated with CAPTAIN
+                      "DOI":
+                          trc.dow ?? "--", // Note: This seems reversed with DOW
+                      "MTOW":
+                          trc.doi ?? "--", // Note: This seems reversed with DOI
+                      "RTOW": trc.rtow ?? "--",
+                    },
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           InfoSection(
             title: "Fuel Data",
-            data: {
-              "TAXI+APU": controller.flightDetail.value?.trc!.taxi ?? "--",
-              "BLOCK": controller.flightDetail.value?.trc!.block ?? "--",
-              "TRIP": controller.flightDetail.value?.trc!.trip ?? "--",
-              "EET": controller.flightDetail.value?.trc!.eet ?? "--",
-              "TAKE OFF": controller.flightDetail.value?.trc!.takeOff ?? "--",
-              "UPLIFTED": controller.flightDetail.value?.trc!.uplifted ?? "--",
-              "ALTN": controller.flightDetail.value?.trc!.altn ?? "--",
-            },
+            data:
+                trc == null
+                    ? {"No Fuel Data Available": "--"}
+                    : {
+                      "TAXI+APU": trc.taxi ?? "--",
+                      "BLOCK": trc.block ?? "--",
+                      "TRIP": trc.trip ?? "--",
+                      "EET": trc.eet ?? "--",
+                      "TAKE OFF": trc.takeOff ?? "--",
+                      "UPLIFTED": trc.uplifted ?? "--",
+                      "ALTN": trc.altn ?? "--",
+                    },
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           InfoSection(
             title: "F.O.D",
-            data: {
-              "Before Arrival": controller.flightDetail.value?.trc!.beforeArrival ?? "--",
-              "Before Departure": controller.flightDetail.value?.trc!.beforeDeparture ?? "--",
-              "After Departure": controller.flightDetail.value?.trc!.afterDeparture ?? "--",
-            },
+            data:
+                trc == null
+                    ? {"No FOD Data Available": "--"}
+                    : {
+                      "Before Arrival": trc.beforeArrival ?? "--",
+                      "Before Departure": trc.beforeDeparture ?? "--",
+                      "After Departure": trc.afterDeparture ?? "--",
+                    },
           ),
-          SizedBox(height: 12),
+          const SizedBox(height: 12),
           InfoSection(
             keyColor: Colors.red,
             valueColor: Colors.red,
-
             title: "Total Onboard",
-
             data: {
               "PAX":
                   controller.flightDetail.value?.actualPax.totalPax

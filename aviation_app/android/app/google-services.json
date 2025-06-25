@@ -8,6 +8,25 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:773569883624:android:9c70ecdf2a9abdb621085d",
+        "android_client_info": {
+          "package_name": "com.example.aviationApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBsGDDIDgmne1Fu0vmp4dnSVTzN6STpHwg"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:773569883624:android:c5af079af330bf3121085d",
         "android_client_info": {
           "package_name": "com.example.aviation_app"

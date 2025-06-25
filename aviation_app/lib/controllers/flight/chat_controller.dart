@@ -20,9 +20,542 @@ class ChatController extends GetxController {
   var argument = Get.arguments;
 
   final ScrollController scrollController = ScrollController();
-  StreamSubscription<QuerySnapshot>? _messagesSubscription;
+
+  // Pagination
+  final int _pageSize = 50;
+  DocumentSnapshot? _lastDocument;
+  bool _hasMore = true;
+  bool _isInitialLoad = true;
+  bool _isLoadingMessages = false;
 
   var staffList = <StaffModel>[].obs;
+
+  StreamSubscription<QuerySnapshot>? _messagesSubscription;
+
+  @override
+  void onInit() {
+    super.onInit();
+    _initializeChat();
+    _setupFirestoreListener();
+  }
+
+  void _initializeChat() {
+    fetchFlightChatDetail(argument);
+    _setupFlightDetailListener();
+    _setupStaffList();
+    _loadInitialMessages();
+  }
+
+  void _setupFirestoreListener() {
+    _messagesSubscription?.cancel();
+
+    _messagesSubscription = FirebaseFirestore.instance
+        .collection('chats')
+        .doc(argument.toString())
+        .collection('messages')
+        .orderBy('created_at', descending: false)
+        .snapshots()
+        .listen((snapshot) {
+          _handleNewMessages(snapshot.docs);
+        });
+  }
+
+  void _handleNewMessages(List<DocumentSnapshot> docs) async {
+    // Parse new messages
+    final newMessages = await _parseMessages(docs);
+
+    // Create a map of existing messages by their unique key
+    final existingMessagesMap = {
+      for (var msg in messages) '${msg.senderId}-${msg.time}': msg,
+    };
+
+    // Merge new messages with existing ones
+    final mergedMessages = [...messages];
+    bool newMessagesAdded = false;
+
+    for (final newMsg in newMessages) {
+      // Skip if it's an optimistic message we're already showing
+      if (newMsg.id.startsWith('optimistic-')) continue;
+
+      if (!existingMessagesMap.containsKey(newMsg.id)) {
+        mergedMessages.add(newMsg);
+        newMessagesAdded = true;
+      }
+    }
+    // Update the list only if new messages were added
+    if (newMessagesAdded) {
+      messages.assignAll(mergedMessages);
+      _scrollToBottom();
+      markVisibleMessagesAsRead();
+    }
+  }
+
+  void _setupFlightDetailListener() {
+    ever(flightDetail, (FlightDetailModel? detail) {
+      if (detail != null) checkTabMessages();
+    });
+  }
+
+  void _setupStaffList() {
+    if (Get.isRegistered<FlightCommController>()) {
+      final flightCommController = Get.find<FlightCommController>();
+      staffList.assignAll(flightCommController.flightStaff);
+    }
+  }
+
+  Future<void> _loadInitialMessages() async {
+    await _loadMessages();
+    _isInitialLoad = true;
+  }
+
+  Future<void> _loadMessages({bool loadMore = false}) async {
+    if (_isLoadingMessages) return;
+    if (!loadMore) {
+      _lastDocument = null;
+      _hasMore = true;
+
+      if (messages.isNotEmpty) messages.clear();
+    }
+
+    if (!_hasMore) return;
+
+    Query query = FirebaseFirestore.instance
+        .collection('chats')
+        .doc(argument.toString())
+        .collection('messages')
+        .orderBy('created_at', descending: false)
+        .limit(_pageSize);
+
+    if (_lastDocument != null) {
+      query = query.startAfterDocument(_lastDocument!);
+    }
+
+    try {
+      final snapshot = await query.get();
+      if (snapshot.docs.isEmpty) {
+        _hasMore = false;
+        return;
+      }
+
+      _lastDocument = snapshot.docs.last;
+      final newMessages = await _parseMessages(snapshot.docs);
+
+      if (loadMore) {
+        messages.insertAll(0, newMessages);
+      } else {
+        messages.assignAll(newMessages);
+        _scrollToBottom();
+        markVisibleMessagesAsRead();
+      }
+    } catch (e) {
+      debugPrint('Error loading messages: $e');
+    } finally {
+      _isLoadingMessages = false;
+    }
+  }
+
+  Future<List<ChatMessage>> _parseMessages(List<DocumentSnapshot> docs) async {
+    return await Future.wait(docs.map((doc) => _parseMessage(doc)));
+  }
+
+  Future<ChatMessage> _parseMessage(DocumentSnapshot doc) async {
+    final data = doc.data() as Map<String, dynamic>;
+    final senderIdStr = data['sender_id'].toString();
+
+    final matchedStaff = staffList.firstWhereOrNull(
+      (staff) => staff.id.toString() == senderIdStr,
+    );
+
+    // Get the timestamp and convert to ISO string
+    final timestamp = data['created_at'] as Timestamp?;
+    final isoTime = timestamp?.toDate().toUtc().toIso8601String() ?? '';
+
+    return ChatMessage.fromJson({
+      ...data,
+      'sender_name': matchedStaff?.displayName ?? 'User',
+      'station': matchedStaff?.airport.iataCode ?? 'Unknown',
+      'created_at': isoTime, // Use consistent UTC ISO format
+      'sender_id': senderIdStr,
+    });
+  }
+
+  void _scrollToBottom() {
+    if (scrollController.hasClients && !_isInitialLoad) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        scrollController.animateTo(
+          scrollController.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 300),
+          curve: Curves.easeOut,
+        );
+      });
+    }
+    _isInitialLoad = false;
+  }
+
+  Future<void> sendMessage() async {
+    final text = messageController.text.trim();
+    if (text.isEmpty || isSendingMessage.value) return;
+
+    isSendingMessage.value = true;
+    try {
+      final currentUser = DataStorageController.to.user;
+      final currentUserIdStr = currentUser.id.toString();
+
+      // Create optimistic message
+      final optimisticMessage = ChatMessage(
+        id: 'optimistic-${DateTime.now().millisecondsSinceEpoch}',
+        senderId: currentUser.id,
+        senderName: currentUser.name,
+        station: '',
+        message: text,
+        time: DateTime.now().toUtc().toIso8601String(),
+        isOwn: true,
+        readBy: [currentUser.id],
+        type: 'simple',
+      );
+
+      // Add optimistically to UI
+      messages.add(optimisticMessage);
+      _scrollToBottom();
+
+      final docRef = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(argument.toString())
+          .collection('messages')
+          .add({
+            'sender_id': currentUserIdStr,
+            'message': text,
+            'message_type': 'simple',
+            'read_by': [currentUserIdStr],
+            'created_at': FieldValue.serverTimestamp(),
+          });
+
+      // Update local message with actual ID
+      final index = messages.indexOf(optimisticMessage);
+      if (index != -1) {
+        messages[index] = messages[index].copyWith(id: docRef.id);
+      }
+
+      messageController.clear();
+    } catch (e) {
+      messages.removeWhere((msg) => msg.id.startsWith('optimistic-'));
+      debugPrint('Error sending message: $e');
+    } finally {
+      isSendingMessage.value = false;
+    }
+  }
+
+  Future<void> markVisibleMessagesAsRead() async {
+    // log('[ChatController] markVisibleMessagesAsRead called');
+
+    final currentUserId = DataStorageController.to.user.id;
+    final currentUserIdStr = currentUserId.toString();
+
+    // Get messages that haven't been read by the current user
+    final unreadMessages =
+        messages
+            .where((msg) => !(msg.readBy?.contains(currentUserId) ?? true))
+            .toList();
+
+    // log(
+    //   '[ChatController] markVisibleMessagesAsRead Unread messages count: ${unreadMessages.length}',
+    // );
+
+    if (unreadMessages.isEmpty) return;
+
+    try {
+      // Create a batch update
+      final batch = FirebaseFirestore.instance.batch();
+      int batchCount = 0;
+
+      for (final message in unreadMessages) {
+        if (batchCount >= 400) break; // Firestore batch limit
+
+        log(
+          '[ChatController] Marking message as read: ${message.id} | '
+          'Sender: ${message.senderId} | Time: ${message.time}',
+        );
+
+        // Get the exact timestamp from the message
+        final messageTime = DateTime.parse(message.time);
+        final timestamp = Timestamp.fromDate(messageTime);
+
+        // Find the message document by its unique properties
+        Query query = FirebaseFirestore.instance
+            .collection('chats')
+            .doc(argument.toString())
+            .collection('messages')
+            .where('created_at', isEqualTo: timestamp)
+            .where('sender_id', isEqualTo: message.senderId.toString())
+            // .where('message', isEqualTo: message.message)
+            .limit(1);
+
+        // // Handle different message types
+        // if (message.type == 'simple') {
+        //   query = query.where('message', isEqualTo: message.message);
+        // } else {
+        //   log('[ChatController] message type: ${message.type}');
+
+        //   log('[ChatController] message data: ${message.fhrMessage!.toMap()}');
+        //   // For complex messages, compare the string representation
+        //   final messageData = message.toFirestoreMessageData();
+        //   query = query.where('message', isEqualTo: messageData);
+        // }
+
+        log(
+          '[ChatController] markVisibleMessagesAsRead Querying for message: $query',
+        );
+
+        final snapshot = await query.get();
+        log(
+          '[ChatController] markVisibleMessagesAsRead Query result: ${snapshot.docs.length} docs found',
+        );
+        if (snapshot.docs.isNotEmpty) {
+          final doc = snapshot.docs.first;
+          batch.update(doc.reference, {
+            'read_by': FieldValue.arrayUnion([currentUserIdStr]),
+          });
+          batchCount++;
+
+          log('[ChatController]  Message marked as read: ${message.readBy}');
+
+          // Update local message state
+          if (message.readBy == null) {
+            message.readBy = [currentUserId];
+          } else {
+            message.readBy!.add(currentUserId);
+          }
+        }
+      }
+
+      if (batchCount > 0) {
+        await batch.commit();
+        log('Marked $batchCount messages as read');
+
+        // Update unread count in FlightCommController
+        final newUnreadCount = _calculateUnreadCount();
+
+        log(
+          '[chatController] markVisibleMessagesAsRead Unread messages count: $newUnreadCount',
+        );
+
+        if (Get.isRegistered<FlightCommController>()) {
+          Get.find<FlightCommController>().updateFlightUnreadCount(
+            argument,
+            newUnreadCount,
+          );
+        }
+      }
+    } catch (e, stack) {
+      log('Error marking messages as read: $e');
+      log('Stack trace: $stack');
+    }
+  }
+
+  int _calculateUnreadCount() {
+    final currentUserId = DataStorageController.to.user.id;
+    return messages
+        .where((msg) => !(msg.readBy?.contains(currentUserId) ?? true))
+        .length;
+  }
+
+  Future<void> loadMoreMessages() async {
+    if (!_hasMore) return;
+    await _loadMessages(loadMore: true);
+  }
+
+  Future<void> markSingleMessageRead(ChatMessage message) async {
+    final currentUserId = DataStorageController.to.user.id;
+    if (message.readBy?.contains(currentUserId) ?? false) return;
+
+    try {
+      final currentUserIdStr = currentUserId.toString();
+      final messageTime = DateTime.parse(message.time);
+      final timestamp = Timestamp.fromDate(messageTime);
+
+      // Find the message document
+      Query query = FirebaseFirestore.instance
+          .collection('chats')
+          .doc(argument.toString())
+          .collection('messages')
+          .where('created_at', isEqualTo: timestamp)
+          .where('sender_id', isEqualTo: message.senderId.toString())
+          // .where('message', isEqualTo: message.message)
+          .limit(1);
+
+      final snapshot = await query.get();
+      if (snapshot.docs.isNotEmpty) {
+        final doc = snapshot.docs.first;
+        await doc.reference.update({
+          'read_by': FieldValue.arrayUnion([currentUserIdStr]),
+        });
+
+        // Update local message state
+        if (message.readBy == null) {
+          message.readBy = [currentUserId];
+        } else {
+          message.readBy!.add(currentUserId);
+        }
+
+        // Update unread count
+        final newUnreadCount = _calculateUnreadCount();
+        if (Get.isRegistered<FlightCommController>()) {
+          Get.find<FlightCommController>().updateFlightUnreadCount(
+            argument,
+            newUnreadCount,
+          );
+        }
+      }
+    } catch (e) {
+      debugPrint('Error marking single message read: $e');
+    }
+  }
+
+  @override
+  void onClose() {
+    _messagesSubscription?.cancel();
+    scrollController.dispose();
+    messageController.dispose();
+    super.onClose();
+  }
+
+  // Future<void> fetchFlightChatsWithFirebase(int flightId) async {
+  //   // flightId = 65139;
+  //   log('[fetchFlightChatsWithFirebase] flightId : $flightId');
+
+  //   try {
+  //     await _messagesSubscription?.cancel();
+  //     await _unreadCounterSubscription?.cancel();
+
+  //     _messagesSubscription = FirebaseFirestore.instance
+  //         .collection('chats')
+  //         .doc(flightId.toString())
+  //         .collection('messages')
+  //         .orderBy('created_at', descending: false)
+  //         .limit(50)
+  //         .snapshots()
+  //         .listen(
+  //           (snapshot) {
+  //             // final staffList = flightCommController.flightStaff;
+
+  //             final fetchedMessages =
+  //                 snapshot.docs.map((doc) {
+  //                   final data = doc.data();
+
+  //                   // Log message metadata (without sensitive content)
+  //                   log(
+  //                     '[FirebaseChat] Message ID: ${doc.id} | '
+  //                     'Sender: ${data['sender_id']} | '
+  //                     'Type: ${data['message_type']} | '
+  //                     'Timestamp: ${data['created_at']}',
+  //                   );
+
+  //                   if (data['message'] != null &&
+  //                       data['message_type'] == 'simple') {
+  //                     // log('[FirebaseChat] Simple message detected');
+
+  //                     // final msg = data['message'] as String;
+  //                     // log(
+  //                     //   '[FirebaseChat] Message preview: ${msg.length > 20 ? '${msg.substring(0, 20)}...' : msg}',
+  //                     // );
+  //                   }
+  //                   // else if (data['message'] != null &&
+  //                   //     data['message_type'] == 'staff') {
+  //                   //   log('[FirebaseChat] Staff message detected');
+  //                   //   final staffMsg = data['message'] as Map<String, dynamic>;
+  //                   //   log('[FirebaseChat] Staff message: $staffMsg');
+  //                   // } else if (data['message'] != null &&
+  //                   //     data['message_type'] == 'arr') {
+  //                   //   log('[FirebaseChat] Arr message detected');
+  //                   //   final arrMsg = data['message'] as Map<String, dynamic>;
+  //                   //   log('[FirebaseChat] Arr message: $arrMsg');
+  //                   // }
+  //                   // else if (data['message'] != null &&
+  //                   //     data['message_type'] == 'fhr') {
+  //                   //   log('[FirebaseChat] Fhr message detected');
+  //                   //   final fhrMsg = data['message'] as Map<String, dynamic>;
+  //                   //   log('[FirebaseChat] Fhr message: $fhrMsg');
+  //                   // }
+  //                   else if (data['message'] != null &&
+  //                       data['message_type'] == 'ssr') {
+  //                     log('[FirebaseChat] SSR message detected');
+
+  //                     final ssrMsg = data['message'] as Map<String, dynamic>;
+  //                     log('[FirebaseChat] SSR message: $ssrMsg');
+  //                   }
+
+  //                   // // Try matching senderId with a staff member
+  //                   final senderIdStr = data['sender_id'].toString();
+  //                   final matchedStaff = staffList.firstWhereOrNull(
+  //                     (staff) => staff.id.toString() == senderIdStr,
+  //                   );
+
+  //                   return ChatMessage.fromJson({
+  //                     ...data,
+  //                     'sender_name': matchedStaff?.displayName ?? 'User',
+  //                     'station': matchedStaff?.airport.iataCode ?? 'Unknown',
+  //                     'created_at':
+  //                         (data['created_at'] as Timestamp?)
+  //                             ?.toDate()
+  //                             .toIso8601String() ??
+  //                         '',
+  //                     'sender_id': senderIdStr,
+  //                   });
+  //                 }).toList();
+
+  //             messages.assignAll(fetchedMessages);
+  //             log(
+  //               '[fetchFlightChatsWithFirebase] Loaded ${messages.length} messages',
+  //             );
+  //           },
+  //           onError: (e, stack) {
+  //             log('[fetchFlightChatsWithFirebase] Firestore stream error: $e');
+  //             log('[fetchFlightChatsWithFirebase] Stack: $stack');
+  //           },
+  //         );
+  //   } catch (e, stack) {
+  //     log('[fetchFlightChatsWithFirebase] Exception: $e');
+  //     log('[fetchFlightChatsWithFirebase] Stack: $stack');
+  //   }
+  // }
+
+  // Future<void> sendMessage() async {
+  //   log("[sendMessage] sendMessage data...");
+
+  //   final text = messageController.text.trim();
+  //   if (text.isEmpty) return;
+
+  //   isSendingMessage.value = true;
+
+  //   final payload = {
+  //     "flight_id": argument,
+  //     "message": text,
+  //     "type": null,
+  //     "file": null,
+  //   };
+
+  //   log("[sendMessage] sendMessage Payload: $payload");
+
+  //   try {
+  //     final response = await FlightChatService.instance.sendMessage(payload);
+
+  //     if (response.isSuccess) {
+  //       log("[ChatController] sendMessage data submitted successfully.");
+
+  //       messageController.clear();
+  //       // fetchFlightChats(argument);
+  //     } else {
+  //       log(
+  //         "[ChatController] sendMessage submission failed: ${response.errorMessage}",
+  //       );
+  //     }
+  //   } catch (e, stack) {
+  //     log("[sendMessage] Exception while sending ARR: $e");
+  //     log("[sendMessage] Stack: $stack");
+  //   } finally {
+  //     isSendingMessage.value = false;
+  //   }
+  // }
 
   // Add these variables
   final Map<String, bool> _tabHasMessages =
@@ -50,66 +583,6 @@ class ChatController extends GetxController {
 
   bool hasMessages(String tabName) {
     return _tabHasMessages[tabName] ?? false;
-  }
-
-  @override
-  void onInit() {
-    super.onInit();
-
-    log('[ChatController] argument : $argument');
-
-    fetchFlightChatDetail(argument);
-    // fetchFlightChats(argument);
-
-    // Add listener for flightDetail changes
-    ever(flightDetail, (FlightDetailModel? detail) {
-      if (detail != null) {
-        checkTabMessages();
-      }
-    });
-
-    if (Get.isRegistered<FlightCommController>()) {
-      final flightCommController = Get.find<FlightCommController>();
-
-      staffList.assignAll(flightCommController.flightStaff);
-      if (staffList.isNotEmpty) {
-        // Initialize listeners
-        fetchFlightChatsWithFirebase(argument);
-        markAllMessagesAsRead(argument);
-      } else {
-        log("[ChatController] Staff members loaded successfully");
-      }
-
-      listenForUnreadMessages(argument);
-    } else {
-      log("[ChatController] FlightInfoController not registered");
-    }
-
-    // Scroll to bottom when messages change
-    ever(messages, (_) {
-      // log("[ChatController] Messages updated, scrolling to bottom");
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        if (scrollController.hasClients) {
-          // log(
-          //   "[ChatController] Scrolling to ${scrollController.position.maxScrollExtent}",
-          // );
-          scrollController.animateTo(
-            scrollController.position.maxScrollExtent,
-            duration: const Duration(milliseconds: 300),
-            curve: Curves.easeOut,
-          );
-        } else {
-          log("[ChatController] ScrollController has no clients");
-        }
-      });
-    });
-  }
-
-  @override
-  void onClose() {
-    _messagesSubscription?.cancel();
-    scrollController.dispose(); // Dispose ScrollController
-    super.onClose();
   }
 
   final selectedTab = 'Chat'.obs;
@@ -170,157 +643,46 @@ class ChatController extends GetxController {
 
   final RxBool isSendingMessage = false.obs;
 
-  // Future<void> sendMessage() async {
-  //   log("[sendMessage] sendMessage data...");
-
-  //   final text = messageController.text.trim();
-  //   if (text.isEmpty) return;
-
-  //   isSendingMessage.value = true;
-
-  //   final payload = {
-  //     "flight_id": argument,
-  //     "message": text,
-  //     "type": null,
-  //     "file": null,
-  //   };
-
-  //   log("[sendMessage] sendMessage Payload: $payload");
-
-  //   try {
-  //     final response = await FlightChatService.instance.sendMessage(payload);
-
-  //     if (response.isSuccess) {
-  //       log("[ChatController] sendMessage data submitted successfully.");
-
-  //       messageController.clear();
-  //       // fetchFlightChats(argument);
-  //     } else {
-  //       log(
-  //         "[ChatController] sendMessage submission failed: ${response.errorMessage}",
-  //       );
-  //     }
-  //   } catch (e, stack) {
-  //     log("[sendMessage] Exception while sending ARR: $e");
-  //     log("[sendMessage] Stack: $stack");
-  //   } finally {
-  //     isSendingMessage.value = false;
-  //   }
+  // void listenForUnreadMessages(int flightId) {
+  //   final currentUserIdStr = DataStorageController.to.user.id.toString();
+  //   FirebaseFirestore.instance
+  //       .collection('chats')
+  //       .doc(flightId.toString())
+  //       .collection('messages')
+  //       .where('read_by', arrayContains: currentUserIdStr)
+  //       .snapshots()
+  //       .listen((snapshot) {
+  //         // When messages are marked as read, update the unread count
+  //         updateUnreadCountForFlight(flightId);
+  //       });
   // }
 
-  Future<void> sendMessage() async {
-    log("[sendMessage] sendMessage data...");
+  // Future<void> updateUnreadCountForFlight(int flightId) async {
+  //   try {
+  //     final currentUserIdStr = DataStorageController.to.user.id.toString();
+  //     // Single query to count unread messages
+  //     final unreadQuery =
+  //         FirebaseFirestore.instance
+  //             .collection('chats')
+  //             .doc(flightId.toString())
+  //             .collection('messages')
+  //             .where('read_by', whereNotIn: [currentUserIdStr])
+  //             .count();
 
-    final text = messageController.text.trim();
-    if (text.isEmpty) return;
+  //     final unreadSnapshot = await unreadQuery.get();
+  //     final unreadCount = unreadSnapshot.count ?? 0;
 
-    isSendingMessage.value = true;
+  //     log(
+  //       '[updateUnreadCountForFlight] Flight $flightId has $unreadCount unread messages',
+  //     );
 
-    try {
-      final currentUser = DataStorageController.to.user;
-      final currentUserIdStr = currentUser.id.toString();
-
-      // Save to Firestore with only required fields
-      await FirebaseFirestore.instance
-          .collection('chats')
-          .doc(argument.toString())
-          .collection('messages')
-          .add({
-            'sender_id': currentUserIdStr,
-            'message': text,
-            'message_type': 'simple',
-            'read_by': [currentUserIdStr],
-            'created_at': FieldValue.serverTimestamp(),
-          });
-
-      log("[sendMessage] Message sent successfully.");
-      messageController.clear();
-    } catch (e, stack) {
-      log("[sendMessage] Exception while sending message: $e");
-      log("[sendMessage] Stack: $stack");
-    } finally {
-      isSendingMessage.value = false;
-    }
-
-    print('isSendingMessage: ${isSendingMessage.value}');
-  }
-
-  Future<void> markAllMessagesAsRead(int flightId) async {
-    final currentUserIdStr = DataStorageController.to.user.id.toString();
-
-    try {
-      // Get all unread messages (where current user is not in read_by)
-      var query = FirebaseFirestore.instance
-          .collection('chats')
-          .doc(flightId.toString())
-          .collection('messages')
-          .where('read_by', whereNotIn: [currentUserIdStr]);
-
-      // Get the first batch
-      QuerySnapshot snapshot = await query.get();
-
-      while (snapshot.docs.isNotEmpty) {
-        final batch = FirebaseFirestore.instance.batch();
-
-        for (final doc in snapshot.docs) {
-          batch.update(doc.reference, {
-            'read_by': FieldValue.arrayUnion([currentUserIdStr]),
-          });
-        }
-
-        await batch.commit();
-      }
-
-      //  Immediately update count
-      // if (Get.isRegistered<FlightCommController>()) {
-      //   log("[markAllMessagesAsRead] FlightCommController $flightId");
-      //   Get.find<FlightCommController>().updateFlightUnreadCount(flightId, 0);
-      // }
-    } catch (e) {
-      log('Error marking all messages as read: $e');
-    }
-  }
-
-  void listenForUnreadMessages(int flightId) {
-    final currentUserIdStr = DataStorageController.to.user.id.toString();
-    FirebaseFirestore.instance
-        .collection('chats')
-        .doc(flightId.toString())
-        .collection('messages')
-        .where('read_by', arrayContains: currentUserIdStr)
-        .snapshots()
-        .listen((snapshot) {
-          // When messages are marked as read, update the unread count
-          updateUnreadCountForFlight(flightId);
-        });
-  }
-
-  Future<void> updateUnreadCountForFlight(int flightId) async {
-    try {
-      final currentUserIdStr = DataStorageController.to.user.id.toString();
-      // Single query to count unread messages
-      final unreadQuery =
-          FirebaseFirestore.instance
-              .collection('chats')
-              .doc(flightId.toString())
-              .collection('messages')
-              .where('read_by', whereNotIn: [currentUserIdStr])
-              .count();
-
-      final unreadSnapshot = await unreadQuery.get();
-      final unreadCount = unreadSnapshot.count ?? 0;
-
-      log(
-        '[updateUnreadCountForFlight] Flight $flightId has $unreadCount unread messages',
-      );
-
-      if (Get.isRegistered<FlightCommController>()) {
-        Get.find<FlightCommController>().updateFlightUnreadCount(flightId, 0);
-      }
-    } catch (e) {
-      log('Error updating unread count: $e');
-    }
-  }
+  //     if (Get.isRegistered<FlightCommController>()) {
+  //       Get.find<FlightCommController>().updateFlightUnreadCount(flightId, 0);
+  //     }
+  //   } catch (e) {
+  //     log('Error updating unread count: $e');
+  //   }
+  // }
 
   // CHAT FORM
 
@@ -343,86 +705,6 @@ class ChatController extends GetxController {
   //     log('[ChatController] Stack: $stack');
   //   }
   // }
-
-  Future<void> fetchFlightChatsWithFirebase(int flightId) async {
-    // flightId = 65139;
-    log('[fetchFlightChatsWithFirebase] flightId : $flightId');
-
-    try {
-      _messagesSubscription?.cancel(); // cancel any previous subscription
-
-      _messagesSubscription = FirebaseFirestore.instance
-          .collection('chats')
-          .doc(flightId.toString())
-          .collection('messages')
-          .orderBy('created_at', descending: false)
-          .snapshots()
-          .listen(
-            (snapshot) {
-              // final staffList = flightCommController.flightStaff;
-
-              final fetchedMessages =
-                  snapshot.docs.map((doc) {
-                    final data = doc.data();
-
-                    // Log message metadata (without sensitive content)
-                    log(
-                      '[FirebaseChat] Message ID: ${doc.id} | '
-                      'Sender: ${data['sender_id']} | '
-                      'Type: ${data['message_type']} | '
-                      'Timestamp: ${data['created_at']}',
-                    );
-
-                    if (data['message'] != null &&
-                        data['message_type'] == 'simple') {
-                      log('[FirebaseChat] Simple message detected');
-
-                      final msg = data['message'] as String;
-                      log(
-                        '[FirebaseChat] Message preview: ${msg.length > 20 ? '${msg.substring(0, 20)}...' : msg}',
-                      );
-                    } else if (data['message'] != null &&
-                        data['message_type'] == 'staff') {
-                      log('[FirebaseChat] Staff message detected');
-
-                      final staffMsg = data['message'] as Map<String, dynamic>;
-                      log('[FirebaseChat] Staff message: $staffMsg');
-                    }
-
-                    // // Try matching senderId with a staff member
-                    final senderIdStr = data['sender_id'].toString();
-                    final matchedStaff = staffList.firstWhereOrNull(
-                      (staff) => staff.id.toString() == senderIdStr,
-                    );
-
-                    return ChatMessage.fromJson({
-                      ...data,
-                      'sender_name': matchedStaff?.displayName ?? 'User',
-                      'station': matchedStaff?.airport.iataCode ?? 'Unknown',
-                      'created_at':
-                          (data['created_at'] as Timestamp?)
-                              ?.toDate()
-                              .toIso8601String() ??
-                          '',
-                      'sender_id': senderIdStr,
-                    });
-                  }).toList();
-
-              messages.assignAll(fetchedMessages);
-              log(
-                '[fetchFlightChatsWithFirebase] Loaded ${messages.length} messages',
-              );
-            },
-            onError: (e, stack) {
-              log('[fetchFlightChatsWithFirebase] Firestore stream error: $e');
-              log('[fetchFlightChatsWithFirebase] Stack: $stack');
-            },
-          );
-    } catch (e, stack) {
-      log('[fetchFlightChatsWithFirebase] Exception: $e');
-      log('[fetchFlightChatsWithFirebase] Stack: $stack');
-    }
-  }
 
   // UPATE INFO
 
@@ -517,13 +799,13 @@ class ChatController extends GetxController {
     log("[ChatController] ARR Payload: $payload");
 
     try {
-      // final response = await FlightChatService.instance.sendArr(payload);
+      final response = await FlightChatService.instance.sendArr(payload);
 
-      // if (response.isSuccess) {
-      //   log("[ChatController] ARR data submitted successfully.");
-      // } else {
-      //   log("[ChatController] ARR submission failed: ${response.errorMessage}");
-      // }
+      if (response.isSuccess) {
+        log("[ChatController] ARR data submitted successfully.");
+      } else {
+        log("[ChatController] ARR submission failed: ${response.errorMessage}");
+      }
     } catch (e, stack) {
       log("[ChatController] Exception while sending ARR: $e");
       log("[ChatController] Stack: $stack");
@@ -555,13 +837,13 @@ class ChatController extends GetxController {
     log("[ChatController] FHR Payload: $payload");
 
     try {
-      // final response = await FlightChatService.instance.sendFhr(payload);
+      final response = await FlightChatService.instance.sendFhr(payload);
 
-      // if (response.isSuccess) {
-      //   log("[ChatController] FHR data submitted successfully.");
-      // } else {
-      //   log("[ChatController] FHR submission failed: ${response.errorMessage}");
-      // }
+      if (response.isSuccess) {
+        log("[ChatController] FHR data submitted successfully.");
+      } else {
+        log("[ChatController] FHR submission failed: ${response.errorMessage}");
+      }
     } catch (e, stack) {
       log("[ChatController] Exception while sending ARR: $e");
       log("[ChatController] Stack: $stack");
