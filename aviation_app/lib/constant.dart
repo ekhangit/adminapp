@@ -57,7 +57,7 @@ String formatDate(String rawDate) {
 String formatChatTimestamp(String raw) {
   try {
     final parsed = DateTime.parse(raw); // "2025-05-22 21:22:57"
-    final formatted = DateFormat("dd MMM yy  HH:mm").format(parsed);
+    final formatted = DateFormat("HH:mm").format(parsed);
     return formatted;
   } catch (_) {
     return raw; // fallback if parsing fails

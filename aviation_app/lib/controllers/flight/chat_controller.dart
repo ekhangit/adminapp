@@ -56,38 +56,49 @@ class ChatController extends GetxController {
         .orderBy('created_at', descending: false)
         .snapshots()
         .listen((snapshot) {
-          _handleNewMessages(snapshot.docs);
+          print('[ChatController] New messages snapshot received');
+
+          _handleNewMessages(snapshot);
         });
   }
 
-  void _handleNewMessages(List<DocumentSnapshot> docs) async {
-    // Parse new messages
-    final newMessages = await _parseMessages(docs);
+  // FIXED: Handle new messages properly
+  void _handleNewMessages(QuerySnapshot snapshot) async {
+    // Process document changes instead of all docs
+    for (var change in snapshot.docChanges) {
+      if (change.type == DocumentChangeType.added) {
+        final newMessage = await _parseMessage(change.doc);
 
-    // Create a map of existing messages by their unique key
-    final existingMessagesMap = {
-      for (var msg in messages) '${msg.senderId}-${msg.time}': msg,
-    };
+        // 1. Skip messages sent by current user (already handled optimistically)
+        if (newMessage.senderId == DataStorageController.to.user.id) {
+          continue;
+        }
 
-    // Merge new messages with existing ones
-    final mergedMessages = [...messages];
-    bool newMessagesAdded = false;
+        // Check if we already have this message (optimistic or real)
+        final existingIndex = messages.indexWhere(
+          (msg) =>
+              msg.id == newMessage.id ||
+              (msg.id.startsWith('optimistic-') && msg.time == newMessage.time),
+        );
 
-    for (final newMsg in newMessages) {
-      // Skip if it's an optimistic message we're already showing
-      if (newMsg.id.startsWith('optimistic-')) continue;
+        if (existingIndex != -1) {
+          // Replace optimistic message with real one
+          messages[existingIndex] = newMessage;
+        } else {
+          // Add new message
+          messages.add(newMessage);
+        }
 
-      if (!existingMessagesMap.containsKey(newMsg.id)) {
-        mergedMessages.add(newMsg);
-        newMessagesAdded = true;
+        // Immediately mark as read if it's not from current user
+        if (newMessage.senderId != DataStorageController.to.user.id) {
+          markSingleMessageRead(newMessage);
+        }
       }
     }
-    // Update the list only if new messages were added
-    if (newMessagesAdded) {
-      messages.assignAll(mergedMessages);
-      _scrollToBottom();
-      markVisibleMessagesAsRead();
-    }
+
+    // Scroll to bottom and update read status
+    _scrollToBottom();
+    markVisibleMessagesAsRead();
   }
 
   void _setupFlightDetailListener() {
@@ -132,6 +143,7 @@ class ChatController extends GetxController {
 
     try {
       final snapshot = await query.get();
+
       if (snapshot.docs.isEmpty) {
         _hasMore = false;
         return;
@@ -139,6 +151,9 @@ class ChatController extends GetxController {
 
       _lastDocument = snapshot.docs.last;
       final newMessages = await _parseMessages(snapshot.docs);
+
+      // Log message types breakdown
+      _logMessageTypes(newMessages);
 
       if (loadMore) {
         messages.insertAll(0, newMessages);
@@ -152,6 +167,46 @@ class ChatController extends GetxController {
     } finally {
       _isLoadingMessages = false;
     }
+  }
+
+  void _logMessageTypes(List<ChatMessage> messages) {
+    log('📊 Logging message types breakdown...');
+
+    final typeCounts = <String, int>{};
+    var hasAttachmentCount = 0;
+
+    for (final message in messages) {
+      // Count message types
+      final type = message.type ?? 'simple';
+      // typeCounts[type] = (typeCounts[type] ?? 0) + 1;
+      log('   - Message Type: $type');
+
+      if (type == 'occ') {
+        log('   - OCC Message: ${message.message.toString()}');
+      }
+
+      // Count attachments
+      if (message.attachment != null && message.attachment!.isNotEmpty) {
+        hasAttachmentCount++;
+      }
+    }
+
+    log('📊 Message Type Breakdown:');
+    // typeCounts.forEach((type, count) {
+    //   log('   - $type: $count');
+    // });
+    // log('   - With attachments: $hasAttachmentCount');
+
+    // // Special message types
+    // if (messages.any((m) => m.ssrMessage != null)) {
+    //   log('   - Contains SSR messages');
+    // }
+    // if (messages.any((m) => m.fhrMessage != null)) {
+    //   log('   - Contains FHR messages');
+    // }
+    // if (messages.any((m) => m.arrMessage != null)) {
+    //   log('   - Contains ARR messages');
+    // }
   }
 
   Future<List<ChatMessage>> _parseMessages(List<DocumentSnapshot> docs) async {
@@ -201,12 +256,16 @@ class ChatController extends GetxController {
       final currentUser = DataStorageController.to.user;
       final currentUserIdStr = currentUser.id.toString();
 
+      final matchedStaff = staffList.firstWhereOrNull(
+        (staff) => staff.id.toString() == currentUserIdStr,
+      );
+
       // Create optimistic message
       final optimisticMessage = ChatMessage(
         id: 'optimistic-${DateTime.now().millisecondsSinceEpoch}',
         senderId: currentUser.id,
-        senderName: currentUser.name,
-        station: '',
+        senderName: matchedStaff?.displayName ?? 'User',
+        station: matchedStaff?.airport.iataCode ?? 'Unknown',
         message: text,
         time: DateTime.now().toUtc().toIso8601String(),
         isOwn: true,
@@ -287,20 +346,7 @@ class ChatController extends GetxController {
             .collection('messages')
             .where('created_at', isEqualTo: timestamp)
             .where('sender_id', isEqualTo: message.senderId.toString())
-            // .where('message', isEqualTo: message.message)
             .limit(1);
-
-        // // Handle different message types
-        // if (message.type == 'simple') {
-        //   query = query.where('message', isEqualTo: message.message);
-        // } else {
-        //   log('[ChatController] message type: ${message.type}');
-
-        //   log('[ChatController] message data: ${message.fhrMessage!.toMap()}');
-        //   // For complex messages, compare the string representation
-        //   final messageData = message.toFirestoreMessageData();
-        //   query = query.where('message', isEqualTo: messageData);
-        // }
 
         log(
           '[ChatController] markVisibleMessagesAsRead Querying for message: $query',
@@ -419,144 +465,6 @@ class ChatController extends GetxController {
     super.onClose();
   }
 
-  // Future<void> fetchFlightChatsWithFirebase(int flightId) async {
-  //   // flightId = 65139;
-  //   log('[fetchFlightChatsWithFirebase] flightId : $flightId');
-
-  //   try {
-  //     await _messagesSubscription?.cancel();
-  //     await _unreadCounterSubscription?.cancel();
-
-  //     _messagesSubscription = FirebaseFirestore.instance
-  //         .collection('chats')
-  //         .doc(flightId.toString())
-  //         .collection('messages')
-  //         .orderBy('created_at', descending: false)
-  //         .limit(50)
-  //         .snapshots()
-  //         .listen(
-  //           (snapshot) {
-  //             // final staffList = flightCommController.flightStaff;
-
-  //             final fetchedMessages =
-  //                 snapshot.docs.map((doc) {
-  //                   final data = doc.data();
-
-  //                   // Log message metadata (without sensitive content)
-  //                   log(
-  //                     '[FirebaseChat] Message ID: ${doc.id} | '
-  //                     'Sender: ${data['sender_id']} | '
-  //                     'Type: ${data['message_type']} | '
-  //                     'Timestamp: ${data['created_at']}',
-  //                   );
-
-  //                   if (data['message'] != null &&
-  //                       data['message_type'] == 'simple') {
-  //                     // log('[FirebaseChat] Simple message detected');
-
-  //                     // final msg = data['message'] as String;
-  //                     // log(
-  //                     //   '[FirebaseChat] Message preview: ${msg.length > 20 ? '${msg.substring(0, 20)}...' : msg}',
-  //                     // );
-  //                   }
-  //                   // else if (data['message'] != null &&
-  //                   //     data['message_type'] == 'staff') {
-  //                   //   log('[FirebaseChat] Staff message detected');
-  //                   //   final staffMsg = data['message'] as Map<String, dynamic>;
-  //                   //   log('[FirebaseChat] Staff message: $staffMsg');
-  //                   // } else if (data['message'] != null &&
-  //                   //     data['message_type'] == 'arr') {
-  //                   //   log('[FirebaseChat] Arr message detected');
-  //                   //   final arrMsg = data['message'] as Map<String, dynamic>;
-  //                   //   log('[FirebaseChat] Arr message: $arrMsg');
-  //                   // }
-  //                   // else if (data['message'] != null &&
-  //                   //     data['message_type'] == 'fhr') {
-  //                   //   log('[FirebaseChat] Fhr message detected');
-  //                   //   final fhrMsg = data['message'] as Map<String, dynamic>;
-  //                   //   log('[FirebaseChat] Fhr message: $fhrMsg');
-  //                   // }
-  //                   else if (data['message'] != null &&
-  //                       data['message_type'] == 'ssr') {
-  //                     log('[FirebaseChat] SSR message detected');
-
-  //                     final ssrMsg = data['message'] as Map<String, dynamic>;
-  //                     log('[FirebaseChat] SSR message: $ssrMsg');
-  //                   }
-
-  //                   // // Try matching senderId with a staff member
-  //                   final senderIdStr = data['sender_id'].toString();
-  //                   final matchedStaff = staffList.firstWhereOrNull(
-  //                     (staff) => staff.id.toString() == senderIdStr,
-  //                   );
-
-  //                   return ChatMessage.fromJson({
-  //                     ...data,
-  //                     'sender_name': matchedStaff?.displayName ?? 'User',
-  //                     'station': matchedStaff?.airport.iataCode ?? 'Unknown',
-  //                     'created_at':
-  //                         (data['created_at'] as Timestamp?)
-  //                             ?.toDate()
-  //                             .toIso8601String() ??
-  //                         '',
-  //                     'sender_id': senderIdStr,
-  //                   });
-  //                 }).toList();
-
-  //             messages.assignAll(fetchedMessages);
-  //             log(
-  //               '[fetchFlightChatsWithFirebase] Loaded ${messages.length} messages',
-  //             );
-  //           },
-  //           onError: (e, stack) {
-  //             log('[fetchFlightChatsWithFirebase] Firestore stream error: $e');
-  //             log('[fetchFlightChatsWithFirebase] Stack: $stack');
-  //           },
-  //         );
-  //   } catch (e, stack) {
-  //     log('[fetchFlightChatsWithFirebase] Exception: $e');
-  //     log('[fetchFlightChatsWithFirebase] Stack: $stack');
-  //   }
-  // }
-
-  // Future<void> sendMessage() async {
-  //   log("[sendMessage] sendMessage data...");
-
-  //   final text = messageController.text.trim();
-  //   if (text.isEmpty) return;
-
-  //   isSendingMessage.value = true;
-
-  //   final payload = {
-  //     "flight_id": argument,
-  //     "message": text,
-  //     "type": null,
-  //     "file": null,
-  //   };
-
-  //   log("[sendMessage] sendMessage Payload: $payload");
-
-  //   try {
-  //     final response = await FlightChatService.instance.sendMessage(payload);
-
-  //     if (response.isSuccess) {
-  //       log("[ChatController] sendMessage data submitted successfully.");
-
-  //       messageController.clear();
-  //       // fetchFlightChats(argument);
-  //     } else {
-  //       log(
-  //         "[ChatController] sendMessage submission failed: ${response.errorMessage}",
-  //       );
-  //     }
-  //   } catch (e, stack) {
-  //     log("[sendMessage] Exception while sending ARR: $e");
-  //     log("[sendMessage] Stack: $stack");
-  //   } finally {
-  //     isSendingMessage.value = false;
-  //   }
-  // }
-
   // Add these variables
   final Map<String, bool> _tabHasMessages =
       {'MVT': false, 'LDM': false, 'PSM': false, 'PTM': false}.obs;
@@ -642,47 +550,6 @@ class ChatController extends GetxController {
   }
 
   final RxBool isSendingMessage = false.obs;
-
-  // void listenForUnreadMessages(int flightId) {
-  //   final currentUserIdStr = DataStorageController.to.user.id.toString();
-  //   FirebaseFirestore.instance
-  //       .collection('chats')
-  //       .doc(flightId.toString())
-  //       .collection('messages')
-  //       .where('read_by', arrayContains: currentUserIdStr)
-  //       .snapshots()
-  //       .listen((snapshot) {
-  //         // When messages are marked as read, update the unread count
-  //         updateUnreadCountForFlight(flightId);
-  //       });
-  // }
-
-  // Future<void> updateUnreadCountForFlight(int flightId) async {
-  //   try {
-  //     final currentUserIdStr = DataStorageController.to.user.id.toString();
-  //     // Single query to count unread messages
-  //     final unreadQuery =
-  //         FirebaseFirestore.instance
-  //             .collection('chats')
-  //             .doc(flightId.toString())
-  //             .collection('messages')
-  //             .where('read_by', whereNotIn: [currentUserIdStr])
-  //             .count();
-
-  //     final unreadSnapshot = await unreadQuery.get();
-  //     final unreadCount = unreadSnapshot.count ?? 0;
-
-  //     log(
-  //       '[updateUnreadCountForFlight] Flight $flightId has $unreadCount unread messages',
-  //     );
-
-  //     if (Get.isRegistered<FlightCommController>()) {
-  //       Get.find<FlightCommController>().updateFlightUnreadCount(flightId, 0);
-  //     }
-  //   } catch (e) {
-  //     log('Error updating unread count: $e');
-  //   }
-  // }
 
   // CHAT FORM
 

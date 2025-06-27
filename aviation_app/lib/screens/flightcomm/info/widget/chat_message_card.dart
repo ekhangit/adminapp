@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../constant.dart';
 import '../../../../models/chat_model.dart';
 
 Widget buildMessageContent(ChatMessage message) {
@@ -11,14 +12,56 @@ Widget buildMessageContent(ChatMessage message) {
     return _buildFhrMessage(message.fhrMessage!);
   } else if (message.type == 'ssr' && message.ssrMessage != null) {
     return _buildSsrMessage(message.ssrMessage!);
+  } else if (message.type == 'dsr' && message.dsrMessage != null) {
+    return _buildDsrMessage(message.dsrMessage!);
+  } else if (message.type == 'occ') {
+    return _buildOccMessage(message);
   }
   return _buildRegularMessage(message);
 }
 
 Widget _buildRegularMessage(ChatMessage message) {
-  return Text(
-    message.message,
-    style: const TextStyle(color: Colors.black87, fontSize: 15),
+  return IntrinsicWidth(
+    child: Container(
+      padding: EdgeInsets.only(
+        right: message.isOwn ? 12 : 16,
+        left: message.isOwn ? 16 : 12,
+        top: 12,
+        bottom: 12,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+
+        borderRadius: BorderRadius.only(
+          topLeft:
+              message.isOwn
+                  ? const Radius.circular(12)
+                  : const Radius.circular(0),
+          topRight:
+              message.isOwn ? Radius.circular(0) : const Radius.circular(12),
+          bottomLeft: Radius.circular(12),
+          bottomRight: Radius.circular(12),
+        ),
+      ),
+
+      child: Column(
+        children: [
+          Text(
+            message.message,
+            style: const TextStyle(color: Colors.black87, fontSize: 15),
+          ),
+
+          const SizedBox(height: 1),
+          Align(
+            alignment: Alignment.bottomRight,
+            child: Text(
+              formatChatTimestamp(message.time),
+              style: TextStyle(fontSize: 10, color: Colors.black54),
+            ),
+          ),
+        ],
+      ),
+    ),
   );
 }
 
@@ -103,6 +146,19 @@ Widget _buildFhrMessage(FhrMessage fhrMessage) {
 }
 
 Widget _buildSsrMessage(SsrMessage ssrMessage) {
+  // Create a map of field keys and values
+  final fields = {
+    if (ssrMessage.bdgp != null && ssrMessage.bdgp!.isNotEmpty)
+      'BDGP': ssrMessage.bdgp!,
+    if (ssrMessage.bbsl != null && ssrMessage.bbsl!.isNotEmpty)
+      'BBSL': ssrMessage.bbsl!,
+    if (ssrMessage.avih != null && ssrMessage.avih!.isNotEmpty)
+      'AVIH': ssrMessage.avih!,
+  };
+
+  // Return empty if no valid fields
+  if (fields.isEmpty) return const SizedBox.shrink();
+
   return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
@@ -121,14 +177,10 @@ Widget _buildSsrMessage(SsrMessage ssrMessage) {
             fontSize: 15,
           ),
         ),
-
         const SizedBox(height: 8),
         const Divider(height: 1, thickness: 1),
         const SizedBox(height: 8),
-
-        _buildSsrRow('BDGP', ssrMessage.bdgp),
-        _buildSsrRow('BBSL', ssrMessage.bbsl),
-        _buildSsrRow('AVIH', ssrMessage.avih),
+        ...fields.entries.map((entry) => _buildSsrRow(entry.key, entry.value)),
       ],
     ),
   );
@@ -205,6 +257,56 @@ Widget _buildStaffMessage(List<StaffService> services) {
         ),
       ),
     ],
+  );
+}
+
+Widget _buildDsrMessage(DsrMessage dsr) {
+  return Container(
+    padding: EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.grey[100],
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('DSR', style: TextStyle(fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        Divider(height: 1),
+        SizedBox(height: 8),
+        _buildRow('Date', dsr.date),
+        _buildRow('Passenger', dsr.paxName),
+        _buildRow('Service', dsr.serviceType),
+        _buildRow('Amount', '${dsr.amount} ${dsr.currency}'),
+        _buildRow('Flight', dsr.flightNo),
+        _buildRow('PNR', dsr.pnr),
+        _buildRow('Payment', dsr.fop),
+        _buildRow('DOI', dsr.doi),
+      ],
+    ),
+  );
+}
+
+Widget _buildOccMessage(ChatMessage message) {
+  return Container(
+    padding: EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.grey[100],
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text('Occ', style: TextStyle(fontWeight: FontWeight.bold)),
+        SizedBox(height: 8),
+        Divider(height: 1),
+        SizedBox(height: 8),
+
+        _buildRegularMessage(message),
+      ],
+    ),
   );
 }
 

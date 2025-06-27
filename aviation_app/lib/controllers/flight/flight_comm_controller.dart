@@ -206,9 +206,9 @@ class FlightCommController extends GetxController {
   }
 
   void updateFlightUnreadCount(int flightId, int unreadCount) {
-    log(
-      '[FlightCommController] Updating unread count for flight $flightId: $unreadCount',
-    );
+    // log(
+    //   '[FlightCommController] Updating unread count for flight $flightId: $unreadCount',
+    // );
 
     final lists = [
       allFlightList,

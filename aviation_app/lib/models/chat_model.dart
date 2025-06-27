@@ -19,6 +19,7 @@ class ChatMessage {
   final ArrMessage? arrMessage;
   final FhrMessage? fhrMessage;
   final SsrMessage? ssrMessage;
+  final DsrMessage? dsrMessage;
 
   ChatMessage({
     required this.id,
@@ -37,6 +38,7 @@ class ChatMessage {
     this.arrMessage,
     this.fhrMessage,
     this.ssrMessage,
+    this.dsrMessage,
   });
 
   // CopyWith method to create a new instance with updated fields
@@ -57,6 +59,7 @@ class ChatMessage {
     ArrMessage? arrMessage,
     FhrMessage? fhrMessage,
     SsrMessage? ssrMessage,
+    DsrMessage? dsrMessage,
   }) {
     return ChatMessage(
       id: id ?? this.id,
@@ -75,6 +78,7 @@ class ChatMessage {
       arrMessage: arrMessage ?? this.arrMessage,
       fhrMessage: fhrMessage ?? this.fhrMessage,
       ssrMessage: ssrMessage ?? this.ssrMessage,
+      dsrMessage: dsrMessage ?? this.dsrMessage,
     );
   }
 
@@ -165,17 +169,28 @@ class ChatMessage {
       );
     }
 
+    // Parse SSR messages - returns null for missing/empty fields
     SsrMessage? parseSsrMessage(dynamic messageData) {
       if (messageData is! Map<String, dynamic>) return null;
-
       try {
         return SsrMessage(
-          bdgp: messageData['BDGP']?.toString() ?? '--',
-          bbsl: messageData['BBSL']?.toString() ?? '--',
-          avih: messageData['AVIH']?.toString() ?? '--',
+          bdgp: messageData['BDGP']?.toString(),
+          bbsl: messageData['BBSL']?.toString(),
+          avih: messageData['AVIH']?.toString(),
         );
       } catch (e) {
         log('[ChatMessage] Error parsing SSR message: $e');
+        return null;
+      }
+    }
+
+    // Add DSR message parsing
+    DsrMessage? parseDsrMessage(dynamic messageData) {
+      if (messageData is! Map<String, dynamic>) return null;
+      try {
+        return DsrMessage.fromJson(messageData);
+      } catch (e) {
+        log('[ChatMessage] Error parsing DSR message: $e');
         return null;
       }
     }
@@ -203,6 +218,8 @@ class ChatMessage {
           messageType == 'fhr' ? parseFhrMessage(json['message']) : null,
       ssrMessage:
           messageType == 'ssr' ? parseSsrMessage(json['message']) : null,
+      dsrMessage:
+          messageType == 'dsr' ? parseDsrMessage(json['message']) : null,
     );
   }
 
@@ -243,11 +260,11 @@ class ArrMessage {
 }
 
 class SsrMessage {
-  final String bdgp; // Baggage
-  final String bbsl; // Baby stroller
-  final String avih; // Aviation health
+  final String? bdgp; // Baggage
+  final String? bbsl; // Baby stroller
+  final String? avih; // Aviation health
 
-  SsrMessage({required this.bdgp, required this.bbsl, required this.avih});
+  SsrMessage({this.bdgp, this.bbsl, this.avih});
 }
 
 // Add this new class for FHR message data
@@ -288,4 +305,56 @@ class StaffService {
   final String employeeNames;
 
   StaffService({required this.service, required this.employeeNames});
+}
+
+class DsrMessage {
+  final String date;
+  final String paxName;
+  final String serviceType;
+  final int amount;
+  final String flightNo;
+  final String pnr;
+  final String fop;
+  final String currency;
+  final String doi;
+
+  const DsrMessage({
+    required this.date,
+    required this.paxName,
+    required this.serviceType,
+    required this.amount,
+    required this.flightNo,
+    required this.pnr,
+    required this.fop,
+    required this.currency,
+    required this.doi,
+  });
+
+  factory DsrMessage.fromJson(Map<String, dynamic> json) {
+    return DsrMessage(
+      date: json['date']?.toString() ?? '--',
+      paxName: json['pax_name']?.toString() ?? '--',
+      serviceType: json['service_type']?.toString() ?? '--',
+      amount: int.tryParse(json['amount']?.toString() ?? '0') ?? 0,
+      flightNo: json['flight_no']?.toString() ?? '--',
+      pnr: json['pnr']?.toString() ?? '--',
+      fop: json['fop']?.toString() ?? '--',
+      currency: json['currency']?.toString() ?? '--',
+      doi: json['doi']?.toString() ?? '--',
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'date': date,
+      'pax_name': paxName,
+      'service_type': serviceType,
+      'amount': amount,
+      'flight_no': flightNo,
+      'pnr': pnr,
+      'fop': fop,
+      'currency': currency,
+      'doi': doi,
+    };
+  }
 }

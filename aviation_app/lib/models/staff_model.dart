@@ -28,7 +28,7 @@ class StaffModel {
   // Method to get first and last name only
   String get displayName {
     List<String> nameParts = name.trim().split(' ');
-    
+
     if (nameParts.length == 1) {
       // If only one name, return it
       return nameParts[0];
@@ -58,17 +58,19 @@ class StaffModel {
     if (nameParts.length == 1) {
       return nameParts[0].substring(0, 1).toUpperCase();
     } else {
-      return '${nameParts.first.substring(0, 1)}${nameParts.last.substring(0, 1)}'.toUpperCase();
+      return '${nameParts.first.substring(0, 1)}${nameParts.last.substring(0, 1)}'
+          .toUpperCase();
     }
   }
 
   // Method to get custom format (first + last name only)
   String get shortDisplayName {
-    List<String> nameParts = name.trim().split(' ').where((part) => part.isNotEmpty).toList();
-    
+    List<String> nameParts =
+        name.trim().split(' ').where((part) => part.isNotEmpty).toList();
+
     if (nameParts.isEmpty) return '';
     if (nameParts.length == 1) return nameParts[0];
-    
+
     // Return first and last name, skipping middle names
     return '${nameParts.first} ${nameParts.last}';
   }
