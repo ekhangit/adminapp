@@ -50,7 +50,7 @@ class FlightChatService {
         ApiConfig.getFlightStaff,
       );
 
-      log("[flightStaff] response : ${response.data}");
+      // log("[flightStaff] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&

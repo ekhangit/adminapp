@@ -3,6 +3,7 @@ import 'dart:io';
 
 import 'package:aviation_app/utils/app_colors.dart';
 import 'package:aviation_app/screens/main_screen.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -105,6 +106,22 @@ class LoginController extends GetxController {
         if (loginResponse != null) {
           DataStorageController.to.createAccount(loginResponse);
           BaseService.instance.reloadHeaders();
+        }
+
+        final UserCredential userCredential =
+            await FirebaseAuth.instance.signInAnonymously();
+        final firebaseUser = userCredential.user;
+
+        if (firebaseUser != null) {
+          log("[LoginController] Firebase authenticated anonymously ✅");
+        } else {
+          log("[LoginController] Firebase authentication failed.");
+          Utils.showFlushbar(
+            Get.context!,
+            "Firebase authentication failed",
+            backgroundColor: AppColors.colorWarning,
+          );
+          return;
         }
 
         if (FocusManager.instance.primaryFocus?.hasFocus ?? false) {

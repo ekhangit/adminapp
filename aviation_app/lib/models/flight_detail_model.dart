@@ -569,14 +569,14 @@ class PaxType {
 }
 
 class CargoData {
-  final int pcs;
+  final String pcs;
   final String wt;
 
   CargoData({required this.pcs, required this.wt});
 
   factory CargoData.fromJson(Map<String, dynamic> json) {
     return CargoData(
-      pcs: (json['pcs'] as int?) ?? 0,
+      pcs: json['pcs']?.toString() ?? '0',
       wt: json['wt']?.toString() ?? '0',
     );
   }

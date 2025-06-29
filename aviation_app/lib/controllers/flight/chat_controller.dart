@@ -172,41 +172,19 @@ class ChatController extends GetxController {
   void _logMessageTypes(List<ChatMessage> messages) {
     log('📊 Logging message types breakdown...');
 
-    final typeCounts = <String, int>{};
-    var hasAttachmentCount = 0;
+    // final typeCounts = <String, int>{};
+    // var hasAttachmentCount = 0;
 
     for (final message in messages) {
       // Count message types
       final type = message.type ?? 'simple';
       // typeCounts[type] = (typeCounts[type] ?? 0) + 1;
-      log('   - Message Type: $type');
+      log('Message Type: $type');
 
-      if (type == 'occ') {
-        log('   - OCC Message: ${message.message.toString()}');
-      }
-
-      // Count attachments
-      if (message.attachment != null && message.attachment!.isNotEmpty) {
-        hasAttachmentCount++;
+      if (type == 'ckin') {
+        log('CKIN Message: ${message.message.toString()}');
       }
     }
-
-    log('📊 Message Type Breakdown:');
-    // typeCounts.forEach((type, count) {
-    //   log('   - $type: $count');
-    // });
-    // log('   - With attachments: $hasAttachmentCount');
-
-    // // Special message types
-    // if (messages.any((m) => m.ssrMessage != null)) {
-    //   log('   - Contains SSR messages');
-    // }
-    // if (messages.any((m) => m.fhrMessage != null)) {
-    //   log('   - Contains FHR messages');
-    // }
-    // if (messages.any((m) => m.arrMessage != null)) {
-    //   log('   - Contains ARR messages');
-    // }
   }
 
   Future<List<ChatMessage>> _parseMessages(List<DocumentSnapshot> docs) async {
@@ -478,14 +456,20 @@ class ChatController extends GetxController {
     _tabHasMessages['MVT'] =
         messages.mvtArrival.isNotEmpty || messages.mvtDeparture.isNotEmpty;
     _tabHasMessages['LDM'] = messages.ldm.isNotEmpty;
+    _tabHasMessages['LIR'] = messages.lir.isNotEmpty;
+    _tabHasMessages['LDS'] = messages.lds.isNotEmpty;
     _tabHasMessages['PSM'] = messages.psm.isNotEmpty;
     _tabHasMessages['PTM'] = messages.ptm.isNotEmpty;
+    _tabHasMessages['CPM'] = messages.cpm.isNotEmpty;
 
     log(
       'Message status - MVT: ${_tabHasMessages['MVT']}, '
       'LDM: ${_tabHasMessages['LDM']}, '
+      'LIR: ${_tabHasMessages['LIR']}, '
+      'LDS: ${_tabHasMessages['LDS']}, '
       'PSM: ${_tabHasMessages['PSM']}, '
-      'PTM: ${_tabHasMessages['PTM']}',
+      'PTM: ${_tabHasMessages['PTM']}, '
+      'CPM: ${_tabHasMessages['CPM']}, ',
     );
   }
 

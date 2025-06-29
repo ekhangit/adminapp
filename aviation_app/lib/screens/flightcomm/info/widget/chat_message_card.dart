@@ -4,7 +4,11 @@ import '../../../../constant.dart';
 import '../../../../models/chat_model.dart';
 
 Widget buildMessageContent(ChatMessage message) {
-  if (message.type == 'staff') {
+  if (message.type == 'trc') {
+    return _buildTrcMessage(message.trcMessage!);
+  } else if (message.type == 'ckin' && message.ckinMessage != null) {
+    return _buildCkinMessage(message.ckinMessage!);
+  } else if (message.type == 'staff') {
     return _buildStaffMessage(message.staffServicesMessage ?? []);
   } else if (message.type == 'arr') {
     return _buildArrMessage(message.arrMessage!);
@@ -63,6 +67,203 @@ Widget _buildRegularMessage(ChatMessage message) {
       ),
     ),
   );
+}
+
+Widget _buildTrcMessage(TrcMessage trc) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.grey[100],
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        _buildExpandRow('Name', trc.name),
+        _buildExpandRow('Mobile', trc.mobile),
+        _buildExpandRow('Remarks', trc.remarks),
+
+        _buildTrcSection('A/C Data', [
+          // _buildTrcRow('CREW', trc.crew),
+          _buildExpandRow('PANTRY', trc.pantry),
+          _buildExpandRow('CAPTAIN', trc.captain),
+          _buildExpandRow('DOW', trc.dow),
+          _buildExpandRow('DOI', trc.doiTrc),
+          _buildExpandRow('MTOW', trc.mtow),
+          _buildExpandRow('RTOW', trc.rtow),
+        ]),
+
+        // F.O.D
+        _buildTrcSection('F.O.D', [
+          _buildExpandRow('Before Arrival', trc.beforeArrival),
+          _buildExpandRow('Before Departure', trc.beforeDeparture),
+          _buildExpandRow('After Departure', trc.afterDeparture),
+        ]),
+
+        // Fuel Data
+        _buildTrcSection('Fuel Data', [
+          _buildExpandRow('TAXI', trc.taxi),
+          _buildExpandRow('BLOCK FUEL', trc.block),
+          _buildExpandRow('TRIP', trc.trip),
+          _buildExpandRow('E.E.T.', trc.eet),
+          _buildExpandRow('TOF', trc.tofFuel),
+          _buildExpandRow('UPLIFTED', trc.uplifted),
+          _buildExpandRow('ALTN', trc.altn),
+        ]),
+      ],
+    ),
+  );
+}
+
+Widget _buildCkinMessage(CkinMessage ckin) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: Colors.grey[100],
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Flight Information
+        if (ckin.ckinStaff.isNotEmpty)
+          _buildCkinStaffSection('CKIN', ckin.ckinStaff),
+
+        if (ckin.gateStaff.isNotEmpty)
+          _buildCkinStaffSection('GATE', ckin.gateStaff),
+
+        if (ckin.gateSpvr.isNotEmpty)
+          _buildCkinStaffSection('GATE SPVR', ckin.gateSpvr),
+
+        if (ckin.spvr.isNotEmpty) _buildCkinStaffSection('SVPR', ckin.spvr),
+
+        // Supervisor Remarks
+        if (ckin.spvrRemarks!.isNotEmpty)
+          _buildCkinSection('SPVR Remarks', [
+            _buildCkinRow('Remarks', ckin.spvrRemarks!),
+          ]),
+
+        // Issues
+        if (ckin.flightSpecial!.isNotEmpty)
+          _builBoxItem('SPECIALS', ckin.flightSpecial!),
+        if (ckin.flightBookingStatus!.isNotEmpty)
+          _builBoxItem('BOOKING STATUS', ckin.flightBookingStatus!),
+        if (ckin.flightScheduleInfo!.isNotEmpty)
+          _builBoxItem('SCHEDULE INFO', ckin.flightScheduleInfo!),
+        if (ckin.flightDocsCheck!.isNotEmpty)
+          _builBoxItem('DOCS CHECK', ckin.flightDocsCheck!),
+        if (ckin.flightRamp!.isNotEmpty)
+          _builBoxItem('RAMP (SPECIAL)', ckin.flightRamp!),
+        if (ckin.flightOther!.isNotEmpty)
+          _builBoxItem('OTHERS', ckin.flightOther!),
+
+        _buildTrcSection('Actual Pax', [
+          _buildExpandRow('CKIN DESKS NO:', ckin.ckinDeskUsed.toString()),
+          _buildExpandRow('CKIN OPENED:', ckin.ckinOpened.toString()),
+          _buildExpandRow('CKIN CLOSED:', ckin.ckinClosed.toString()),
+          _buildExpandRow('BDG GATE CLOSED:', ckin.bdgGateOpened.toString()),
+          _buildExpandRow(
+            'ALL MATERIAL SECURED AT GATE:',
+            ckin.securedGate.toString(),
+          ),
+          _buildExpandRow(
+            'NO OF CKIN DESKS USED:',
+            ckin.ckinDeskUsed.toString(),
+          ),
+          _buildExpandRow('BDG STARTED:', ckin.bdgGateStarted.toString()),
+          _buildExpandRow('BDG COMPLETED:', ckin.bdgGateCompleted.toString()),
+          _buildExpandRow('BDG GATE CLOSED:', ckin.bdgGateClosed.toString()),
+        ]),
+
+        _buildTrcSection('BAGGAGE AT CKIN', [
+          _buildExpandRow('PCS', ckin.baggageCkinPcs.toString()),
+          _buildExpandRow('WT', ckin.baggageCkinWt.toString()),
+        ]),
+        _buildTrcSection('BAGGAGE AT GATE', [
+          _buildExpandRow('PCS', ckin.baggageGatePcs.toString()),
+          _buildExpandRow('WT', ckin.baggageGateWt.toString()),
+        ]),
+      ],
+    ),
+  );
+}
+
+Widget _buildCkinSection(String title, List<Widget> children) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+          fontSize: 14,
+        ),
+      ),
+
+      const SizedBox(height: 8),
+      const Divider(height: 1, thickness: 1),
+      const SizedBox(height: 8),
+      const SizedBox(height: 4),
+      ...children,
+      const SizedBox(height: 12),
+    ],
+  );
+}
+
+Widget _buildCkinRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildCkinStaffSection(String title, List<StaffMember> staff) {
+  return _buildCkinSection(title, [
+    Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children:
+          staff
+              .map(
+                (member) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 2),
+                  child: Text(
+                    '• ${member.name}',
+                    style: const TextStyle(color: Colors.black87, fontSize: 13),
+                  ),
+                ),
+              )
+              .toList(),
+    ),
+  ]);
 }
 
 Widget _buildArrMessage(ArrMessage arrMessage) {
@@ -133,13 +334,13 @@ Widget _buildFhrMessage(FhrMessage fhrMessage) {
         const SizedBox(height: 8),
 
         // Issues
-        _builFhrItem('MISSED ARTG-5 EXPLANATION', fhrMessage.missedConnection),
-        _builFhrItem('DELAY EXPLANATION', fhrMessage.delayExplanation),
-        _builFhrItem('CHECK-IN/TKTG ISSUES', fhrMessage.checkInIssues),
-        _builFhrItem('RAMP/CREWDISRUPTIVE PAX ETC', fhrMessage.rampIssues),
-        _builFhrItem('SAFETY/SECURITY/SYSTEM', fhrMessage.safetyIssues),
-        _builFhrItem('OTHER', fhrMessage.otherIssues),
-        _builFhrItem('INVOL DENIED BOARDING', fhrMessage.deniedBoarding),
+        _builBoxItem('MISSED ARTG-5 EXPLANATION', fhrMessage.missedConnection),
+        _builBoxItem('DELAY EXPLANATION', fhrMessage.delayExplanation),
+        _builBoxItem('CHECK-IN/TKTG ISSUES', fhrMessage.checkInIssues),
+        _builBoxItem('RAMP/CREWDISRUPTIVE PAX ETC', fhrMessage.rampIssues),
+        _builBoxItem('SAFETY/SECURITY/SYSTEM', fhrMessage.safetyIssues),
+        _builBoxItem('OTHER', fhrMessage.otherIssues),
+        _builBoxItem('INVOL DENIED BOARDING', fhrMessage.deniedBoarding),
       ],
     ),
   );
@@ -310,6 +511,62 @@ Widget _buildOccMessage(ChatMessage message) {
   );
 }
 
+Widget _buildTrcSection(String title, List<Widget> rows) {
+  return Column(
+    crossAxisAlignment: CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          color: Colors.black87,
+          fontSize: 14,
+        ),
+      ),
+
+      const SizedBox(height: 8),
+      const Divider(height: 1, thickness: 1),
+      const SizedBox(height: 8),
+      const SizedBox(height: 4),
+      ...rows,
+      const SizedBox(height: 12),
+    ],
+  );
+}
+
+Widget _buildExpandRow(String label, String value) {
+  return Padding(
+    padding: const EdgeInsets.symmetric(vertical: 4),
+    child: Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        SizedBox(
+          width: 120,
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 13,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 13,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 Widget _buildRow(String label, String value) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
@@ -337,20 +594,23 @@ Widget _buildRow(String label, String value) {
   );
 }
 
-Widget _builFhrItem(String label, String value) {
+Widget _builBoxItem(String label, String value) {
   return Padding(
     padding: const EdgeInsets.symmetric(vertical: 4),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       mainAxisSize: MainAxisSize.min, // Add this
       children: [
-        Text(
-          label,
-          style: const TextStyle(
-            color: Colors.black54,
-            fontSize: 12.5,
-            fontWeight: FontWeight.w500,
-            height: 1.2, // Adjusted line height
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 4),
+          child: Text(
+            label,
+            style: const TextStyle(
+              color: Colors.black54,
+              fontSize: 12.5,
+              fontWeight: FontWeight.w500,
+              height: 1.2, // Adjusted line height
+            ),
           ),
         ),
         const SizedBox(height: 2), // Reduced spacing

@@ -3,6 +3,7 @@ import 'dart:developer';
 
 import 'package:aviation_app/models/flight_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -98,6 +99,15 @@ class FlightCommController extends GetxController {
 
         // show complete list of flights with json
         // log('[FlightCommController]: ${arrivalFlightList.map((f) => f.id)}');
+
+        final firebaseUser = FirebaseAuth.instance.currentUser;
+
+        if (firebaseUser == null) {
+          log(
+            '[FlightCommController] User not authenticated. Skipping Firestore listener.',
+          );
+          return;
+        }
 
         _setupFlightChatListeners();
       } else {
