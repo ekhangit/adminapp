@@ -26,7 +26,7 @@ class FlightCard extends StatelessWidget {
         curve: Curves.easeInOut,
         width: double.infinity,
         margin: EdgeInsets.symmetric(vertical: 0.07.h),
-        padding: EdgeInsets.symmetric(horizontal: 1.8.w, vertical: 0.7.h),
+        padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 0.4.h),
         decoration: BoxDecoration(
           color:
               isSelected
@@ -62,17 +62,17 @@ class FlightCard extends StatelessWidget {
             isSelected
                 ? Icon(
                   Icons.check_circle,
-                  size: 2.4.h,
+                  size: 2.2.h,
                   color: AppColors.colorPrimary,
                 )
                 : Image.asset(
                   flight.isDeparture
                       ? "assets/images/outbound.png"
                       : "assets/images/inbound.png",
-                  height: 2.4.h,
-                  width: 2.4.h,
+                  height: 2.2.h,
+                  width: 2.2.h,
                 ),
-            SizedBox(width: 1.5.w),
+            SizedBox(width: 1.2.w),
 
             // Flight info section
             Expanded(
@@ -111,7 +111,7 @@ class FlightCard extends StatelessWidget {
                             ),
                             _divider(opacity: .7),
                             SizedBox(
-                              width: 18.w,
+                              width: 19.w,
                               child: Text(
                                 '${flight.departureAirport?.iataCode}-${flight.arrivalAirport?.iataCode}',
                                 style: TextStyle(
@@ -121,13 +121,11 @@ class FlightCard extends StatelessWidget {
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (flight.aircraft != null &&
-                                flight.aircraft!.aircraftType != null)
+                            if (flight.aircraftType!.icao!.isNotEmpty)
                               _divider(height: 1.7),
-                            if (flight.aircraft != null &&
-                                flight.aircraft!.aircraftType != null)
+                            if (flight.aircraftType!.icao!.isNotEmpty)
                               Text(
-                                flight.aircraft!.aircraftType!.icao,
+                                flight.aircraftType!.icao!,
                                 style: TextStyle(
                                   fontSize: 13.5.sp,
                                   fontWeight: FontWeight.w600,
@@ -174,27 +172,26 @@ class FlightCard extends StatelessWidget {
                     ],
                   ),
 
-                  SizedBox(height: 0.1.h),
+                  SizedBox(height: 0.2.h),
 
                   // Time & Duration Row
                   Row(
                     children: [
                       if (flight.isDeparture) ...[
-                        if (flight.std != null && flight.std!.isNotEmpty)
+                        if (flight.std!.isNotEmpty)
                           _timeBlock(
                             "STD",
                             formatFlightTime(flight.std!),
                             Colors.blue.shade700,
                           ),
 
-                        if (flight.std != null && flight.std!.isNotEmpty)
-                          SizedBox(width: 2.5.w),
-                        if (flight.atd != null && flight.atd!.isNotEmpty)
+                        if (flight.std!.isNotEmpty) SizedBox(width: 2.5.w),
+                        if (flight.atd!.isNotEmpty)
                           _timeBlock(
                             "ATD",
                             formatFlightTime(flight.atd!),
                             flight.isDeparture
-                                ? (flight.std != null && flight.std!.isEmpty)
+                                ? (flight.std!.isEmpty)
                                     ? Colors.blue.shade700
                                     : flight.departureColor == 'greenBtn'
                                     ? Colors.green.shade700
@@ -203,17 +200,23 @@ class FlightCard extends StatelessWidget {
                                 ? Colors.green.shade700
                                 : Colors.red.shade700,
                           ),
-                        if (flight.atd!.isEmpty && flight.sta!.isNotEmpty)
+                        if (flight.atd!.isEmpty &&
+                            flight.sta!.isNotEmpty &&
+                            flight.eta!.isEmpty)
                           _timeBlock(
                             "STA",
                             formatFlightTime(flight.sta!),
                             Colors.blue.shade700,
                           ),
+                        if (flight.atd!.isEmpty && flight.etd!.isNotEmpty)
+                          _timeBlock(
+                            "ETD",
+                            formatFlightTime(flight.eta!),
+                            Colors.amber.shade700,
+                          ),
                       ] else ...[
                         if (flight.ata!.isEmpty &&
-                            flight.std != null &&
                             flight.std!.isNotEmpty &&
-                            flight.eta != null &&
                             flight.eta!.isEmpty)
                           _timeBlock(
                             "STD",
@@ -221,20 +224,17 @@ class FlightCard extends StatelessWidget {
                             Colors.blue.shade700,
                           ),
                         if (flight.ata!.isEmpty &&
-                            flight.std != null &&
                             flight.std!.isNotEmpty &&
-                            flight.eta != null &&
                             flight.eta!.isEmpty)
                           SizedBox(width: 2.5.w),
-                        if (flight.sta != null && flight.sta!.isNotEmpty)
+                        if (flight.sta!.isNotEmpty)
                           _timeBlock(
                             "STA",
                             formatFlightTime(flight.sta!),
                             Colors.blue.shade700,
                           ),
-                        if (flight.sta != null && flight.sta!.isNotEmpty)
-                          SizedBox(width: 2.5.w),
-                        if (flight.ata != null && flight.ata!.isNotEmpty)
+                        if (flight.sta!.isNotEmpty) SizedBox(width: 2.5.w),
+                        if (flight.ata!.isNotEmpty)
                           _timeBlock(
                             "ATA",
                             formatFlightTime(flight.ata!),
@@ -246,9 +246,7 @@ class FlightCard extends StatelessWidget {
                                 ? Colors.green.shade700
                                 : Colors.red.shade700,
                           ),
-                        if (flight.ata!.isEmpty &&
-                            flight.eta != null &&
-                            flight.eta!.isNotEmpty)
+                        if (flight.ata!.isEmpty && flight.eta!.isNotEmpty)
                           _timeBlock(
                             "ETA",
                             formatFlightTime(flight.eta!),
@@ -299,7 +297,7 @@ class FlightCard extends StatelessWidget {
                               flight.departureDelayMinutes != 0) ||
                           (!flight.isDeparture &&
                               flight.arrivalDelayMinutes != 0))
-                        SizedBox(width: 1.0.w),
+                        SizedBox(width: 0.5.w),
 
                       // if (flight.departureDelayMinutes == 0 ||
                       //     flight.arrivalDelayMinutes == 0)

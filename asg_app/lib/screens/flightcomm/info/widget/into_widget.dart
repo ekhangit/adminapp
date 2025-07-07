@@ -11,7 +11,7 @@ class InfoText extends StatelessWidget {
     return Text(
       text,
       style: TextStyle(
-        fontSize: 14.0,
+        fontSize: 12.5,
         fontWeight: FontWeight.w500,
         color: textColor,
       ),
@@ -36,7 +36,7 @@ class InfoBadge extends StatelessWidget {
       child: Text(
         label,
         style: const TextStyle(
-          fontSize: 11,
+          fontSize: 10,
           color: Colors.white,
           fontWeight: FontWeight.w600,
         ),

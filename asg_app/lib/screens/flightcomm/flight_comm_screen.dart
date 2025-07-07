@@ -21,7 +21,7 @@ class FlightCommScreen extends StatelessWidget {
         systemNavigationBarColor: AppColors.colorWhite,
       ),
       child: Scaffold(
-        backgroundColor: AppColors.backgroundColor,
+        backgroundColor: AppColors.colorWhite,
         appBar: AppBar(
           centerTitle: true,
           title: const Text(
@@ -34,6 +34,19 @@ class FlightCommScreen extends StatelessWidget {
           ),
 
           actions: [
+            Obx(
+              () =>
+                  controller.selectedFlightIndex.value == -1
+                      ? IconButton(
+                        icon: const Icon(
+                          Icons.date_range,
+                          size: 20,
+                          color: Colors.white,
+                        ),
+                        onPressed: () => _showDatePicker(context, controller),
+                      )
+                      : const SizedBox(),
+            ),
             Obx(() {
               return controller.selectedFlightIndex.value != -1
                   ? PopupMenuButton<int>(
@@ -83,121 +96,169 @@ class FlightCommScreen extends StatelessWidget {
           backgroundColor: AppColors.colorPrimary,
         ),
         body: SafeArea(
-          child: Stack(
-            children: [
-              CustomScrollView(
-                slivers: [
-                  // 🔁 Sticky Filter Chips
-                  SliverPersistentHeader(
-                    pinned: true,
-                    delegate: _FilterHeaderDelegate(controller),
-                  ),
-                  SliverToBoxAdapter(
-                    child: Obx(() {
-                      if (controller.isFlightCommLoading.value) {
-                        return Padding(
-                          padding: EdgeInsets.symmetric(vertical: 60),
-                          child: Center(
-                            child: Container(
-                              padding: const EdgeInsets.all(12.0),
-                              height: 50,
-                              width: 50,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white.withValues(alpha: 0.85),
-                                boxShadow: kElevationToShadow[1],
-                                border: Border.all(
-                                  color: AppColors.matteBlackColor,
-                                  width: 0.05,
-                                ),
-                              ),
-                              child: const Center(
-                                child: CircularProgressIndicator(
-                                  strokeWidth: 3.0,
-                                  color: AppColors.colorPrimary,
-                                ),
-                              ),
-                            ),
-                          ),
-                        );
+          child: Obx(
+            () => IgnorePointer(
+              ignoring: controller.isRefreshing.value,
+              child: Stack(
+                children: [
+                  RefreshIndicator(
+                    backgroundColor: AppColors.colorPrimary,
+                    color: Colors.white,
+                    onRefresh: () async {
+                      if (!controller.isFlightCommLoading.value) {
+                        await controller.fetchFlightComm(isRefereshing: true);
                       }
+                    },
+                    child: CustomScrollView(
+                      slivers: [
+                        // 🔁 Sticky Filter Chips
+                        SliverPersistentHeader(
+                          pinned: true,
+                          delegate: _FilterHeaderDelegate(controller),
+                        ),
+                        SliverToBoxAdapter(
+                          child: Obx(() {
+                            if (controller.isFlightCommLoading.value) {
+                              return Padding(
+                                padding: EdgeInsets.symmetric(vertical: 60),
+                                child: Center(
+                                  child: Container(
+                                    padding: const EdgeInsets.all(12.0),
+                                    height: 50,
+                                    width: 50,
+                                    decoration: BoxDecoration(
+                                      shape: BoxShape.circle,
+                                      color: Colors.white.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                      boxShadow: kElevationToShadow[1],
+                                      border: Border.all(
+                                        color: AppColors.matteBlackColor,
+                                        width: 0.05,
+                                      ),
+                                    ),
+                                    child: const Center(
+                                      child: CircularProgressIndicator(
+                                        strokeWidth: 3.0,
+                                        color: AppColors.colorPrimary,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              );
+                            }
 
-                      if (controller.flightList.isEmpty) {
-                        return const Padding(
-                          padding: EdgeInsets.symmetric(vertical: 60),
-                          child: Center(child: Text("No flights available.")),
-                        );
-                      }
+                            if (controller.flightList.isEmpty) {
+                              return const Padding(
+                                padding: EdgeInsets.symmetric(vertical: 60),
+                                child: Center(
+                                  child: Text("No flights available."),
+                                ),
+                              );
+                            }
 
-                      return ListView.separated(
-                        itemCount: controller.flightList.length,
-                        shrinkWrap: true,
-                        physics: const NeverScrollableScrollPhysics(),
-                        separatorBuilder:
-                            (context, index) => const Divider(
-                              height: 0,
-                              thickness: 0.3,
-                              color: Colors.grey,
-                            ),
-                        itemBuilder: (context, index) {
-                          final flight = controller.flightList[index];
-                          return GestureDetector(
-                            behavior: HitTestBehavior.opaque,
-                            onTap: () {
-                              if (controller.selectedFlightIndex.value == -1) {
-                                Get.to(
-                                  () => const ChatScreen(),
-                                  arguments: flight.id,
+                            return ListView.separated(
+                              itemCount: controller.flightList.length,
+                              shrinkWrap: true,
+                              physics: const NeverScrollableScrollPhysics(),
+                              separatorBuilder:
+                                  (context, index) => const Divider(
+                                    height: 0,
+                                    thickness: 0.3,
+                                    color: Colors.grey,
+                                  ),
+                              itemBuilder: (context, index) {
+                                final flight = controller.flightList[index];
+                                return GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    if (controller.selectedFlightIndex.value ==
+                                        -1) {
+                                      Get.to(
+                                        () => const ChatScreen(),
+                                        arguments: flight.id,
+                                      );
+                                    } else {
+                                      controller.selectFlight(index);
+                                    }
+                                  },
+                                  onLongPress:
+                                      () => controller.selectFlight(index),
+                                  child: FlightCard(
+                                    flight: flight,
+                                    index: index,
+                                  ),
                                 );
-                              } else {
-                                controller.selectFlight(index);
-                              }
-                            },
-                            onLongPress: () => controller.selectFlight(index),
-                            child: FlightCard(flight: flight, index: index),
-                          );
-                        },
-                      );
-                    }),
+                              },
+                            );
+                          }),
+                        ),
+                      ],
+                    ),
                   ),
+
+                  // 🔄 Loader Overlay
+                  Obx(() {
+                    return controller.isRefreshing.value
+                        ? Container(
+                          color: Colors.black.withValues(alpha: 0.25),
+                          // child: Center(
+                          //   child: Container(
+                          //     padding: const EdgeInsets.all(12.0),
+                          //     height: 60,
+                          //     width: 60,
+                          //     child: const Center(
+                          //       child: CircularProgressIndicator(
+                          //         strokeWidth: 2.0,
+                          //         color: AppColors.skyBlueColor,
+                          //       ),
+                          //     ),
+                          //   ),
+                          // ),
+                        )
+                        : const SizedBox.shrink();
+                  }),
                 ],
               ),
-
-              // 🔄 Loader Overlay
-              Obx(() {
-                return controller.isFlightCommLoading2.value
-                    ? Container(
-                      color: Colors.black.withValues(alpha: 0.1),
-                      child: Center(
-                        child: Container(
-                          padding: const EdgeInsets.all(12.0),
-                          height: 50,
-                          width: 50,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.white.withValues(alpha: 0.85),
-                            boxShadow: kElevationToShadow[1],
-                            border: Border.all(
-                              color: AppColors.matteBlackColor,
-                              width: 0.05,
-                            ),
-                          ),
-                          child: const Center(
-                            child: CircularProgressIndicator(
-                              strokeWidth: 3.0,
-                              color: AppColors.colorPrimary,
-                            ),
-                          ),
-                        ),
-                      ),
-                    )
-                    : const SizedBox.shrink();
-              }),
-            ],
+            ),
           ),
         ),
       ),
     );
+  }
+
+  void _showDatePicker(
+    BuildContext context,
+    FlightCommController controller,
+  ) async {
+    final initialDate = controller.selectedDate.value ?? DateTime.now().toUtc();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.colorPrimary,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.colorPrimary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      await controller.handleDateChange(pickedDate);
+    }
   }
 }
 
@@ -213,9 +274,9 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
     bool overlapsContent,
   ) {
     return Container(
-      color: AppColors.backgroundColor,
+      color: AppColors.colorWhite,
       // color: Colors.yellow,
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.only(top: 12),
       child: Obx(() {
         return Column(
           crossAxisAlignment: CrossAxisAlignment.center,
@@ -224,13 +285,14 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
             SingleChildScrollView(
               scrollDirection: Axis.horizontal,
               child: Row(
+                mainAxisAlignment: MainAxisAlignment.start,
                 children: List.generate(controller.filters.length, (index) {
                   final filter = controller.filters[index];
                   final isSelected = controller.selectedFilter.value == filter;
                   return Padding(
                     padding: EdgeInsets.only(
-                      right: 12,
-                      left: index == 0 ? 12 : 0,
+                      right: 10,
+                      left: index == 0 ? 10 : 0,
                     ),
                     child: FlightFilterChip(
                       label: filter,
@@ -251,7 +313,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                   TextSpan(
                     text: _getDatePart(controller.formattedDateTime.value),
                     style: TextStyle(
-                      fontSize: 14.5,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: Colors.redAccent.shade200,
                     ),
@@ -260,7 +322,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                   TextSpan(
                     text: _getTimePart(controller.formattedDateTime.value),
                     style: const TextStyle(
-                      fontSize: 14.5,
+                      fontSize: 12.5,
                       fontWeight: FontWeight.w600,
                       color: Colors.black87,
                     ),
@@ -275,9 +337,9 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 95;
+  double get maxExtent => 90;
   @override
-  double get minExtent => 95;
+  double get minExtent => 90;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>

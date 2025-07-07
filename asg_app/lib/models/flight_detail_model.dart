@@ -5,6 +5,8 @@ class FlightDetailModel {
   final Aircraft? aircraft;
   final Capacity capacity;
   final ActualPax actualPax;
+  final String? inboundFlight; // New field
+  final String? outboundFlight;
   final TrcData? trc;
   final CkinData? ckin;
   final ArrData? arr;
@@ -18,6 +20,8 @@ class FlightDetailModel {
     this.aircraft,
     required this.capacity,
     required this.actualPax,
+    this.inboundFlight,
+    this.outboundFlight,
     this.trc,
     this.ckin,
     this.arr,
@@ -41,6 +45,8 @@ class FlightDetailModel {
           info['aircraft'] != null ? Aircraft.fromJson(info['aircraft']) : null,
       capacity: Capacity.fromJson(info['capacity']),
       actualPax: ActualPax.fromJson(info['actual_pax']),
+      inboundFlight: info['inbound_flight']?.toString(),
+      outboundFlight: info['outbound_flight']?.toString(),
       trc: trcJson != null ? TrcData.fromJson(trcJson) : null,
       ckin: ckinJson != null ? CkinData.fromJson(ckinJson) : null,
       arr: arrJson != null ? ArrData.fromJson(arrJson) : null,
@@ -48,6 +54,9 @@ class FlightDetailModel {
       sodData: List<SodData>.from(sodJson.map((x) => SodData.fromJson(x))),
     );
   }
+
+  bool get isConnectingFlight => inboundFlight?.isNotEmpty == true || 
+      outboundFlight?.isNotEmpty == true;
 }
 
 class BasicDetails {
@@ -697,12 +706,18 @@ class MessageData {
 class SodData {
   final String serviceAbbr;
   final String type;
+  final String slaTimeIn;
+  final String slaTimeOut;
+  final String duration;
   final int requiredStaff;
   final List<SodEmployee> employees;
 
   SodData({
     required this.serviceAbbr,
     required this.type,
+    required this.slaTimeIn,
+    required this.slaTimeOut,
+    required this.duration,
     required this.requiredStaff,
     required this.employees,
   });
@@ -710,12 +725,13 @@ class SodData {
   factory SodData.fromJson(Map<String, dynamic> json) => SodData(
     serviceAbbr: json['service_abbr']?.toString() ?? '',
     type: json['type']?.toString() ?? '',
+    slaTimeIn: json['sla_time_in']?.toString() ?? '',
+    slaTimeOut: json['sla_time_out']?.toString() ?? '',
+    duration: json['duration']?.toString() ?? '00:00',
     requiredStaff: (json['required_staff'] as int?) ?? 0,
-    employees: List<SodEmployee>.from(
-      (json['employees'] as List<dynamic>? ?? []).map(
-        (x) => SodEmployee.fromJson(x as Map<String, dynamic>),
-      ),
-    ),
+    employees: (json['employees'] as List<dynamic>?)
+        ?.map((e) => SodEmployee.fromJson(e))
+        .toList() ?? [],
   );
 }
 
@@ -723,16 +739,36 @@ class SodEmployee {
   final int employeeId;
   final String name;
   final String airport;
+  final String plannedTimeIn;
+  final String plannedTimeOut;
+  final String actualTimeIn;
+  final String actualTimeOut;
+  final String plannedDuration;
+  final String actualDuration;
 
   SodEmployee({
     required this.employeeId,
     required this.name,
     required this.airport,
+    required this.plannedTimeIn,
+    required this.plannedTimeOut,
+    required this.actualTimeIn,
+    required this.actualTimeOut,
+    required this.plannedDuration,
+    required this.actualDuration,
   });
 
   factory SodEmployee.fromJson(Map<String, dynamic> json) => SodEmployee(
     employeeId: (json['employee_id'] as int?) ?? 0,
     name: json['name']?.toString() ?? '',
     airport: json['airport']?.toString() ?? '',
+    plannedTimeIn: json['planned_time_in']?.toString() ?? '',
+    plannedTimeOut: json['planned_time_out']?.toString() ?? '',
+    actualTimeIn: json['actual_time_in']?.toString() ?? '',
+    actualTimeOut: json['actual_time_out']?.toString() ?? '',
+    plannedDuration: json['planned_duration']?.toString() ?? '00:00',
+    actualDuration: json['actual_duration']?.toString() ?? '00:00',
   );
 }
+
+

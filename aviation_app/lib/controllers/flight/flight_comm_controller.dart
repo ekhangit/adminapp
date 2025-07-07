@@ -20,6 +20,8 @@ class FlightCommController extends GetxController {
   final Map<int, StreamSubscription> _flightChatSubscriptions = {};
   final _lastUnreadCounts = <int, int>{};
 
+  Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
+
   var myFlightList = <FlightsModel>[].obs;
   var allFlightList = <FlightsModel>[].obs;
   var arrivalFlightList = <FlightsModel>[].obs;
@@ -27,7 +29,7 @@ class FlightCommController extends GetxController {
   var cancelledFlightList = <FlightsModel>[].obs;
 
   var isFlightCommLoading = false.obs;
-  var isFlightCommLoading2 = false.obs;
+  var isRefreshing = false.obs;
 
   @override
   void onInit() {
@@ -41,10 +43,48 @@ class FlightCommController extends GetxController {
     _timer = Timer.periodic(const Duration(seconds: 1), (_) => _updateTime());
   }
 
+  // void _updateTime() {
+  //   final now = DateTime.now().toUtc();
+  //   final formatter = DateFormat('EEEE, dd MMMM yyyy HH:mm:ss \'UTC\'');
+  //   formattedDateTime.value = formatter.format(now);
+  // }
+
   void _updateTime() {
     final now = DateTime.now().toUtc();
-    final formatter = DateFormat('EEEE, dd MMMM yyyy HH:mm:ss \'UTC\'');
-    formattedDateTime.value = formatter.format(now);
+    final dateToShow = selectedDate.value ?? now;
+
+    // Check if we're showing today (either no selection or explicitly selected today)
+    final isToday =
+        selectedDate.value == null ||
+        (selectedDate.value != null &&
+            DateUtils.isSameDay(selectedDate.value, now));
+
+    if (isToday) {
+      // Always use current time for today
+      final formatter = DateFormat('EEEE, dd MMMM yyyy HH:mm:ss \'UTC\'');
+      formattedDateTime.value = formatter.format(now); // Use current time
+    } else {
+      // Show just date for other days
+      final formatter = DateFormat('EEEE, dd MMMM yyyy');
+      formattedDateTime.value = formatter.format(dateToShow);
+    }
+
+    // print('formattedDateTime: ${formattedDateTime.value}');
+  }
+
+  // Add this method to handle date changes from the UI
+  Future<void> handleDateChange(DateTime? newDate) async {
+    if (newDate == null) return;
+
+    // Don't fetch if same date is selected again
+    if (selectedDate.value != null &&
+        DateUtils.isSameDay(selectedDate.value, newDate)) {
+      return;
+    }
+
+    selectedDate.value = newDate;
+    await fetchFlightComm();
+    print('[FlightCommController] Date changed to: ${selectedDate.value}');
   }
 
   Future<void> _fetchData() async {
@@ -77,12 +117,18 @@ class FlightCommController extends GetxController {
     }
   }
 
-  Future<void> fetchFlightComm() async {
-    final now = DateTime.now().toUtc();
-    final formattedDate = DateFormat('yyyy-MM-dd').format(now);
+  Future<void> fetchFlightComm({bool isRefereshing = false}) async {
+    // final now = DateTime.now().toUtc();
+
+    final dateToFetch = selectedDate.value ?? DateTime.now().toUtc();
+    final formattedDate = DateFormat('yyyy-MM-dd').format(dateToFetch);
 
     log('[FlightCommController] formattedDate: $formattedDate');
-    isFlightCommLoading.value = true;
+    if (isRefereshing) {
+      isRefreshing.value = true;
+    } else {
+      isFlightCommLoading.value = true;
+    }
 
     try {
       final response = await FlightCommService.instance.allFlightComm(
@@ -117,7 +163,11 @@ class FlightCommController extends GetxController {
       log('[FlightCommController] Exception: $e');
       log('[FlightCommController] Stack: $stack');
     } finally {
-      isFlightCommLoading.value = false;
+      if (isRefereshing) {
+        isRefreshing.value = false;
+      } else {
+        isFlightCommLoading.value = false;
+      }
     }
   }
 

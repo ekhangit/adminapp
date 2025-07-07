@@ -16,8 +16,6 @@ class AirlineModel {
   }
 }
 
-
-
 class AirportModel {
   final int id;
   final String? iata;

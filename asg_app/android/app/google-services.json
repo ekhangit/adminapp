@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "715521065715",
+    "firebase_url": "https://asgsys-565cb-default-rtdb.firebaseio.com",
+    "project_id": "asgsys-565cb",
+    "storage_bucket": "asgsys-565cb.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:715521065715:android:14fa32e1f30a3ec11f2d86",
+        "android_client_info": {
+          "package_name": "com.example.asgApp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAtuIr3hCOP_za-q8Dc7_HhaGVyLXd5VVY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

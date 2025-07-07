@@ -91,7 +91,7 @@ class ChatScreen extends StatelessWidget {
                                           style: const TextStyle(
                                             color: Colors.red,
                                             fontWeight: FontWeight.w500,
-                                            fontSize: 16.5,
+                                            fontSize: 15,
                                           ),
                                         ),
                                         const SizedBox(width: 6),
@@ -102,33 +102,74 @@ class ChatScreen extends StatelessWidget {
                                           style: const TextStyle(
                                             color: Colors.red,
                                             fontWeight: FontWeight.w500,
-                                            fontSize: 16.5,
+                                            fontSize: 15,
                                           ),
                                         ),
                                         const SizedBox(width: 6),
                                         Row(
                                           children: [
-                                            Text(
-                                              "GATE: ${flight.basicDetails.gate ?? '--'}",
-                                              style: const TextStyle(
-                                                color: Colors.blue,
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 12.5,
+                                            if (flight
+                                                .basicDetails
+                                                .gate!
+                                                .isNotEmpty)
+                                              Text(
+                                                "GATE: ${flight.basicDetails.gate ?? '--'}",
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 10.5,
+                                                ),
                                               ),
-                                            ),
-                                            const SizedBox(width: 6),
-                                            _divider(Colors.blue),
-                                            const SizedBox(width: 6),
-                                            Text(
-                                              "POS: ${flight.basicDetails.pos ?? '--'}",
-                                              style: const TextStyle(
-                                                color: Colors.blue,
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 12.5,
+                                            if (flight
+                                                .basicDetails
+                                                .gate!
+                                                .isNotEmpty)
+                                              const SizedBox(width: 6),
+                                            if (flight
+                                                .basicDetails
+                                                .pos!
+                                                .isNotEmpty)
+                                              _divider(Colors.blue),
+                                            if (flight
+                                                .basicDetails
+                                                .pos!
+                                                .isNotEmpty)
+                                              const SizedBox(width: 6),
+                                            if (flight
+                                                .basicDetails
+                                                .pos!
+                                                .isNotEmpty)
+                                              Text(
+                                                "POS: ${flight.basicDetails.pos ?? '--'}",
+                                                style: const TextStyle(
+                                                  color: Colors.blue,
+                                                  fontWeight: FontWeight.w500,
+                                                  fontSize: 10.5,
+                                                ),
                                               ),
-                                            ),
                                           ],
                                         ),
+
+                                        if (flight.isConnectingFlight) Spacer(),
+                                        if (flight.isConnectingFlight)
+                                          Container(
+                                            padding: const EdgeInsets.all(5.0),
+                                            decoration: BoxDecoration(
+                                              color: Colors.red,
+                                              borderRadius:
+                                                  BorderRadius.circular(4),
+                                            ),
+                                            child: Text(
+                                              flight.inboundFlight!.isNotEmpty
+                                                  ? 'I/B FLT ${flight.inboundFlight!}'
+                                                  : 'O/B FLT ${flight.outboundFlight!}',
+                                              style: const TextStyle(
+                                                color: Colors.white,
+                                                fontWeight: FontWeight.w500,
+                                                fontSize: 8.0,
+                                              ),
+                                            ),
+                                          ),
                                       ],
                                     ),
                                     const SizedBox(height: 2),

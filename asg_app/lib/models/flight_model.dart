@@ -23,6 +23,7 @@ class FlightsModel {
   final Airport? departureAirport;
   final Airport? arrivalAirport;
   final Aircraft? aircraft;
+  final AircraftType? aircraftType;
   final List<FlightDelay> flightDelays;
   final RxBool isFavorite;
   final int departureDelayMinutes;
@@ -53,6 +54,7 @@ class FlightsModel {
     this.departureAirport,
     this.arrivalAirport,
     this.aircraft,
+    this.aircraftType,
     required this.flightDelays,
     required bool isFavorite,
     required this.departureDelayMinutes,
@@ -99,20 +101,20 @@ class FlightsModel {
               : null,
       aircraft:
           json['aircraft'] != null ? Aircraft.fromJson(json['aircraft']) : null,
+      aircraftType:
+          json['aircraft_type'] != null ? AircraftType.fromJson(json['aircraft_type']) : null,
       flightDelays: delays,
       isFavorite: (json['is_favorite'] ?? false),
       departureDelayMinutes: _parseDelay(json['departure_delay']),
       departureDelayColor: json['departure_delay_color'] ?? '',
       departureColor: json['departure_color'] ?? '',
-      
       arrivalDelayMinutes: _parseDelay(json['arrival_delay']),
       arrivalDelayColor: json['arrival_delay_color'] ?? '',
       arrivalColor: json['arrival_color'] ?? '',
     );
   }
 
-  bool get isDeparture =>
-      ['FRA', 'MUC', 'DUS', 'HAM', 'STR'].contains(departureAirport?.iataCode);
+  bool get isDeparture => ['GND'].contains(departureAirport?.iataCode);
 
   bool get flightDelayStatus => flightDelays.isNotEmpty;
 
@@ -181,27 +183,24 @@ class Airport {
 class Aircraft {
   final int id;
   final String name;
-  final AircraftType? aircraftType;
+  final int aircraftTypeId;
 
-  Aircraft({required this.id, required this.name, this.aircraftType});
+  Aircraft({required this.id, required this.name, required this.aircraftTypeId});
 
   factory Aircraft.fromJson(Map<String, dynamic> json) {
     return Aircraft(
       id: json['id'],
       name: json['name'] ?? '',
-      aircraftType:
-          json['aircraft_type'] != null
-              ? AircraftType.fromJson(json['aircraft_type'])
-              : null,
+      aircraftTypeId: json['aircraft_type_id'] ?? 0,
     );
   }
 }
 
 class AircraftType {
   final int id;
-  final String icao;
+  final String? icao;
 
-  AircraftType({required this.id, required this.icao});
+  AircraftType({required this.id,  this.icao});
 
   factory AircraftType.fromJson(Map<String, dynamic> json) {
     return AircraftType(id: json['id'], icao: json['icao'] ?? '');

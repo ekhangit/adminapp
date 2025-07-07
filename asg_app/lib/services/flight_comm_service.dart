@@ -21,7 +21,7 @@ class FlightCommService {
         data: {"date": date},
       );
 
-      // log("[allFlightComm] response : ${response.data}");
+      log("[allFlightComm] response : ${response.data}");
 
       final body = response.data['body'];
 

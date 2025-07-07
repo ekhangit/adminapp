@@ -27,11 +27,14 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      // log("[flightChatDetail] response : ${response.data}");
+      log("[flightChatDetail] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
           response.data['body'] != null) {
+        // log(
+        //   "[flightChatDetail] response basicDetail : ${response.data['body']['flight_info']['basic_details']}",
+        // );
         final flightDetail = FlightDetailModel.fromJson(response.data['body']);
         return ResponseClass.success(flightDetail);
       } else {

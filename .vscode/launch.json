@@ -1,0 +1,48 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "asg_app",
+            "cwd": "asg_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "asg_app (profile mode)",
+            "cwd": "asg_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "asg_app (release mode)",
+            "cwd": "asg_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "aviation_app",
+            "cwd": "aviation_app",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "aviation_app (profile mode)",
+            "cwd": "aviation_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "aviation_app (release mode)",
+            "cwd": "aviation_app",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

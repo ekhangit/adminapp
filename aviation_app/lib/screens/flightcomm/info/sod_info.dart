@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-
 import '../../../controllers/flight/chat_controller.dart';
 import '../../../models/flight_detail_model.dart';
 
@@ -10,7 +9,8 @@ class SodInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
-    final sodData = [];
+    // Get SOD data from your flight details
+    final sodData = controller.flightDetail.value?.sodData ?? [];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
@@ -52,11 +52,19 @@ class SodInfo extends StatelessWidget {
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
-                sod.serviceAbbr,
-                style: const TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
+              Container(
+                padding: EdgeInsets.all(2.0),
+                decoration: BoxDecoration(
+                  color: Colors.blueAccent,
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  sod.serviceAbbr,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.white,
+                    fontWeight: FontWeight.w400,
+                  ),
                 ),
               ),
               Text(
@@ -66,12 +74,101 @@ class SodInfo extends StatelessWidget {
                   fontStyle: FontStyle.italic,
                 ),
               ),
+              // Chip(
+              //   label: Text('${sod.employees.length}/${sod.requiredStaff}'),
+              //   backgroundColor:
+              //       sod.employees.length >= sod.requiredStaff
+              //           ? Colors.green.shade100
+              //           : Colors.orange.shade100,
+              // ),
             ],
           ),
-          const SizedBox(height: 12),
-          // _buildTimeRow('Start Time', sod.startTime),
-          // _buildTimeRow('End Time', sod.endTime),
-          // _buildTimeRow('Duration', sod.duration),
+          const SizedBox(height: 8),
+          _buildTimeRow('Start Time', sod.slaTimeIn),
+          _buildTimeRow('Release Time', sod.slaTimeOut),
+          _buildTimeRow('Duration', sod.duration),
+          if (sod.employees.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            const Text(
+              'Assigned Staff:',
+              style: TextStyle(fontWeight: FontWeight.w500),
+            ),
+            ...sod.employees.map(
+              (emp) => Padding(
+                padding: const EdgeInsets.only(left: 0, top: 4),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('${emp.airport} - ${emp.name}'),
+                    SizedBox(height: 6),
+
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 2,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.green,
+
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'PLN',
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${emp.plannedTimeIn} - ${emp.plannedTimeOut}',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                    SizedBox(height: 6),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 2,
+                            vertical: 2,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.blueAccent,
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            'ACT',
+                            style: TextStyle(
+                              fontSize: 8,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w400,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '${emp.actualTimeIn} - ${emp.actualTimeOut}',
+                          style: TextStyle(
+                            fontSize: 10.5,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -81,6 +178,7 @@ class SodInfo extends StatelessWidget {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 4),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           SizedBox(
             width: 100,
