@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../models/aircraft_model.dart';
 import '../../../../models/flight_no_model.dart';
 import '../../../../utils/app_colors.dart';
@@ -519,6 +520,7 @@ class AircraftRegSelectDropdown extends StatelessWidget {
 
 class SingleSelectDropdown extends StatelessWidget {
   final String label;
+  final double labelFontSize;
   final List<String> options;
   final RxString selectedItem;
   final String hint;
@@ -533,6 +535,7 @@ class SingleSelectDropdown extends StatelessWidget {
     this.showSearchField = true,
     this.hint = "Select option",
     this.onChanged, // Add to constructor
+    this.labelFontSize = 14.0,
   });
 
   @override
@@ -543,9 +546,9 @@ class SingleSelectDropdown extends StatelessWidget {
         children: [
           Text(
             label,
-            style: const TextStyle(
+            style: TextStyle(
               fontWeight: FontWeight.w600,
-              fontSize: 14,
+              fontSize: labelFontSize,
               color: Colors.black87,
             ),
           ),
@@ -706,23 +709,27 @@ class SingleSelectDropdown extends StatelessWidget {
 }
 
 class GenericSelectDropdown<T> extends StatelessWidget {
-  final String label;
+  final String? label;
   final List<T> options;
   final Rx<T?> selectedItem;
   final String hint;
-  final String Function(T) displayText;
+  final Widget Function(T) displayText;
+  final Widget Function(T)? leadingIcon;
   final bool Function(T, String) filterCondition;
   final bool Function(T, T) isSelected;
+  final Function(T)? onChanged;
 
   const GenericSelectDropdown({
     super.key,
-    required this.label,
+    this.label,
     required this.options,
     required this.selectedItem,
     required this.displayText,
+    this.leadingIcon,
     required this.filterCondition,
     required this.isSelected,
     this.hint = "Select item",
+    this.onChanged,
   });
 
   @override
@@ -731,15 +738,16 @@ class GenericSelectDropdown<T> extends StatelessWidget {
       () => Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            label,
-            style: const TextStyle(
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-              color: Colors.black87,
+          if (label != null)
+            Text(
+              label!,
+              style: GoogleFonts.robotoCondensed(
+                fontWeight: FontWeight.w600,
+                fontSize: 14,
+                color: Colors.black87,
+              ),
             ),
-          ),
-          const SizedBox(height: 6),
+          if (label != null) const SizedBox(height: 6),
           GestureDetector(
             onTap: () => _showSelectionDialog(context),
             child: Container(
@@ -753,18 +761,22 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      selectedItem.value != null
-                          ? displayText(selectedItem.value!)
-                          : hint,
-                      style: TextStyle(
-                        color:
-                            selectedItem.value == null
-                                ? Colors.grey
-                                : Colors.black,
-                        fontSize: 14,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                    child: Row(
+                      children: [
+                        if (selectedItem.value != null && leadingIcon != null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: leadingIcon!(selectedItem.value!),
+                          ),
+                        if (selectedItem.value != null)
+                          Expanded(child: displayText(selectedItem.value!)),
+                        if (selectedItem.value == null)
+                          Text(
+                            hint,
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
                   ),
                   const Icon(Icons.arrow_drop_down),
@@ -791,91 +803,104 @@ class GenericSelectDropdown<T> extends StatelessWidget {
       builder: (context) {
         return DraggableScrollableSheet(
           initialChildSize: 0.75,
-          minChildSize: 0.5,
-          maxChildSize: 0.85,
+          minChildSize: 0.50,
+          maxChildSize: 0.75,
           expand: false,
           builder: (context, scrollController) {
             return Container(
               padding: const EdgeInsets.all(16),
-              child: Obx(() {
-                final filteredOptions =
-                    options
-                        .where(
-                          (item) => filterCondition(item, searchTerm.value),
-                        )
-                        .toList();
-
-                return ListView(
-                  controller: scrollController,
-                  children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w600,
-                        fontSize: 16,
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    TextField(
-                      controller: searchController,
-                      onChanged: (value) => searchTerm.value = value,
-                      decoration: InputDecoration(
-                        hintText: "Search...",
-                        prefixIcon: const Icon(Icons.search),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        filled: true,
-                        fillColor: Colors.grey.shade100,
-                        isDense: true,
-                        contentPadding: const EdgeInsets.all(12),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ...filteredOptions.map((item) {
-                      final selected =
-                          selectedItem.value != null &&
-                          isSelected(selectedItem.value!, item);
-
-                      return Container(
-                        decoration: BoxDecoration(
-                          color:
-                              selected
-                                  ? AppColors.colorPrimary.withOpacity(0.1)
-                                  : null,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                        child: ListTile(
-                          title: Text(
-                            displayText(item),
-                            style: TextStyle(
-                              fontWeight:
-                                  selected
-                                      ? FontWeight.bold
-                                      : FontWeight.normal,
-                              color:
-                                  selected
-                                      ? AppColors.colorPrimary
-                                      : Colors.black,
-                            ),
+              child: Column(
+                children: [
+                  // Non-scrolling header section
+                  Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      if (label != null)
+                        Text(
+                          label!,
+                          style: GoogleFonts.robotoCondensed(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
                           ),
-                          trailing:
-                              selected
-                                  ? const Icon(
-                                    Icons.check,
-                                    color: AppColors.colorPrimary,
-                                  )
-                                  : null,
-                          onTap: () {
-                            selectedItem.value = item;
-                            Navigator.pop(context);
-                          },
                         ),
+                      if (label != null) const SizedBox(height: 12),
+                      TextField(
+                        controller: searchController,
+                        onChanged: (value) => searchTerm.value = value,
+                        decoration: InputDecoration(
+                          hintText: "Search...",
+                          prefixIcon: const Icon(Icons.search),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          filled: true,
+                          fillColor: Colors.grey.shade100,
+                          isDense: true,
+                          contentPadding: const EdgeInsets.all(12),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                    ],
+                  ),
+
+                  // Scrollable list section
+                  Expanded(
+                    child: Obx(() {
+                      final filteredOptions =
+                          options
+                              .where(
+                                (item) =>
+                                    filterCondition(item, searchTerm.value),
+                              )
+                              .toList();
+
+                      return ListView(
+                        controller: scrollController,
+                        children: [
+                          ...filteredOptions.map((item) {
+                            final selected =
+                                selectedItem.value != null &&
+                                isSelected(selectedItem.value!, item);
+
+                            return Container(
+                              decoration: BoxDecoration(
+                                color:
+                                    selected
+                                        ? AppColors.colorPrimary.withValues(
+                                          alpha: .1,
+                                        )
+                                        : null,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: ListTile(
+                                leading:
+                                    leadingIcon != null
+                                        ? leadingIcon!(item)
+                                        : null,
+                                title: displayText(item),
+                                trailing:
+                                    selected
+                                        ? const Icon(
+                                          Icons.check,
+                                          color: AppColors.colorPrimary,
+                                        )
+                                        : null,
+                                onTap: () {
+                                  selectedItem.value = item;
+                                  if (onChanged != null) {
+                                    onChanged!(item);
+                                  }
+                                  Navigator.pop(context);
+                                },
+                              ),
+                            );
+                          }),
+                        ],
                       );
                     }),
-                  ],
-                );
-              }),
+                  ),
+                ],
+              ),
             );
           },
         );

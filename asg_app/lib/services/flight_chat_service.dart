@@ -362,12 +362,20 @@ class FlightChatService {
 
       log("[getPTSOption] response : ${response.data}");
 
-      if (response.statusCode == 200 &&
-          response.data['status'] == true &&
-          response.data['body'] != null) {
-        final List rawList = response.data['body'];
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        final dynamic body = response.data['body'];
 
-        final List<String> ptsData = rawList.map((e) => e.toString()).toList();
+        List<String> ptsData = [];
+
+        // Handle both list and map responses
+        if (body is List) {
+          ptsData = body.map((e) => e.toString()).toList();
+        } else if (body is Map) {
+          // Convert map keys to list if needed
+          ptsData = body.keys.map((k) => k.toString()).toList();
+          // OR if you want values:
+          // ptsData = body.values.map((v) => v.toString()).toList();
+        }
 
         return ResponseClass.success(ptsData);
       } else {
@@ -376,6 +384,7 @@ class FlightChatService {
         );
       }
     } catch (e) {
+      log("Error in getPTSOption: $e");
       return ResponseClass.error(e.toString());
     }
   }

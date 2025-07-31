@@ -49,6 +49,23 @@ class FlightCommController extends GetxController {
   //   formattedDateTime.value = formatter.format(now);
   // }
 
+  Future<void> navigateDate(int daysToAdd) async {
+    final currentDate = selectedDate.value ?? DateTime.now().toUtc();
+    final newDate = currentDate.add(Duration(days: daysToAdd));
+
+    // Check if new date is within allowed range
+    final now = DateTime.now().toUtc();
+    final minDate = now.subtract(const Duration(days: 30));
+    final maxDate = now.add(const Duration(days: 30));
+
+    if (newDate.isBefore(minDate) || newDate.isAfter(maxDate)) {
+      // Optionally show a snackbar or toast that date is out of range
+      return;
+    }
+
+    await handleDateChange(newDate);
+  }
+
   void _updateTime() {
     final now = DateTime.now().toUtc();
     final dateToShow = selectedDate.value ?? now;

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/flight/chat_controller.dart';
@@ -145,6 +146,90 @@ Widget _formField(
 //   );
 // }
 
+Widget timerField2({
+  required String label,
+  String initialTime = '12:00',
+  Color iconColor = Colors.white,
+  Color borderColor = Colors.grey,
+  double borderWidth = 0.2,
+  double iconSize = 30,
+  TextStyle? timeTextStyle,
+  EdgeInsetsGeometry? padding,
+  VoidCallback? onTap,
+}) {
+  return GestureDetector(
+    onTap: onTap,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        // Label
+        Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 11.0,
+            color: AppColors.colorPrimary,
+          ),
+        ),
+        const SizedBox(height: 4),
+
+        // Time selector container
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: borderColor, width: borderWidth),
+          ),
+          child: Column(
+            children: [
+              // Icon section
+              Container(
+                padding:
+                    padding ??
+                    const EdgeInsets.symmetric(horizontal: 36, vertical: 8),
+                decoration: BoxDecoration(
+                  color:
+                      AppColors.colorPrimary, // Changed from green to primary
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(4),
+                  ),
+                ),
+                child: Icon(
+                  Icons.access_time,
+                  size: iconSize,
+                  color: iconColor,
+                ),
+              ),
+
+              // Time display section
+              Container(
+                padding:
+                    padding ??
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: const BorderRadius.vertical(
+                    bottom: Radius.circular(4),
+                  ),
+                ),
+                child: Text(
+                  initialTime,
+                  style:
+                      timeTextStyle ??
+                      const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w400,
+                        color: Colors.black54,
+                      ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
 Widget timerField({
   required String label,
   required TextEditingController controller,
@@ -280,3 +365,33 @@ Widget _timeAdjustButton({
     ),
   );
 }
+
+
+class TimeInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue, 
+    TextEditingValue newValue,
+  ) {
+    // Handle deletion
+    if (newValue.text.length < oldValue.text.length) {
+      return newValue;
+    }
+    
+    // Auto-format as HHMM
+    if (newValue.text.length == 2 && oldValue.text.length == 1) {
+      return TextEditingValue(
+        text: '${newValue.text}:',
+        selection: TextSelection.collapsed(offset: 3),
+      );
+    }
+    
+    // Limit to 5 characters (HH:MM)
+    if (newValue.text.length > 5) {
+      return oldValue;
+    }
+    
+    return newValue;
+  }
+}
+

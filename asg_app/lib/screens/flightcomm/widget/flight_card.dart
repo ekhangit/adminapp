@@ -2,6 +2,7 @@ import 'package:asg_app/models/flight_model.dart';
 import 'package:asg_app/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../constant.dart';
 import '../../../controllers/flight/flight_comm_controller.dart';
 import '../../../utils/app_colors.dart';
@@ -59,20 +60,28 @@ class FlightCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             // Flight status icon
-            isSelected
-                ? Icon(
-                  Icons.check_circle,
-                  size: 2.2.h,
-                  color: AppColors.colorPrimary,
-                )
-                : Image.asset(
-                  flight.isDeparture
-                      ? "assets/images/outbound.png"
-                      : "assets/images/inbound.png",
-                  height: 2.2.h,
-                  width: 2.2.h,
-                ),
-            SizedBox(width: 1.2.w),
+            // isSelected
+            //     ? Icon(
+            //       Icons.check_circle,
+            //       size: 2.2.h,
+            //       color: AppColors.colorPrimary,
+            //     )
+            //     :
+            // Image.asset(
+            //       flight.isDeparture
+            //           ? "assets/images/outbound.png"
+            //           : "assets/images/inbound.png",
+            //       height: 2.2.h,
+            //       width: 2.2.h,
+            //     ),
+            CustomImage(
+              imageUrl: flight.airline?.mobilePicture ?? "",
+              size: 3.5.h,
+              boxFit: BoxFit.fill,
+              isCircular: false,
+              borderRadius: 4.0,
+            ),
+            SizedBox(width: 2.2.w),
 
             // Flight info section
             Expanded(
@@ -83,12 +92,13 @@ class FlightCard extends StatelessWidget {
                   Row(
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      CustomCircularImage(
-                        imageUrl: flight.airline?.mobilePicture ?? "",
-                        size: 2.8.h,
-                        boxFit: BoxFit.fill,
-                      ),
-                      SizedBox(width: 2.0.w),
+                      // CustomImage(
+                      //   imageUrl: flight.airline?.mobilePicture ?? "",
+                      //   size: 3.5.h,
+                      //   boxFit: BoxFit.fill,
+                      //   isCircular: false,
+                      // ),
+                      // SizedBox(width: 2.0.w),
 
                       // Flight Details
                       Expanded(
@@ -97,12 +107,10 @@ class FlightCard extends StatelessWidget {
                           spacing: 1.6.w,
                           children: [
                             SizedBox(
-                              width: 16.w, // or appropriate width
+                              width: 16.w,
                               child: Text(
-                                formatFlightInfo(
-                                  flight.flightInfo,
-                                ), // use formatted version
-                                style: TextStyle(
+                                formatFlightInfo(flight.flightInfo),
+                                style: GoogleFonts.robotoCondensed(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w700,
                                 ),
@@ -114,7 +122,7 @@ class FlightCard extends StatelessWidget {
                               width: 19.w,
                               child: Text(
                                 '${flight.departureAirport?.iataCode}-${flight.arrivalAirport?.iataCode}',
-                                style: TextStyle(
+                                style: GoogleFonts.robotoCondensed(
                                   fontSize: 15.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -126,7 +134,7 @@ class FlightCard extends StatelessWidget {
                             if (flight.aircraftType!.icao!.isNotEmpty)
                               Text(
                                 flight.aircraftType!.icao!,
-                                style: TextStyle(
+                                style: GoogleFonts.robotoCondensed(
                                   fontSize: 13.5.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -135,7 +143,7 @@ class FlightCard extends StatelessWidget {
                             if (flight.aircraft != null)
                               Text(
                                 flight.aircraft!.name,
-                                style: TextStyle(
+                                style: GoogleFonts.robotoCondensed(
                                   fontSize: 13.5.sp,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -146,10 +154,6 @@ class FlightCard extends StatelessWidget {
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.end,
                         children: [
-                          // if ((flight.isDeparture &&
-                          //         flight.departureDelayMinutes != 0) ||
-                          //     (!flight.isDeparture &&
-                          //         flight.arrivalDelayMinutes != 0))
                           if (unreadCount != 0)
                             _seenCount(' $unreadCount ', Colors.green),
                           SizedBox(width: 0.2.h),
@@ -260,7 +264,7 @@ class FlightCard extends StatelessWidget {
                           flight.flightDelays[0].delayDate != '-')
                         Text(
                           "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}/${flight.flightDelays[0].delayDate}",
-                          style: TextStyle(
+                          style: GoogleFonts.robotoCondensed(
                             fontSize: 13.5.sp,
                             fontWeight: FontWeight.w600,
                             color: Colors.red,
@@ -279,7 +283,7 @@ class FlightCard extends StatelessWidget {
                           flight.isDeparture
                               ? flight.formattedDepartureDelay
                               : flight.formattedArrivalDelay,
-                          style: TextStyle(
+                          style: GoogleFonts.robotoCondensed(
                             fontSize: 13.5.sp,
                             color:
                                 flight.isDeparture
@@ -298,14 +302,6 @@ class FlightCard extends StatelessWidget {
                           (!flight.isDeparture &&
                               flight.arrivalDelayMinutes != 0))
                         SizedBox(width: 0.5.w),
-
-                      // if (flight.departureDelayMinutes == 0 ||
-                      //     flight.arrivalDelayMinutes == 0)
-                      //   if (unreadCount != 0)
-                      //     _seenCount(
-                      //       ' $unreadCount ',
-                      //       Colors.green,
-                      //     ),
                     ],
                   ),
                 ],
@@ -331,26 +327,30 @@ class FlightCard extends StatelessWidget {
     return Row(
       children: [
         Container(
-          width: 6.8.w,
-          height: 1.8.h,
+          // width: 7.0.w,
+          // height: 2.0.h,
+          padding: EdgeInsets.symmetric(vertical: 0.01.h, horizontal: 0.5.w),
           alignment: Alignment.center,
           decoration: BoxDecoration(
             color: color,
-            borderRadius: BorderRadius.circular(0.5.h),
+            borderRadius: BorderRadius.circular(0.35.h),
           ),
           child: Text(
             label,
-            style: TextStyle(
-              fontSize: 11.5.sp,
+            style: GoogleFonts.robotoCondensed(
+              fontSize: 12.5.sp,
               color: Colors.white,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
             ),
           ),
         ),
         SizedBox(width: 1.5.w),
         Text(
           time,
-          style: TextStyle(fontSize: 15.sp, fontWeight: FontWeight.w600),
+          style: GoogleFonts.robotoCondensed(
+            fontSize: 15.sp,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ],
     );
@@ -367,7 +367,7 @@ class FlightCard extends StatelessWidget {
       ),
       child: Text(
         label,
-        style: TextStyle(
+        style: GoogleFonts.robotoCondensed(
           fontSize: 11.5.sp,
           color: Colors.white,
           fontWeight: FontWeight.w600,
@@ -392,6 +392,6 @@ class FlightCard extends StatelessWidget {
       return '$airline $number${' ' * spaceCount}';
     }
 
-    return info; // fallback if pattern doesn't match
+    return info;
   }
 }

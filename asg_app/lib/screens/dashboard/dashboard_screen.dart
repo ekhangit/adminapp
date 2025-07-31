@@ -1,5 +1,6 @@
 import 'package:asg_app/screens/flightcomm/flight_comm_screen.dart';
 import 'package:asg_app/screens/leave/leave_request_screen.dart';
+import 'package:asg_app/screens/pts/pts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
@@ -26,24 +27,18 @@ class DashboardScreen extends StatelessWidget {
         children: [
           // 🔵 Top Section
           Container(
-            height: 150,
+            height: 135,
             width: double.infinity,
             color: AppColors.colorWhite,
             child: SafeArea(
               bottom: false,
               child: Container(
-                // color: Colors.yellow,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                ),
+                // decoration: BoxDecoration(color: Colors.yellow),
                 padding: const EdgeInsets.all(24.0),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 24,
+                      radius: 20,
                       backgroundColor: AppColors.colorPrimary.withValues(
                         alpha: 0.2,
                       ),
@@ -52,7 +47,7 @@ class DashboardScreen extends StatelessWidget {
                         style: TextStyle(
                           color: AppColors.colorPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 20,
                         ),
                       ),
                     ),
@@ -65,28 +60,20 @@ class DashboardScreen extends StatelessWidget {
                           user.name,
                           style: TextStyle(
                             color: AppColors.colorPrimary,
-                            fontSize: 16.0,
+                            fontSize: 15.0,
                             fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          "Munich",
-                          style: TextStyle(
-                            color: AppColors.colorPrimary,
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                     const Spacer(),
                     CircleAvatar(
-                      radius: 24,
+                      radius: 20,
                       backgroundColor: AppColors.colorPrimary.withOpacity(0.2),
                       child: Icon(
                         Icons.notifications,
                         color: AppColors.colorPrimary,
-                        size: 28,
+                        size: 24,
                       ),
                     ),
                   ],
@@ -98,17 +85,17 @@ class DashboardScreen extends StatelessWidget {
           // ⚪ White content starting after the top, but height wraps content
           Column(
             children: [
-              const SizedBox(height: 150), // Offset to clear top container
+              const SizedBox(height: 135), // Offset to clear top container
               Expanded(
                 child: Container(
                   width: double.infinity,
                   decoration: BoxDecoration(
                     // color: AppColors.colorPrimary.withOpacity(0.95),
                     gradient: appThemeGradientSoft2,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(24),
-                      topLeft: Radius.circular(24),
-                    ),
+                    // borderRadius: BorderRadius.only(
+                    //   topRight: Radius.circular(24),
+                    //   topLeft: Radius.circular(24),
+                    // ),
                   ),
                   child: Center(
                     child: SingleChildScrollView(
@@ -142,7 +129,7 @@ class DashboardScreen extends StatelessWidget {
                               CustomBox2(
                                 title: 'PTS',
                                 iconPath: 'assets/images/airlines_final.png',
-                                onTap: () => (),
+                                onTap: () => Get.to(() => const PtsScreen()),
                               ),
 
                               CustomBox2(

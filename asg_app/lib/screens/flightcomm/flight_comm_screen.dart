@@ -1,9 +1,11 @@
 import 'package:asg_app/screens/flightcomm/chat_screen.dart';
 import 'package:asg_app/screens/flightcomm/widget/flight_card.dart';
 import 'package:asg_app/screens/flightcomm/widget/flight_filter_chip.dart';
+import 'package:asg_app/widgets/custom_loader.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../controllers/flight/flight_comm_controller.dart';
 import '../../utils/app_colors.dart';
@@ -24,9 +26,9 @@ class FlightCommScreen extends StatelessWidget {
         backgroundColor: AppColors.colorWhite,
         appBar: AppBar(
           centerTitle: true,
-          title: const Text(
+          title: Text(
             "Flight Comm",
-            style: TextStyle(color: Colors.white),
+            style: GoogleFonts.robotoCondensed(color: Colors.white),
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
@@ -34,19 +36,19 @@ class FlightCommScreen extends StatelessWidget {
           ),
 
           actions: [
-            Obx(
-              () =>
-                  controller.selectedFlightIndex.value == -1
-                      ? IconButton(
-                        icon: const Icon(
-                          Icons.date_range,
-                          size: 20,
-                          color: Colors.white,
-                        ),
-                        onPressed: () => _showDatePicker(context, controller),
-                      )
-                      : const SizedBox(),
-            ),
+            // Obx(
+            //   () =>
+            //       controller.selectedFlightIndex.value == -1
+            //           ? IconButton(
+            //             icon: const Icon(
+            //               Icons.date_range,
+            //               size: 20,
+            //               color: Colors.white,
+            //             ),
+            //             onPressed: () => _showDatePicker(context, controller),
+            //           )
+            //           : const SizedBox(),
+            // ),
             Obx(() {
               return controller.selectedFlightIndex.value != -1
                   ? PopupMenuButton<int>(
@@ -121,30 +123,7 @@ class FlightCommScreen extends StatelessWidget {
                             if (controller.isFlightCommLoading.value) {
                               return Padding(
                                 padding: EdgeInsets.symmetric(vertical: 60),
-                                child: Center(
-                                  child: Container(
-                                    padding: const EdgeInsets.all(12.0),
-                                    height: 50,
-                                    width: 50,
-                                    decoration: BoxDecoration(
-                                      shape: BoxShape.circle,
-                                      color: Colors.white.withValues(
-                                        alpha: 0.85,
-                                      ),
-                                      boxShadow: kElevationToShadow[1],
-                                      border: Border.all(
-                                        color: AppColors.matteBlackColor,
-                                        width: 0.05,
-                                      ),
-                                    ),
-                                    child: const Center(
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 3.0,
-                                        color: AppColors.colorPrimary,
-                                      ),
-                                    ),
-                                  ),
-                                ),
+                                child: CustomLoader(),
                               );
                             }
 
@@ -226,40 +205,6 @@ class FlightCommScreen extends StatelessWidget {
       ),
     );
   }
-
-  void _showDatePicker(
-    BuildContext context,
-    FlightCommController controller,
-  ) async {
-    final initialDate = controller.selectedDate.value ?? DateTime.now().toUtc();
-    final pickedDate = await showDatePicker(
-      context: context,
-      initialDate: initialDate,
-      firstDate: DateTime.now().subtract(const Duration(days: 30)),
-      lastDate: DateTime.now().add(const Duration(days: 30)),
-      builder: (context, child) {
-        return Theme(
-          data: Theme.of(context).copyWith(
-            colorScheme: ColorScheme.light(
-              primary: AppColors.colorPrimary,
-              onPrimary: Colors.white,
-              onSurface: Colors.black,
-            ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: AppColors.colorPrimary,
-              ),
-            ),
-          ),
-          child: child!,
-        );
-      },
-    );
-
-    if (pickedDate != null) {
-      await controller.handleDateChange(pickedDate);
-    }
-  }
 }
 
 class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
@@ -304,32 +249,123 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
               ),
             ),
 
-            const SizedBox(height: 12),
+            // const SizedBox(height: 8),
 
             // 🔹 Date-Time
-            RichText(
-              text: TextSpan(
-                children: [
-                  TextSpan(
-                    text: _getDatePart(controller.formattedDateTime.value),
-                    style: TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.redAccent.shade200,
-                    ),
+            // RichText(
+            //   text: TextSpan(
+            //     children: [
+            //       // Back arrow
+            //       WidgetSpan(
+            //         child: GestureDetector(
+            //           onTap: () => controller.navigateDate(-1),
+            //           child: Icon(
+            //             Icons.chevron_left,
+            //             size: 18,
+            //             color: Colors.grey.shade600,
+            //           ),
+            //         ),
+            //       ),
+
+            //       // const TextSpan(text: '   '), // spacing
+            //       TextSpan(
+            //         text: _getDatePart(controller.formattedDateTime.value),
+            //         style: TextStyle(
+            //           fontSize: 12.5,
+            //           fontWeight: FontWeight.w600,
+            //           color: Colors.redAccent.shade200,
+            //         ),
+            //       ),
+            //       const TextSpan(text: '  '), // spacing
+            //       TextSpan(
+            //         text: _getTimePart(controller.formattedDateTime.value),
+            //         style: const TextStyle(
+            //           fontSize: 12.5,
+            //           fontWeight: FontWeight.w600,
+            //           color: Colors.black87,
+            //         ),
+            //       ),
+
+            //       // const TextSpan(text: '   '), // spacing
+            //       // Forward arrow
+            //       WidgetSpan(
+            //         child: GestureDetector(
+            //           onTap: () => controller.navigateDate(1),
+            //           child: Icon(
+            //             Icons.chevron_right,
+            //             size: 18,
+            //             color: Colors.grey.shade600,
+            //           ),
+            //         ),
+            //       ),
+            //     ],
+            //   ),
+            // ),
+
+            // Enhanced version with visual integration
+            Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Back arrow
+                IconButton(
+                  onPressed: () => controller.navigateDate(-1),
+                  icon: Icon(
+                    Icons.chevron_left,
+                    size: 18,
+                    color: Colors.grey.shade700,
                   ),
-                  const TextSpan(text: '  '), // spacing
-                  TextSpan(
-                    text: _getTimePart(controller.formattedDateTime.value),
-                    style: const TextStyle(
-                      fontSize: 12.5,
-                      fontWeight: FontWeight.w600,
-                      color: Colors.black87,
-                    ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+                const SizedBox(width: 4),
+
+                // Date part
+                GestureDetector(
+                  onTap: () {
+                    // Add date picker
+                    _showDatePicker(context, controller);
+                  },
+                  child: Row(
+                    children: [
+                      Text(
+                        _getDatePart(controller.formattedDateTime.value),
+                        style: GoogleFonts.robotoCondensed(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.redAccent.shade200,
+                        ),
+                      ),
+
+                      const SizedBox(width: 4),
+
+                      Text(
+                        _getTimePart(controller.formattedDateTime.value),
+                        style: GoogleFonts.robotoCondensed(
+                          fontSize: 12.5,
+                          fontWeight: FontWeight.w600,
+                          color: Colors.black87,
+                        ),
+                      ),
+                    ],
                   ),
-                ],
-              ),
+                ),
+
+                // Forward arrow
+                IconButton(
+                  onPressed: () => controller.navigateDate(1),
+                  icon: Icon(
+                    Icons.chevron_right,
+                    size: 18,
+                    color: Colors.grey.shade700,
+                  ),
+                  padding: EdgeInsets.zero,
+                  constraints: const BoxConstraints(),
+                ),
+
+                // Time part (outside the container)
+              ],
             ),
+            // Add time widget separately if needed
           ],
         );
       }),
@@ -337,13 +373,47 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
   }
 
   @override
-  double get maxExtent => 90;
+  double get maxExtent => 100;
   @override
-  double get minExtent => 90;
+  double get minExtent => 100;
 
   @override
   bool shouldRebuild(covariant SliverPersistentHeaderDelegate oldDelegate) =>
       true;
+
+  void _showDatePicker(
+    BuildContext context,
+    FlightCommController controller,
+  ) async {
+    final initialDate = controller.selectedDate.value ?? DateTime.now().toUtc();
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: initialDate,
+      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+      lastDate: DateTime.now().add(const Duration(days: 30)),
+      builder: (context, child) {
+        return Theme(
+          data: Theme.of(context).copyWith(
+            colorScheme: ColorScheme.light(
+              primary: AppColors.colorPrimary,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
+            ),
+            textButtonTheme: TextButtonThemeData(
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.colorPrimary,
+              ),
+            ),
+          ),
+          child: child!,
+        );
+      },
+    );
+
+    if (pickedDate != null) {
+      await controller.handleDateChange(pickedDate);
+    }
+  }
 }
 
 String _getDatePart(String value) {

@@ -61,7 +61,7 @@ class AttendanceScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.center,
                         children: [
-                          CustomCircularImage(
+                          CustomImage(
                             imageUrl: 'assets/images/profile.jpg',
                             isNetwork: false,
                             borderColor: Colors.white,

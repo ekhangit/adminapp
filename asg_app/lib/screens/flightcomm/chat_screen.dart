@@ -203,10 +203,7 @@ class ChatScreen extends StatelessWidget {
 
                                             if (flight.aircraft != null) ...[
                                               InfoText(
-                                                flight
-                                                    .aircraft!
-                                                    .aircraftType
-                                                    .icao,
+                                                flight.aircraftType!.icao,
                                               ),
                                               const SizedBox(width: 6),
                                               _divider(Colors.blue),

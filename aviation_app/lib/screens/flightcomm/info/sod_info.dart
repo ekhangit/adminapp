@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/flight/chat_controller.dart';
 import '../../../models/flight_detail_model.dart';
+import 'package:intl/intl.dart';
 
 class SodInfo extends StatelessWidget {
   const SodInfo({super.key});
@@ -59,7 +60,7 @@ class SodInfo extends StatelessWidget {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  sod.serviceAbbr,
+                  sod.serviceAbbr!,
                   style: TextStyle(
                     fontSize: 12,
                     color: Colors.white,
@@ -68,7 +69,7 @@ class SodInfo extends StatelessWidget {
                 ),
               ),
               Text(
-                sod.type,
+                sod.type ?? '',
                 style: TextStyle(
                   color: Colors.grey.shade700,
                   fontStyle: FontStyle.italic,
@@ -84,16 +85,18 @@ class SodInfo extends StatelessWidget {
             ],
           ),
           const SizedBox(height: 8),
-          _buildTimeRow('Start Time', sod.slaTimeIn),
-          _buildTimeRow('Release Time', sod.slaTimeOut),
-          _buildTimeRow('Duration', sod.duration),
-          if (sod.employees.isNotEmpty) ...[
+          // _buildTimeRow('Start Time', sod.startTime!),
+          // _buildTimeRow('Release Time', sod.endTime!),
+          _buildTimeRow('Start Time', _formatDateTime(sod.startTime)),
+          _buildTimeRow('Release Time', _formatDateTime(sod.endTime)),
+          _buildTimeRow('Duration', sod.duration!),
+          if (sod.employees != null && sod.employees!.isNotEmpty) ...[
             const SizedBox(height: 8),
             const Text(
               'Assigned Staff:',
               style: TextStyle(fontWeight: FontWeight.w500),
             ),
-            ...sod.employees.map(
+            ...sod.employees!.map(
               (emp) => Padding(
                 padding: const EdgeInsets.only(left: 0, top: 4),
                 child: Column(
@@ -187,9 +190,25 @@ class SodInfo extends StatelessWidget {
               style: const TextStyle(fontWeight: FontWeight.w500),
             ),
           ),
-          Text(time),
+          Text(
+            time,
+            style: const TextStyle(color: Colors.black87, fontSize: 12),
+          ),
         ],
       ),
     );
+  }
+
+  String _formatDateTime(String? dateTimeString) {
+    if (dateTimeString == null || dateTimeString.isEmpty) return '--';
+
+    try {
+      final dateTime = DateTime.tryParse(dateTimeString);
+      if (dateTime == null) return '--';
+
+      return DateFormat('dd MMM yyyy HH:mm').format(dateTime);
+    } catch (e) {
+      return '--';
+    }
   }
 }

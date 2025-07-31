@@ -6,6 +6,7 @@ import 'package:visibility_detector/visibility_detector.dart';
 
 import '../../../controllers/flight/chat_controller.dart';
 import '../../../models/chat_model.dart';
+import 'package:intl/intl.dart';
 
 class ChatInfo extends StatelessWidget {
   const ChatInfo({super.key});
@@ -18,211 +19,308 @@ class ChatInfo extends StatelessWidget {
       controller: controller.scrollController,
       slivers: [
         // 🔵 Chat Messages
-        Obx(
-          () => SliverList(
+        Obx(() {
+          final groupedMessages = _groupMessagesByDate(controller.messages);
+          final dateKeys =
+              groupedMessages.keys.toList()
+                ..sort((a, b) => b.compareTo(a)); // Sort dates descending
+
+          // Return empty widget if there are no messages
+          // if (dateKeys.isEmpty) {
+          //   return SliverToBoxAdapter(
+          //     child: Center(
+          //       child: Padding(
+          //         padding: const EdgeInsets.all(16.0),
+          //         child: Text(
+          //           'No messages yet',
+          //           style: TextStyle(color: Colors.grey[600], fontSize: 16),
+          //         ),
+          //       ),
+          //     ),
+          //   );
+          // }
+
+          return SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
-              final message = controller.messages[index];
-              final isSentMe = message.isOwn;
+              if (index >= dateKeys.length) return const SizedBox.shrink();
 
-              return VisibilityDetector(
-                key: Key('${message.senderId}-${message.time}'),
-                onVisibilityChanged: (info) {
-                  if (info.visibleFraction > 0.5) {
-                    controller.markSingleMessageRead(message);
-                  }
-                },
-                child: Container(
-                  // color: Colors.yellow,
-                  margin: EdgeInsets.only(
-                    top: index == 0 ? 16 : 2,
-                    bottom: index == controller.messages.length - 1 ? 16 : 0,
+              final date = dateKeys[index];
+              final messages = groupedMessages[date]!;
+
+              // final message = controller.messages[index];
+              // final isSentMe = message.isOwn;
+
+              return Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  // Date header
+                  _buildDateHeader(date),
+                  // Messages for this date
+                  ...messages.map(
+                    (message) => _buildMessageItem(controller, message),
                   ),
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: Row(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment:
-                        isSentMe
-                            ? MainAxisAlignment.end
-                            : MainAxisAlignment.start,
-                    children: [
-                      // Incoming: Show avatar
-                      if (!isSentMe) ...[
-                        _buildAvatar(context, controller, message),
-                        // const SizedBox(width: 8),
-                      ],
-                      // if (!isSentMe) const SizedBox(width: 8),
-                      if (isSentMe) const SizedBox(width: 60),
-                      // Chat bubble
-                      Flexible(
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Container(
-                              padding: const EdgeInsets.only(
-                                top: 4,
-                                bottom: 4,
-                                left: 12,
-                                right: 12,
-                              ),
-                              decoration: BoxDecoration(
-                                // color: Colors.yellow,
-                                borderRadius: BorderRadius.only(
-                                  topLeft:
-                                      isSentMe
-                                          ? const Radius.circular(12)
-                                          : const Radius.circular(0),
-                                  topRight:
-                                      isSentMe
-                                          ? Radius.circular(0)
-                                          : const Radius.circular(12),
-                                  bottomLeft: Radius.circular(12),
-                                  bottomRight: Radius.circular(12),
-                                ),
-                                border:
-                                    message.messageFrom != null
-                                        ? Border.all(
-                                          color: AppColors.chatCardColor,
-                                          width: 2.5,
-                                        )
-                                        : null,
-                              ),
-                              child: Column(
-                                mainAxisSize: MainAxisSize.min,
-                                crossAxisAlignment:
-                                    isSentMe
-                                        ? CrossAxisAlignment.end
-                                        : CrossAxisAlignment.start,
-                                children: [
-                                  // if (!isSentMe)
-                                  // LayoutBuilder(
-                                  //   builder: (context, constraints) {
-                                  //     final maxWidth = constraints.maxWidth;
-
-                                  //     return Row(
-                                  //       children: [
-                                  //         ConstrainedBox(
-                                  //           constraints: BoxConstraints(
-                                  //             maxWidth: maxWidth * 0.9,
-                                  //           ),
-                                  //           child: Text(
-                                  //             "${message.senderName} - ${message.station}",
-                                  //             style: TextStyle(
-                                  //               color: controller
-                                  //                   .getAvatarColor(
-                                  //                     _getInitials(
-                                  //                       message.senderName,
-                                  //                     ),
-                                  //                   ),
-                                  //               fontSize: 14,
-                                  //               fontWeight: FontWeight.w600,
-                                  //             ),
-                                  //             overflow:
-                                  //                 TextOverflow.ellipsis,
-                                  //             maxLines: 1,
-                                  //           ),
-                                  //         ),
-                                  //         const Spacer(),
-                                  //         if (message.messageFrom !=
-                                  //             null) ...[
-                                  //           Container(
-                                  //             padding:
-                                  //                 const EdgeInsets.symmetric(
-                                  //                   horizontal: 8,
-                                  //                   vertical: 2.5,
-                                  //                 ),
-                                  //             decoration: BoxDecoration(
-                                  //               border: Border.all(
-                                  //                 color: controller
-                                  //                     .getAvatarColor(
-                                  //                       _getInitials(
-                                  //                         message
-                                  //                             .senderName,
-                                  //                       ),
-                                  //                     ),
-                                  //                 width: 1.0,
-                                  //               ),
-                                  //               borderRadius:
-                                  //                   BorderRadius.circular(
-                                  //                     6,
-                                  //                   ),
-                                  //             ),
-                                  //             child: Text(
-                                  //               message.messageFrom!,
-                                  //               style: TextStyle(
-                                  //                 fontSize: 13,
-                                  //                 color: Colors.black87,
-                                  //                 fontWeight:
-                                  //                     FontWeight.w500,
-                                  //               ),
-                                  //             ),
-                                  //           ),
-                                  //         ],
-                                  //       ],
-                                  //     );
-                                  //   },
-                                  // ),
-                                  if (!isSentMe) ...[
-                                    _buildSenderInfo(
-                                      context,
-                                      controller,
-                                      message,
-                                    ),
-                                  ],
-
-                                  if (!isSentMe) SizedBox(height: 4),
-                                  // Message content
-                                  buildMessageContent(message),
-                                  // Container(
-                                  //   alignment: Alignment.centerRight,
-                                  //   padding: const EdgeInsets.only(
-                                  //     top: 8,
-                                  //     left: 4,
-                                  //     right: 4,
-                                  //   ),
-                                  //   child: Text(
-                                  //     formatChatTimestamp(message.time),
-                                  //     style: TextStyle(
-                                  //       fontSize: 11,
-                                  //       color: Colors.grey.shade600,
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                  // Timestamp
-                                  // Padding(
-                                  //   padding: const EdgeInsets.only(top: 8),
-                                  //   child: Align(
-                                  //     alignment:
-                                  //         isSentMe
-                                  //             ? Alignment.centerRight
-                                  //             : Alignment.centerLeft,
-                                  //     child: Text(
-                                  //       formatChatTimestamp(message.time),
-                                  //       style: TextStyle(
-                                  //         fontSize: 11,
-                                  //         color: Colors.grey.shade600,
-                                  //       ),
-                                  //     ),
-                                  //   ),
-                                  // ),
-                                ],
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      // if (isSentMe) ...[
-                      //   _buildAvatar(context, controller, message),
-                      // ],
-                      if (!isSentMe) const SizedBox(width: 60),
-                    ],
-                  ),
-                ),
+                ],
               );
+
+              // return VisibilityDetector(
+              //   key: Key('${message.senderId}-${message.time}'),
+              //   onVisibilityChanged: (info) {
+              //     if (info.visibleFraction > 0.5) {
+              //       controller.markSingleMessageRead(message);
+              //     }
+              //   },
+              //   child: Container(
+              //     // color: Colors.yellow,
+              //     margin: EdgeInsets.only(
+              //       top: index == 0 ? 16 : 2,
+              //       bottom: index == controller.messages.length - 1 ? 16 : 0,
+              //     ),
+              //     padding: const EdgeInsets.symmetric(horizontal: 12),
+              //     child: Row(
+              //       crossAxisAlignment: CrossAxisAlignment.start,
+              //       mainAxisAlignment:
+              //           isSentMe
+              //               ? MainAxisAlignment.end
+              //               : MainAxisAlignment.start,
+              //       children: [
+              //         // Incoming: Show avatar
+              //         if (!isSentMe) ...[
+              //           _buildAvatar(context, controller, message),
+              //           // const SizedBox(width: 8),
+              //         ],
+              //         // if (!isSentMe) const SizedBox(width: 8),
+              //         if (isSentMe) const SizedBox(width: 60),
+              //         // Chat bubble
+              //         Flexible(
+              //           child: Column(
+              //             mainAxisSize: MainAxisSize.min,
+              //             crossAxisAlignment: CrossAxisAlignment.start,
+              //             children: [
+              //               Container(
+              //                 padding: const EdgeInsets.only(
+              //                   top: 4,
+              //                   bottom: 4,
+              //                   left: 12,
+              //                   right: 12,
+              //                 ),
+              //                 decoration: BoxDecoration(
+              //                   // color: Colors.yellow,
+              //                   borderRadius: BorderRadius.only(
+              //                     topLeft:
+              //                         isSentMe
+              //                             ? const Radius.circular(12)
+              //                             : const Radius.circular(0),
+              //                     topRight:
+              //                         isSentMe
+              //                             ? Radius.circular(0)
+              //                             : const Radius.circular(12),
+              //                     bottomLeft: Radius.circular(12),
+              //                     bottomRight: Radius.circular(12),
+              //                   ),
+              //                   border:
+              //                       message.messageFrom != null
+              //                           ? Border.all(
+              //                             color: AppColors.chatCardColor,
+              //                             width: 2.5,
+              //                           )
+              //                           : null,
+              //                 ),
+              //                 child: Column(
+              //                   mainAxisSize: MainAxisSize.min,
+              //                   crossAxisAlignment:
+              //                       isSentMe
+              //                           ? CrossAxisAlignment.end
+              //                           : CrossAxisAlignment.start,
+              //                   children: [
+              //                     if (!isSentMe) ...[
+              //                       _buildSenderInfo(
+              //                         context,
+              //                         controller,
+              //                         message,
+              //                       ),
+              //                     ],
+
+              //                     if (!isSentMe) SizedBox(height: 4),
+              //                     // Message content
+              //                     buildMessageContent(message),
+              //                     // Timestamp
+              //                     // Padding(
+              //                     //   padding: const EdgeInsets.only(top: 8),
+              //                     //   child: Align(
+              //                     //     alignment:
+              //                     //         isSentMe
+              //                     //             ? Alignment.centerRight
+              //                     //             : Alignment.centerLeft,
+              //                     //     child: Text(
+              //                     //       formatChatTimestamp(message.time),
+              //                     //       style: TextStyle(
+              //                     //         fontSize: 11,
+              //                     //         color: Colors.grey.shade600,
+              //                     //       ),
+              //                     //     ),
+              //                     //   ),
+              //                     // ),
+              //                   ],
+              //                 ),
+              //               ),
+              //             ],
+              //           ),
+              //         ),
+              //         if (!isSentMe) const SizedBox(width: 60),
+              //       ],
+              //     ),
+              //   ),
+              // );
             }, childCount: controller.messages.length),
+          );
+        }),
+      ],
+    );
+  }
+
+  // Build individual message item
+  Widget _buildMessageItem(ChatController controller, ChatMessage message) {
+    final isSentMe = message.isOwn;
+
+    // Parse message time string to DateTime
+    DateTime messageDateTime;
+    try {
+      messageDateTime = DateTime.parse(message.time).toLocal();
+    } catch (e) {
+      messageDateTime = DateTime.now().toLocal();
+    }
+
+    return VisibilityDetector(
+      key: Key('${message.senderId}-${message.time}'),
+      onVisibilityChanged: (info) {
+        if (info.visibleFraction > 0.5) {
+          controller.markSingleMessageRead(message);
+        }
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          mainAxisAlignment:
+              isSentMe ? MainAxisAlignment.end : MainAxisAlignment.start,
+          children: [
+            if (!isSentMe) _buildAvatar(Get.context!, controller, message),
+            if (isSentMe) const SizedBox(width: 60),
+            Flexible(
+              child: Container(
+                padding: const EdgeInsets.only(
+                  top: 4,
+                  bottom: 4,
+                  left: 12,
+                  right: 12,
+                ),
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.only(
+                    topLeft:
+                        isSentMe
+                            ? const Radius.circular(12)
+                            : const Radius.circular(0),
+                    topRight:
+                        isSentMe
+                            ? Radius.circular(0)
+                            : const Radius.circular(12),
+                    bottomLeft: Radius.circular(12),
+                    bottomRight: Radius.circular(12),
+                  ),
+                  border:
+                      message.messageFrom != null
+                          ? Border.all(
+                            color: AppColors.chatCardColor,
+                            width: 2.5,
+                          )
+                          : null,
+                ),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment:
+                      isSentMe
+                          ? CrossAxisAlignment.end
+                          : CrossAxisAlignment.start,
+                  children: [
+                    if (!isSentMe)
+                      _buildSenderInfo(Get.context!, controller, message),
+                    if (!isSentMe) const SizedBox(height: 4),
+                    buildMessageContent(message),
+                  ],
+                ),
+              ),
+            ),
+            if (!isSentMe) const SizedBox(width: 60),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Group messages by date (Today, Yesterday, or formatted date)
+  Map<DateTime, List<ChatMessage>> _groupMessagesByDate(
+    List<ChatMessage> messages,
+  ) {
+    final grouped = <DateTime, List<ChatMessage>>{};
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    for (final message in messages) {
+      // Parse string to DateTime and convert to local time
+      DateTime messageTime;
+      try {
+        // Try parsing as ISO format
+        messageTime = DateTime.parse(message.time).toLocal();
+      } catch (e) {
+        // If parsing fails, use current time as fallback
+        messageTime = DateTime.now().toLocal();
+      }
+
+      final messageDay = DateTime(
+        messageTime.year,
+        messageTime.month,
+        messageTime.day,
+      );
+
+      grouped.putIfAbsent(messageDay, () => []).add(message);
+    }
+
+    return grouped;
+  }
+
+  // Build date header widget
+  Widget _buildDateHeader(DateTime date) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    final yesterday = today.subtract(const Duration(days: 1));
+
+    String dateText;
+    if (date == today) {
+      dateText = 'Today';
+    } else if (date == yesterday) {
+      dateText = 'Yesterday';
+    } else {
+      dateText = DateFormat('dd MMM').format(date);
+    }
+
+    return Center(
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        margin: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: Colors.grey[300]!.withValues(alpha: 0.75),
+          borderRadius: BorderRadius.circular(4),
+        ),
+        child: Text(
+          dateText,
+          style: TextStyle(
+            color: Colors.grey[700],
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
           ),
         ),
-      ],
+      ),
     );
   }
 

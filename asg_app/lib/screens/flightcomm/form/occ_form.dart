@@ -59,8 +59,10 @@ class OCCForm extends StatelessWidget {
               label: "Airline",
               options: controller.getAirline,
               selectedItem: controller.selectedAirlineOcc,
+              // displayText:
+              //     (item) => '${item.iata} | ${item.icao} | ${item.name}',
               displayText:
-                  (item) => '${item.iata} | ${item.icao} | ${item.name}',
+                  (item) => Text('${item.iata} | ${item.icao} | ${item.name}'),
               filterCondition:
                   (item, term) => (item.name ?? '').toLowerCase().contains(
                     term.toLowerCase(),

@@ -43,4 +43,7 @@ class ApiConfig {
   static const sendPTS = '/api/v1/flight-comm/pts-send';
   static const sendFhr = '/api/v1/flight-comm/fhr-send';
   static const sendOcc = '/api/v1/flight-comm/occ-send';
+
+  // PTS
+  static const ptsAllFlights = '/api/v1/flight-comm/pts-all-flights';
 }

@@ -236,16 +236,17 @@ class ChatMessage {
     FhrMessage? parseFhrMessage(dynamic messageData) {
       if (messageData is! Map<String, dynamic>) return null;
       return FhrMessage(
-        checkInIssues: messageData['CHECK-IN/TKTG ISSUES']?.toString() ?? '--',
+        checkInIssues: messageData['CHECK-IN/TKTG ISSUES']?.toString() ?? '',
         rampIssues:
-            messageData['RAMP/CREWDISRUPTIVE PAX ETC']?.toString() ?? '--',
-        otherIssues: messageData['OTHER']?.toString() ?? '--',
-        delayExplanation: messageData['DELAY EXPLANATION']?.toString() ?? '--',
-        deniedBoarding:
-            messageData['INVOL DENIED BOARDING']?.toString() ?? '--',
+            messageData['RAMP/CREWDISRUPTIVE PAX ETC']?.toString() ?? '',
+        otherIssues: messageData['OTHER']?.toString() ?? '',
+        delayExplanation: messageData['DELAY EXPLANATION']?.toString() ?? '',
+        deniedBoarding: messageData['INVOL DENIED BOARDING']?.toString() ?? '',
         missedConnection:
-            messageData['MISSED ARTG-5 EXPLANATION']?.toString() ?? '--',
-        safetyIssues: messageData['SAFETY/SECURITY/SYSTEM']?.toString() ?? '--',
+            messageData['MISSED ARTG-5 EXPLANATION']?.toString() ??
+            messageData['MISSED ARTSG 5 EXPLANATION']?.toString() ??
+            '--',
+        safetyIssues: messageData['SAFETY/SECURITY/SYSTEM']?.toString() ?? '',
       );
     }
 
@@ -353,22 +354,22 @@ class SsrMessage {
 
 // Add this new class for FHR message data
 class FhrMessage {
-  final String checkInIssues;
-  final String rampIssues;
-  final String otherIssues;
-  final String delayExplanation;
-  final String deniedBoarding;
-  final String missedConnection;
-  final String safetyIssues;
+  final String? checkInIssues;
+  final String? rampIssues;
+  final String? otherIssues;
+  final String? delayExplanation;
+  final String? deniedBoarding;
+  final String? missedConnection;
+  final String? safetyIssues;
 
   FhrMessage({
-    required this.checkInIssues,
-    required this.rampIssues,
-    required this.otherIssues,
-    required this.delayExplanation,
-    required this.deniedBoarding,
-    required this.missedConnection,
-    required this.safetyIssues,
+    this.checkInIssues,
+    this.rampIssues,
+    this.otherIssues,
+    this.delayExplanation,
+    this.deniedBoarding,
+    this.missedConnection,
+    this.safetyIssues,
   });
 
   Map<String, dynamic> toMap() {

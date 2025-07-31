@@ -64,7 +64,7 @@ class AttendanceService {
       }
     } catch (e) {
       print("Clock-out failed: $e");
-      return false;
+      return false; 
     }
   }
 }

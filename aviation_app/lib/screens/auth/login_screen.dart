@@ -51,7 +51,7 @@ class LoginScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset("assets/images/logo_new.png", height: 70),
+                        Image.asset("assets/images/logo_gsrm.png", height: 100),
 
                         const SizedBox(height: 30),
 

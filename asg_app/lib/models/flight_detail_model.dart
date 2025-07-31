@@ -3,6 +3,7 @@ class FlightDetailModel {
   final Airport departureAirport;
   final Airport arrivalAirport;
   final Aircraft? aircraft;
+  final AircraftType? aircraftType;
   final Capacity capacity;
   final ActualPax actualPax;
   final String? inboundFlight; // New field
@@ -18,6 +19,7 @@ class FlightDetailModel {
     required this.departureAirport,
     required this.arrivalAirport,
     this.aircraft,
+    this.aircraftType,
     required this.capacity,
     required this.actualPax,
     this.inboundFlight,
@@ -43,6 +45,10 @@ class FlightDetailModel {
       arrivalAirport: Airport.fromJson(info['arrival_airport']),
       aircraft:
           info['aircraft'] != null ? Aircraft.fromJson(info['aircraft']) : null,
+      aircraftType:
+          info['aircraft_type'] != null
+              ? AircraftType.fromJson(info['aircraft_type'])
+              : null,
       capacity: Capacity.fromJson(info['capacity']),
       actualPax: ActualPax.fromJson(info['actual_pax']),
       inboundFlight: info['inbound_flight']?.toString(),
@@ -55,8 +61,8 @@ class FlightDetailModel {
     );
   }
 
-  bool get isConnectingFlight => inboundFlight?.isNotEmpty == true || 
-      outboundFlight?.isNotEmpty == true;
+  bool get isConnectingFlight =>
+      inboundFlight?.isNotEmpty == true || outboundFlight?.isNotEmpty == true;
 }
 
 class BasicDetails {
@@ -114,15 +120,11 @@ class Airport {
 class Aircraft {
   final int id;
   final String name;
-  final AircraftType aircraftType;
 
-  Aircraft({required this.id, required this.name, required this.aircraftType});
+  Aircraft({required this.id, required this.name});
 
-  factory Aircraft.fromJson(Map<String, dynamic> json) => Aircraft(
-    id: json['id'] ?? 0,
-    name: json['name'],
-    aircraftType: AircraftType.fromJson(json['aircraft_type']),
-  );
+  factory Aircraft.fromJson(Map<String, dynamic> json) =>
+      Aircraft(id: json['id'] ?? 0, name: json['name']);
 }
 
 class AircraftType {
@@ -729,9 +731,11 @@ class SodData {
     slaTimeOut: json['sla_time_out']?.toString() ?? '',
     duration: json['duration']?.toString() ?? '00:00',
     requiredStaff: (json['required_staff'] as int?) ?? 0,
-    employees: (json['employees'] as List<dynamic>?)
-        ?.map((e) => SodEmployee.fromJson(e))
-        .toList() ?? [],
+    employees:
+        (json['employees'] as List<dynamic>?)
+            ?.map((e) => SodEmployee.fromJson(e))
+            .toList() ??
+        [],
   );
 }
 
@@ -770,5 +774,3 @@ class SodEmployee {
     actualDuration: json['actual_duration']?.toString() ?? '00:00',
   );
 }
-
-

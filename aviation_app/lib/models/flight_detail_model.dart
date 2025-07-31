@@ -3,6 +3,7 @@ class FlightDetailModel {
   final Airport departureAirport;
   final Airport arrivalAirport;
   final Aircraft? aircraft;
+  final AircraftType? aircraftType;
   final Capacity capacity;
   final ActualPax actualPax;
   final String? inboundFlight; // New field
@@ -10,6 +11,7 @@ class FlightDetailModel {
   final TrcData? trc;
   final CkinData? ckin;
   final ArrData? arr;
+  final List<PicData> picData = [];
   final FlightMessages messages;
   final List<SodData> sodData;
 
@@ -18,6 +20,7 @@ class FlightDetailModel {
     required this.departureAirport,
     required this.arrivalAirport,
     this.aircraft,
+    this.aircraftType,
     required this.capacity,
     required this.actualPax,
     this.inboundFlight,
@@ -43,6 +46,10 @@ class FlightDetailModel {
       arrivalAirport: Airport.fromJson(info['arrival_airport']),
       aircraft:
           info['aircraft'] != null ? Aircraft.fromJson(info['aircraft']) : null,
+      aircraftType:
+          info['aircraft_type'] != null
+              ? AircraftType.fromJson(info['aircraft_type'])
+              : null,
       capacity: Capacity.fromJson(info['capacity']),
       actualPax: ActualPax.fromJson(info['actual_pax']),
       inboundFlight: info['inbound_flight']?.toString(),
@@ -114,15 +121,11 @@ class Airport {
 class Aircraft {
   final int id;
   final String name;
-  final AircraftType aircraftType;
 
-  Aircraft({required this.id, required this.name, required this.aircraftType});
+  Aircraft({required this.id, required this.name});
 
-  factory Aircraft.fromJson(Map<String, dynamic> json) => Aircraft(
-    id: json['id'] ?? 0,
-    name: json['name'],
-    aircraftType: AircraftType.fromJson(json['aircraft_type']),
-  );
+  factory Aircraft.fromJson(Map<String, dynamic> json) =>
+      Aircraft(id: json['id'] ?? 0, name: json['name']);
 }
 
 class AircraftType {
@@ -625,6 +628,8 @@ class ArrData {
   );
 }
 
+class PicData {}
+
 class FlightMessages {
   final List<MessageData> mvtDeparture;
   final List<MessageData> mvtArrival;
@@ -704,37 +709,60 @@ class MessageData {
 }
 
 class SodData {
-  final String serviceAbbr;
-  final String type;
-  final String slaTimeIn;
-  final String slaTimeOut;
-  final String duration;
-  final int requiredStaff;
-  final List<SodEmployee> employees;
+  final int? flightId;
+  final String? serviceAbbr;
+  final String? type;
+  // final String? slaTimeIn;
+  // final String? slaTimeOut;
+  final String? startTime;
+  final String? endTime;
+  final String? duration;
+  final int? requiredStaff;
+  final List<SodEmployee>? employees;
 
   SodData({
-    required this.serviceAbbr,
-    required this.type,
-    required this.slaTimeIn,
-    required this.slaTimeOut,
-    required this.duration,
-    required this.requiredStaff,
-    required this.employees,
+    this.flightId,
+    this.serviceAbbr,
+    this.type,
+    this.startTime,
+    this.endTime,
+    this.duration,
+    this.requiredStaff,
+    this.employees,
   });
 
   factory SodData.fromJson(Map<String, dynamic> json) => SodData(
-    serviceAbbr: json['service_abbr']?.toString() ?? '',
+    flightId: json['flight_id'] as int?,
+    serviceAbbr:
+        json['service_abbr']?.toString() ?? json['abbr']?.toString() ?? '',
     type: json['type']?.toString() ?? '',
-    slaTimeIn: json['sla_time_in']?.toString() ?? '',
-    slaTimeOut: json['sla_time_out']?.toString() ?? '',
+    // slaTimeIn: json['sla_time_in']?.toString() ?? '',
+    // slaTimeOut: json['sla_time_out']?.toString() ?? '',
+    startTime: json['start_time'] as String?,
+    endTime: json['end_time'] as String?,
     duration: json['duration']?.toString() ?? '00:00',
     requiredStaff: (json['required_staff'] as int?) ?? 0,
+    // employees:
+    //     (json['employees'] as List<dynamic>?)
+    //         ?.map((e) => SodEmployee.fromJson(e))
+    //         .toList() ??
+    //     [],
     employees:
         (json['employees'] as List<dynamic>?)
             ?.map((e) => SodEmployee.fromJson(e))
-            .toList() ??
-        [],
+            .toList(),
   );
+
+  // Helper method to check if the object is empty
+  bool get isEmpty =>
+      flightId == null &&
+      serviceAbbr == null &&
+      type == null &&
+      startTime == null &&
+      endTime == null &&
+      duration == null &&
+      requiredStaff == null &&
+      (employees == null || employees!.isEmpty);
 }
 
 class SodEmployee {

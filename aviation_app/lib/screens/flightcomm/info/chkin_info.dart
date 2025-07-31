@@ -11,6 +11,9 @@ class ChkinInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
+    final flight = controller.flightDetail.value;
+    final capacity = flight?.capacity;
+    final actualPax = flight?.actualPax;
 
     return SingleChildScrollView(
       padding: EdgeInsets.only(top: 16, bottom: 24),
@@ -27,7 +30,7 @@ class ChkinInfo extends StatelessWidget {
                 controller.flightDetail.value?.basicDetails.date ?? '',
               ),
               "A/C Type":
-                  controller.flightDetail.value?.aircraft!.aircraftType.icao ??
+                  controller.flightDetail.value?.aircraftType!.icao ??
                   '--',
               "A/C Regn": controller.flightDetail.value?.aircraft!.name ?? '--',
               "Gate": controller.flightDetail.value?.basicDetails.gate ?? '--',
@@ -108,22 +111,37 @@ class ChkinInfo extends StatelessWidget {
           SizedBox(height: 12),
           InfoSection(
             title: "Configuration",
-            data: {"C": "--", "M": "--", "Total": "--"},
+            data: {"J": capacity?.j ?? "--", "Y": capacity?.y ?? "--"},
           ),
           SizedBox(height: 12),
           InfoSection(
             title: "Booked Pax",
-            data: {"C": "--", "M": "--", "INF": "--"},
+            data: {
+              "J": "--", // Replace with actual booked J if available
+              "Y": "--", // Replace with actual booked Y if available
+              "INF": "--", // Replace with actual booked INF if available
+            },
           ),
           SizedBox(height: 12),
           InfoSection(
             title: "Actual Pax",
-            data: {"C": "--", "M": "--", "INF": "--", "JMP": "--"},
+            data: {
+              "J": actualPax?.paxC ?? "--",
+              "Y": actualPax?.paxY ?? "--",
+              "INF": actualPax?.paxInf ?? "0",
+              "JMP": actualPax?.paxJmp ?? "--",
+            },
           ),
           SizedBox(height: 12),
           InfoSection(
             title: "Pax Type",
-            data: {"A": "--", "M": "--", "F": "--", "C": "--", "INF": "--"},
+            data: {
+              "A": actualPax?.paxA ?? "--",
+              "M": "--", // Replace with actual M if available
+              "F": "--", // Replace with actual F if available
+              "C": actualPax?.paxC ?? "--",
+              "INF": actualPax?.paxInf ?? "0",
+            },
           ),
           SizedBox(height: 12),
           InfoSection(
@@ -141,6 +159,10 @@ class ChkinInfo extends StatelessWidget {
             data: {"PCs": "--", "WT": "--"},
           ),
           SizedBox(height: 12),
+          InfoSection(
+            title: "Catering",
+            data: {"J": "--", "Y": "--", "Total": "--", "INF": "--"},
+          ),
         ],
       ),
     );

@@ -28,7 +28,7 @@ class TrcInfo extends StatelessWidget {
                 controller.flightDetail.value?.basicDetails.date ?? '--',
               ),
               "A/C Type":
-                  controller.flightDetail.value?.aircraft?.aircraftType.icao ??
+                  controller.flightDetail.value?.aircraftType!.icao ??
                   '--',
               "A/C Regn": controller.flightDetail.value?.aircraft?.name ?? '--',
               "Gate": controller.flightDetail.value?.basicDetails.gate ?? '--',

@@ -9,6 +9,7 @@ import '../../controllers/storage/data_storage_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_box.dart';
 import '../attendance/attendence_screen.dart';
+import '../pts/pts_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -142,7 +143,7 @@ class DashboardScreen extends StatelessWidget {
                               CustomBox2(
                                 title: 'PTS',
                                 iconPath: 'assets/images/airlines_final.png',
-                                onTap: () => (),
+                                onTap: () => Get.to(() => const PtsScreen()),
                               ),
 
                               CustomBox2(

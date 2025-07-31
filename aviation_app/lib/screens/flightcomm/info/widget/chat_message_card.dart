@@ -334,13 +334,23 @@ Widget _buildFhrMessage(FhrMessage fhrMessage) {
         const SizedBox(height: 8),
 
         // Issues
-        _builBoxItem('MISSED ARTG-5 EXPLANATION', fhrMessage.missedConnection),
-        _builBoxItem('DELAY EXPLANATION', fhrMessage.delayExplanation),
-        _builBoxItem('CHECK-IN/TKTG ISSUES', fhrMessage.checkInIssues),
-        _builBoxItem('RAMP/CREWDISRUPTIVE PAX ETC', fhrMessage.rampIssues),
-        _builBoxItem('SAFETY/SECURITY/SYSTEM', fhrMessage.safetyIssues),
-        _builBoxItem('OTHER', fhrMessage.otherIssues),
-        _builBoxItem('INVOL DENIED BOARDING', fhrMessage.deniedBoarding),
+        if (fhrMessage.missedConnection!.isNotEmpty)
+          _builBoxItem(
+            'MISSED ARTG-5 EXPLANATION',
+            fhrMessage.missedConnection!,
+          ),
+        if (fhrMessage.delayExplanation!.isNotEmpty)
+          _builBoxItem('DELAY EXPLANATION', fhrMessage.delayExplanation!),
+        if (fhrMessage.checkInIssues!.isNotEmpty)
+          _builBoxItem('CHECK-IN/TKTG ISSUES', fhrMessage.checkInIssues!),
+        if (fhrMessage.rampIssues!.isNotEmpty)
+          _builBoxItem('RAMP/CREWDISRUPTIVE PAX ETC', fhrMessage.rampIssues!),
+        if (fhrMessage.safetyIssues!.isNotEmpty)
+          _builBoxItem('SAFETY/SECURITY/SYSTEM', fhrMessage.safetyIssues!),
+        if (fhrMessage.otherIssues!.isNotEmpty)
+          _builBoxItem('OTHER', fhrMessage.otherIssues!),
+        if (fhrMessage.deniedBoarding!.isNotEmpty)
+          _builBoxItem('INVOL DENIED BOARDING', fhrMessage.deniedBoarding!),
       ],
     ),
   );

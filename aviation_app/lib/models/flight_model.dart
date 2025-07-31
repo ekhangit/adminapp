@@ -247,3 +247,39 @@ class FlightDelay {
     delayDate: '-',
   );
 }
+
+
+class FlightsModelMini {
+  final int id;
+  final String flightInfo;
+  final int? airlineId;
+  final int? departureAirportId;
+  final int? arrivalAirportId;
+  final String? scheduledDepartureTime;
+  final String? scheduledArrivalTime;
+  final String? status;
+
+  FlightsModelMini({
+    required this.id,
+    required this.flightInfo,
+     this.airlineId,
+     this.departureAirportId,
+     this.arrivalAirportId,
+     this.scheduledDepartureTime,
+     this.scheduledArrivalTime,
+     this.status,
+  });
+
+  factory FlightsModelMini.fromJson(Map<String, dynamic> json) {
+    return FlightsModelMini(
+      id: json['id'],
+      flightInfo: json['flight_info'] ?? '',
+      airlineId: json['airline_id'],
+      departureAirportId: json['departure_airport_id'],
+      arrivalAirportId: json['arrival_airport_id'],
+      scheduledDepartureTime: json['scheduled_departure_time'] ?? '',
+      scheduledArrivalTime: json['scheduled_arrival_time'] ?? '',
+      status: json['status'] ?? '',
+    );
+  }
+}

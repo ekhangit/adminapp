@@ -181,8 +181,8 @@ class ChatController extends GetxController {
       // typeCounts[type] = (typeCounts[type] ?? 0) + 1;
       log('Message Type: $type');
 
-      if (type == 'ckin') {
-        log('CKIN Message: ${message.message.toString()}');
+      if (type == 'fhr') {
+        log('FHR Message: ${message.message.toString()}');
       }
     }
   }
@@ -462,15 +462,15 @@ class ChatController extends GetxController {
     _tabHasMessages['PTM'] = messages.ptm.isNotEmpty;
     _tabHasMessages['CPM'] = messages.cpm.isNotEmpty;
 
-    log(
-      'Message status - MVT: ${_tabHasMessages['MVT']}, '
-      'LDM: ${_tabHasMessages['LDM']}, '
-      'LIR: ${_tabHasMessages['LIR']}, '
-      'LDS: ${_tabHasMessages['LDS']}, '
-      'PSM: ${_tabHasMessages['PSM']}, '
-      'PTM: ${_tabHasMessages['PTM']}, '
-      'CPM: ${_tabHasMessages['CPM']}, ',
-    );
+    // log(
+    //   'Message status - MVT: ${_tabHasMessages['MVT']}, '
+    //   'LDM: ${_tabHasMessages['LDM']}, '
+    //   'LIR: ${_tabHasMessages['LIR']}, '
+    //   'LDS: ${_tabHasMessages['LDS']}, '
+    //   'PSM: ${_tabHasMessages['PSM']}, '
+    //   'PTM: ${_tabHasMessages['PTM']}, '
+    //   'CPM: ${_tabHasMessages['CPM']}, ',
+    // );
   }
 
   bool hasMessages(String tabName) {

@@ -21,7 +21,7 @@ class ArrInfo extends StatelessWidget {
               padding: EdgeInsets.all(16),
               child: Center(
                 child: Text(
-                  'No arrival data available',
+                  'No ARR data available',
                   style: TextStyle(
                     fontSize: 16,
                     color: Colors.grey,

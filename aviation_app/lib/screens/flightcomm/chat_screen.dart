@@ -7,6 +7,7 @@ import 'package:aviation_app/screens/flightcomm/info/ldm_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/lds_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/lir_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/mvt_info.dart';
+import 'package:aviation_app/screens/flightcomm/info/pic_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/psm_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/ptm_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/sod_info.dart';
@@ -203,10 +204,7 @@ class ChatScreen extends StatelessWidget {
 
                                             if (flight.aircraft != null) ...[
                                               InfoText(
-                                                flight
-                                                    .aircraft!
-                                                    .aircraftType
-                                                    .icao,
+                                                flight.aircraftType!.icao,
                                               ),
                                               const SizedBox(width: 6),
                                               _divider(Colors.blue),
@@ -379,6 +377,9 @@ class ChatScreen extends StatelessWidget {
 
                         case 'ARR':
                           return ArrInfo();
+
+                        case 'PIC':
+                          return PicInfo();
 
                         case 'MVT':
                           return MvtInfo();

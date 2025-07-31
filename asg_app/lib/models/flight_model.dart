@@ -102,7 +102,9 @@ class FlightsModel {
       aircraft:
           json['aircraft'] != null ? Aircraft.fromJson(json['aircraft']) : null,
       aircraftType:
-          json['aircraft_type'] != null ? AircraftType.fromJson(json['aircraft_type']) : null,
+          json['aircraft_type'] != null
+              ? AircraftType.fromJson(json['aircraft_type'])
+              : null,
       flightDelays: delays,
       isFavorite: (json['is_favorite'] ?? false),
       departureDelayMinutes: _parseDelay(json['departure_delay']),
@@ -185,7 +187,11 @@ class Aircraft {
   final String name;
   final int aircraftTypeId;
 
-  Aircraft({required this.id, required this.name, required this.aircraftTypeId});
+  Aircraft({
+    required this.id,
+    required this.name,
+    required this.aircraftTypeId,
+  });
 
   factory Aircraft.fromJson(Map<String, dynamic> json) {
     return Aircraft(
@@ -200,7 +206,7 @@ class AircraftType {
   final int id;
   final String? icao;
 
-  AircraftType({required this.id,  this.icao});
+  AircraftType({required this.id, this.icao});
 
   factory AircraftType.fromJson(Map<String, dynamic> json) {
     return AircraftType(id: json['id'], icao: json['icao'] ?? '');
@@ -239,4 +245,29 @@ class FlightDelay {
     delayCode: '-',
     delayDate: '-',
   );
+}
+
+class FlightsModelMini {
+  final int id;
+  final String flightInfo;
+  final String? departureAirport;
+  final String? arrivalAirport;
+
+  FlightsModelMini({
+    required this.id,
+    required this.flightInfo,
+    this.departureAirport,
+    this.arrivalAirport,
+  });
+
+  factory FlightsModelMini.fromJson(Map<String, dynamic> json) {
+    return FlightsModelMini(
+      id: json['id'],
+      flightInfo: json['flight_info'] ?? '',
+      departureAirport: json['departure_airport'],
+      arrivalAirport: json['arrival_airport'],
+    );
+  }
+
+  bool get isDeparture => ['GND'].contains(departureAirport);
 }

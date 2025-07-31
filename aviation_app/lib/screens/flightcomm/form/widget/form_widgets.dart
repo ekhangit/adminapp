@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 
 import '../../../../controllers/flight/chat_controller.dart';
@@ -89,61 +90,6 @@ Widget _formField(
     ],
   );
 }
-
-// Widget timerField({
-//   required String label,
-//   required TextEditingController controller,
-//   VoidCallback? onTap,
-//   bool? showHint = true,
-// }) {
-//   return Column(
-//     crossAxisAlignment: CrossAxisAlignment.start,
-//     children: [
-//       Text(
-//         label,
-//         style: const TextStyle(
-//           fontWeight: FontWeight.w600,
-//           fontSize: 14,
-//           color: AppColors.colorPrimary,
-//         ),
-//       ),
-//       const SizedBox(height: 8),
-//       GestureDetector(
-//         onTap: onTap,
-//         child: AbsorbPointer(
-//           child: TextField(
-//             controller: controller,
-//             readOnly: true,
-//             decoration: InputDecoration(
-//               prefixIcon: const Icon(Icons.access_time, size: 20),
-//               hintText: showHint! ? "Select $label" : '',
-//               filled: true,
-//               fillColor: Colors.grey.shade100,
-//               contentPadding: const EdgeInsets.symmetric(
-//                 horizontal: 12,
-//                 vertical: 10,
-//               ),
-//               border: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//               ),
-//               enabledBorder: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//                 borderSide: BorderSide(color: Colors.grey.shade400, width: 0.2),
-//               ),
-//               focusedBorder: OutlineInputBorder(
-//                 borderRadius: BorderRadius.circular(8),
-//                 borderSide: const BorderSide(
-//                   color: Color(0xFF003862),
-//                   width: 1.5,
-//                 ),
-//               ),
-//             ),
-//           ),
-//         ),
-//       ),
-//     ],
-//   );
-// }
 
 Widget timerField({
   required String label,
@@ -251,6 +197,10 @@ Widget timerField({
   );
 }
 
+
+
+
+
 Widget _timeAdjustButtons({
   required VoidCallback onIncrement,
   required VoidCallback onDecrement,
@@ -280,3 +230,34 @@ Widget _timeAdjustButton({
     ),
   );
 }
+
+
+class TimeInputFormatter extends TextInputFormatter {
+  @override
+  TextEditingValue formatEditUpdate(
+    TextEditingValue oldValue, 
+    TextEditingValue newValue,
+  ) {
+    // Handle deletion
+    if (newValue.text.length < oldValue.text.length) {
+      return newValue;
+    }
+    
+    // Auto-format as HHMM
+    if (newValue.text.length == 2 && oldValue.text.length == 1) {
+      return TextEditingValue(
+        text: '${newValue.text}:',
+        selection: TextSelection.collapsed(offset: 3),
+      );
+    }
+    
+    // Limit to 5 characters (HH:MM)
+    if (newValue.text.length > 5) {
+      return oldValue;
+    }
+    
+    return newValue;
+  }
+}
+
+

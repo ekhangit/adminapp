@@ -88,4 +88,35 @@ class FlightCommService {
       return ResponseClass.error(e.toString());
     }
   }
+
+  /// Fetch all flight communications
+  Future<ResponseClass<List<FlightsModelMini>>> ptsAllFlightComm({
+    required String date,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.ptsAllFlights,
+        data: {"date": date},
+      );
+
+      log("[ptsAllFlightComm] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body']['all_flights'] ?? [];
+
+        final List<FlightsModelMini> data =
+            rawList.map((e) => FlightsModelMini.fromJson(e)).toList();
+
+        return ResponseClass.success(data);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
 }
