@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>API_KEY</key>
+	<string>AIzaSyBGP4xzh8a2yZKvxF5_iwIbJ5dYneQ3sMI</string>
+	<key>GCM_SENDER_ID</key>
+	<string>564595847008</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.aviation.dhsys</string>
+	<key>PROJECT_ID</key>
+	<string>dhsys-ab9af</string>
+	<key>STORAGE_BUCKET</key>
+	<string>dhsys-ab9af.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:564595847008:ios:3f72f1396a17158a3c3805</string>
+	<key>DATABASE_URL</key>
+	<string>https://dhsys-ab9af-default-rtdb.firebaseio.com</string>
+</dict>
+</plist>

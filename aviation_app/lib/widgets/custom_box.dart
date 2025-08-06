@@ -63,6 +63,72 @@ class CustomBox extends StatelessWidget {
   }
 }
 
+// class CustomBox2 extends StatelessWidget {
+//   final String title;
+//   final String iconPath;
+//   final VoidCallback onTap;
+
+//   const CustomBox2({
+//     super.key,
+//     required this.title,
+//     required this.iconPath,
+//     required this.onTap,
+//   });
+
+//   @override
+//   Widget build(BuildContext context) {
+//     return GestureDetector(
+//       onTap: onTap,
+//       child: Container(
+//         width: (MediaQuery.of(context).size.width - 50) / 2, // 2 per row
+//         margin: const EdgeInsets.only(bottom: 6),
+//         padding: const EdgeInsets.all(20),
+//         decoration: BoxDecoration(
+//           // color: AppColors.colorWhite,
+//           // borderRadius: BorderRadius.circular(12),
+//           // boxShadow: [
+//           //   BoxShadow(
+//           //     color: Colors.black12,
+//           //     blurRadius: 8,
+//           //     offset: Offset(0, 4),
+//           //   ),
+//           // ],
+//         ),
+//         child: Column(
+//           mainAxisSize: MainAxisSize.min,
+//           children: [
+//             Container(
+//               // padding: const EdgeInsets.all(20),
+//               decoration: BoxDecoration(
+//                 // color: Color(0xFF0083e6).withOpacity(0.25),
+//                 // color: AppColors.colorWarning,
+//                 shape: BoxShape.circle,
+//               ),
+//               // child: SvgPicture.asset(
+//               //   iconPath,
+//               //   width: 45,
+//               //   height: 45,
+//               //   color: Colors.white,
+//               // ),
+//               child: Image.asset(iconPath, width: 75, height: 75),
+//             ),
+//             const SizedBox(height: 12),
+//             Text(
+//               title,
+//               textAlign: TextAlign.center,
+//               style: const TextStyle(
+//                 fontWeight: FontWeight.w600,
+//                 fontSize: 13.5,
+//                 color: Colors.white,
+//               ),
+//             ),
+//           ],
+//         ),
+//       ),
+//     );
+//   }
+// }
+
 class CustomBox2 extends StatelessWidget {
   final String title;
   final String iconPath;
@@ -80,45 +146,20 @@ class CustomBox2 extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: (MediaQuery.of(context).size.width - 50) / 2, // 2 per row
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          // color: AppColors.colorWhite,
-          // borderRadius: BorderRadius.circular(12),
-          // boxShadow: [
-          //   BoxShadow(
-          //     color: Colors.black12,
-          //     blurRadius: 8,
-          //     offset: Offset(0, 4),
-          //   ),
-          // ],
-        ),
+        width: (MediaQuery.of(context).size.width - 50) / 2,
+        margin: const EdgeInsets.only(bottom: 5),
+        padding: const EdgeInsets.all(16),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            Container(
-              // padding: const EdgeInsets.all(20),
-              decoration: BoxDecoration(
-                // color: Color(0xFF0083e6).withOpacity(0.25),
-                // color: AppColors.colorWarning,
-                shape: BoxShape.circle,
-              ),
-              // child: SvgPicture.asset(
-              //   iconPath,
-              //   width: 45,
-              //   height: 45,
-              //   color: Colors.white,
-              // ),
-              child: Image.asset(iconPath, width: 75, height: 75),
-            ),
+            Image.asset(iconPath, width: 70, height: 70),
             const SizedBox(height: 12),
             Text(
               title,
               textAlign: TextAlign.center,
               style: const TextStyle(
                 fontWeight: FontWeight.w600,
-                fontSize: 13.5,
+                fontSize: 13.0,
                 color: Colors.white,
               ),
             ),

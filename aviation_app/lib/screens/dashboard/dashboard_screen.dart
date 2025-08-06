@@ -27,24 +27,18 @@ class DashboardScreen extends StatelessWidget {
         children: [
           // 🔵 Top Section
           Container(
-            height: 150,
+            height: 135,
             width: double.infinity,
             color: AppColors.colorWhite,
             child: SafeArea(
               bottom: false,
               child: Container(
-                // color: Colors.yellow,
-                decoration: BoxDecoration(
-                  borderRadius: const BorderRadius.only(
-                    bottomLeft: Radius.circular(16),
-                    bottomRight: Radius.circular(16),
-                  ),
-                ),
+                // decoration: BoxDecoration(color: Colors.yellow),
                 padding: const EdgeInsets.all(24.0),
                 child: Row(
                   children: [
                     CircleAvatar(
-                      radius: 24,
+                      radius: 20,
                       backgroundColor: AppColors.colorPrimary.withValues(
                         alpha: 0.2,
                       ),
@@ -53,7 +47,7 @@ class DashboardScreen extends StatelessWidget {
                         style: TextStyle(
                           color: AppColors.colorPrimary,
                           fontWeight: FontWeight.bold,
-                          fontSize: 18,
+                          fontSize: 20,
                         ),
                       ),
                     ),
@@ -66,28 +60,20 @@ class DashboardScreen extends StatelessWidget {
                           user.name,
                           style: TextStyle(
                             color: AppColors.colorPrimary,
-                            fontSize: 16.0,
+                            fontSize: 15.0,
                             fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                        Text(
-                          "Munich",
-                          style: TextStyle(
-                            color: AppColors.colorPrimary,
-                            fontSize: 14.0,
-                            fontWeight: FontWeight.w500,
                           ),
                         ),
                       ],
                     ),
                     const Spacer(),
                     CircleAvatar(
-                      radius: 24,
+                      radius: 20,
                       backgroundColor: AppColors.colorPrimary.withOpacity(0.2),
                       child: Icon(
                         Icons.notifications,
                         color: AppColors.colorPrimary,
-                        size: 28,
+                        size: 24,
                       ),
                     ),
                   ],
@@ -97,84 +83,172 @@ class DashboardScreen extends StatelessWidget {
           ),
 
           // ⚪ White content starting after the top, but height wraps content
+          // Column(
+          //   children: [
+          //     const SizedBox(height: 135), // Offset to clear top container
+          //     Expanded(
+          //       child: Container(
+          //         width: double.infinity,
+          //         decoration: BoxDecoration(
+          //           // color: AppColors.colorPrimary.withOpacity(0.95),
+          //           gradient: appThemeGradientSoft2,
+          //           // borderRadius: BorderRadius.only(
+          //           //   topRight: Radius.circular(24),
+          //           //   topLeft: Radius.circular(24),
+          //           // ),
+          //         ),
+          //         child: Center(
+          //           child: SingleChildScrollView(
+          //             child: Column(
+          //               crossAxisAlignment: CrossAxisAlignment.start,
+          //               mainAxisSize: MainAxisSize.min,
+          //               children: [
+          //                 Wrap(
+          //                   spacing: 12,
+          //                   children: [
+          //                     CustomBox2(
+          //                       title: 'Attendance',
+          //                       iconPath: 'assets/images/hr_final.png',
+          //                       onTap:
+          //                           () =>
+          //                               Get.to(() => const AttendanceScreen()),
+          //                     ),
+          //                     CustomBox2(
+          //                       title: 'Flight Comm',
+          //                       iconPath: 'assets/images/flight_comm_final.png',
+          //                       onTap:
+          //                           () =>
+          //                               Get.to(() => const FlightCommScreen()),
+          //                     ),
+
+          //                     CustomBox2(
+          //                       title: 'My Roster',
+          //                       iconPath: 'assets/images/my_duties_final.png',
+          //                       onTap: () => (),
+          //                     ),
+          //                     CustomBox2(
+          //                       title: 'PTS',
+          //                       iconPath: 'assets/images/airlines_final.png',
+          //                       onTap: () => Get.to(() => const PtsScreen()),
+          //                     ),
+
+          //                     CustomBox2(
+          //                       title: 'Flight Tracker',
+          //                       iconPath:
+          //                           'assets/images/flight_tracker_final.png',
+          //                       onTap: () => (),
+          //                     ),
+          //                     CustomBox2(
+          //                       title: 'Flight Watch',
+          //                       iconPath:
+          //                           'assets/images/flight_watch_final.png',
+          //                       onTap: () => (),
+          //                     ),
+          //                     CustomBox2(
+          //                       title: 'Leave Request',
+          //                       iconPath: 'assets/images/airlines_final.png',
+          //                       onTap:
+          //                           () => Get.to(
+          //                             () => const LeaveRequestScreen(),
+          //                           ),
+          //                     ),
+          //                     CustomBox2(
+          //                       title: 'Staff Watch',
+          //                       iconPath: 'assets/images/staff_watch_final.png',
+          //                       onTap: () => (),
+          //                     ),
+          //                   ],
+          //                 ),
+          //               ],
+          //             ),
+          //           ),
+          //         ),
+          //       ),
+          //     ),
+          //   ],
+          // ),
           Column(
             children: [
-              const SizedBox(height: 150), // Offset to clear top container
+              const SizedBox(height: 135),
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(
-                    // color: AppColors.colorPrimary.withOpacity(0.95),
-                    gradient: appThemeGradientSoft2,
-                    borderRadius: BorderRadius.only(
-                      topRight: Radius.circular(24),
-                      topLeft: Radius.circular(24),
+                  decoration: BoxDecoration(gradient: appThemeGradientSoft2),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 20,
                     ),
-                  ),
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Wrap(
-                            spacing: 12,
-                            children: [
-                              CustomBox2(
-                                title: 'Attendance',
-                                iconPath: 'assets/images/hr_final.png',
-                                onTap:
-                                    () =>
-                                        Get.to(() => const AttendanceScreen()),
-                              ),
-                              CustomBox2(
-                                title: 'Flight Comm',
-                                iconPath: 'assets/images/flight_comm_final.png',
-                                onTap:
-                                    () =>
-                                        Get.to(() => const FlightCommScreen()),
-                              ),
-
-                              CustomBox2(
-                                title: 'My Roster',
-                                iconPath: 'assets/images/my_duties_final.png',
-                                onTap: () => (),
-                              ),
-                              CustomBox2(
-                                title: 'PTS',
-                                iconPath: 'assets/images/airlines_final.png',
-                                onTap: () => Get.to(() => const PtsScreen()),
-                              ),
-
-                              CustomBox2(
-                                title: 'Flight Tracker',
-                                iconPath:
-                                    'assets/images/flight_tracker_final.png',
-                                onTap: () => (),
-                              ),
-                              CustomBox2(
-                                title: 'Flight Watch',
-                                iconPath:
-                                    'assets/images/flight_watch_final.png',
-                                onTap: () => (),
-                              ),
-                              CustomBox2(
-                                title: 'Leave Request',
-                                iconPath: 'assets/images/airlines_final.png',
-                                onTap:
-                                    () => Get.to(
-                                      () => const LeaveRequestScreen(),
-                                    ),
-                              ),
-                              CustomBox2(
-                                title: 'Staff Watch',
-                                iconPath: 'assets/images/staff_watch_final.png',
-                                onTap: () => (),
-                              ),
-                            ],
+                    child: LayoutBuilder(
+                      builder: (context, constraints) {
+                        final allItems = <CustomBox2>[
+                          CustomBox2(
+                            title: 'Attendance',
+                            iconPath: 'assets/images/hr_final.png',
+                            onTap: () => Get.to(() => const AttendanceScreen()),
                           ),
-                        ],
-                      ),
+                          CustomBox2(
+                            title: 'Flight Comm',
+                            iconPath: 'assets/images/flight_comm_final.png',
+                            onTap: () => Get.to(() => const FlightCommScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'My Roster',
+                            iconPath: 'assets/images/my_duties_final.png',
+                            onTap: () {},
+                          ),
+                          CustomBox2(
+                            title: 'PTS',
+                            iconPath: 'assets/images/airlines_final.png',
+                            onTap: () => Get.to(() => const PtsScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'Flight Tracker',
+                            iconPath: 'assets/images/flight_tracker_final.png',
+                            onTap: () {},
+                          ),
+                          CustomBox2(
+                            title: 'Flight Watch',
+                            iconPath: 'assets/images/flight_watch_final.png',
+                            onTap: () {},
+                          ),
+                          CustomBox2(
+                            title: 'Leave Request',
+                            iconPath: 'assets/images/airlines_final.png',
+                            onTap:
+                                () => Get.to(() => const LeaveRequestScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'Staff Watch',
+                            iconPath: 'assets/images/staff_watch_final.png',
+                            onTap: () {},
+                          ),
+                          // Add more items as needed...
+                        ];
+
+                        if (allItems.length <= 8) {
+                          return Wrap(
+                            spacing: 12,
+                            runSpacing: 12,
+                            children: allItems,
+                          );
+                        } else {
+                          return GridView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            shrinkWrap: true,
+                            itemCount: allItems.length,
+                            padding: const EdgeInsets.only(bottom: 20),
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                                  crossAxisCount: 2,
+                                  crossAxisSpacing: 12,
+                                  mainAxisSpacing: 12,
+                                  childAspectRatio: 1,
+                                ),
+                            itemBuilder: (context, index) => allItems[index],
+                          );
+                        }
+                      },
                     ),
                   ),
                 ),

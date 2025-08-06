@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../../models/aircraft_model.dart';
 import '../../../../models/flight_no_model.dart';
 import '../../../../utils/app_colors.dart';
@@ -712,7 +713,8 @@ class GenericSelectDropdown<T> extends StatelessWidget {
   final List<T> options;
   final Rx<T?> selectedItem;
   final String hint;
-  final String Function(T) displayText;
+  final Widget Function(T) displayText;
+  final Widget Function(T)? leadingIcon;
   final bool Function(T, String) filterCondition;
   final bool Function(T, T) isSelected;
   final Function(T)? onChanged;
@@ -723,6 +725,7 @@ class GenericSelectDropdown<T> extends StatelessWidget {
     required this.options,
     required this.selectedItem,
     required this.displayText,
+    this.leadingIcon,
     required this.filterCondition,
     required this.isSelected,
     this.hint = "Select item",
@@ -738,7 +741,7 @@ class GenericSelectDropdown<T> extends StatelessWidget {
           if (label != null)
             Text(
               label!,
-              style: const TextStyle(
+              style: GoogleFonts.robotoCondensed(
                 fontWeight: FontWeight.w600,
                 fontSize: 14,
                 color: Colors.black87,
@@ -758,18 +761,22 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Expanded(
-                    child: Text(
-                      selectedItem.value != null
-                          ? displayText(selectedItem.value!)
-                          : hint,
-                      style: TextStyle(
-                        color:
-                            selectedItem.value == null
-                                ? Colors.grey
-                                : Colors.black,
-                        fontSize: 14,
-                      ),
-                      overflow: TextOverflow.ellipsis,
+                    child: Row(
+                      children: [
+                        if (selectedItem.value != null && leadingIcon != null)
+                          Padding(
+                            padding: const EdgeInsets.only(right: 6),
+                            child: leadingIcon!(selectedItem.value!),
+                          ),
+                        if (selectedItem.value != null)
+                          Expanded(child: displayText(selectedItem.value!)),
+                        if (selectedItem.value == null)
+                          Text(
+                            hint,
+                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                      ],
                     ),
                   ),
                   const Icon(Icons.arrow_drop_down),
@@ -811,7 +818,7 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                       if (label != null)
                         Text(
                           label!,
-                          style: const TextStyle(
+                          style: GoogleFonts.roboto(
                             fontWeight: FontWeight.w600,
                             fontSize: 16,
                           ),
@@ -866,19 +873,11 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                                 borderRadius: BorderRadius.circular(6),
                               ),
                               child: ListTile(
-                                title: Text(
-                                  displayText(item),
-                                  style: TextStyle(
-                                    fontWeight:
-                                        selected
-                                            ? FontWeight.bold
-                                            : FontWeight.normal,
-                                    color:
-                                        selected
-                                            ? AppColors.colorPrimary
-                                            : Colors.black,
-                                  ),
-                                ),
+                                leading:
+                                    leadingIcon != null
+                                        ? leadingIcon!(item)
+                                        : null,
+                                title: displayText(item),
                                 trailing:
                                     selected
                                         ? const Icon(

@@ -30,14 +30,23 @@ class PtsScreen extends StatelessWidget {
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),
             onPressed: () => Get.back(),
           ),
+
           actions: [],
           backgroundColor: AppColors.colorPrimary,
         ),
         floatingActionButton: Obx(
           () =>
               controller.selectedPtsFlight.value != null
-                  ? FloatingActionButton.extended(
-                    label:
+                  ? FloatingActionButton(
+                    backgroundColor:
+                        controller.isSendingPts.value
+                            ? Colors.grey
+                            : Colors.green,
+                    onPressed:
+                        controller.isSendingPts.value
+                            ? null
+                            : controller.sendPts,
+                    child:
                         controller.isSendingPts.value
                             ? const SizedBox(
                               width: 20,
@@ -47,25 +56,12 @@ class PtsScreen extends StatelessWidget {
                                 strokeWidth: 2,
                               ),
                             )
-                            : const Text(
-                              'Save Changes',
-                              style: TextStyle(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                            ),
-                    backgroundColor:
-                        controller.isSendingPts.value
-                            ? Colors.grey
-                            : Colors.green,
-                    onPressed:
-                        controller.isSendingPts.value
-                            ? null
-                            : controller.sendPts,
-                    icon:
-                        controller.isSendingPts.value
-                            ? null
                             : const Icon(Icons.save, color: Colors.white),
+
+                    // icon:
+                    //     controller.isSendingPts.value
+                    //         ? null
+                    //         : const Icon(Icons.save, color: Colors.white),
                   )
                   : SizedBox(),
         ),
@@ -81,72 +77,74 @@ class PtsScreen extends StatelessWidget {
                     SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.all(8.0),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            // Back arrow
-                            IconButton(
-                              onPressed: () => controller.navigateDate(-1),
-                              icon: Icon(
-                                Icons.chevron_left,
-                                size: 18,
-                                color: Colors.grey.shade700,
+                        child: Obx(
+                          () => Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              // Back arrow
+                              IconButton(
+                                onPressed: () => controller.navigateDate(-1),
+                                icon: Icon(
+                                  Icons.chevron_left,
+                                  size: 18,
+                                  color: Colors.grey.shade700,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
-                            const SizedBox(width: 4),
+                              const SizedBox(width: 4),
 
-                            // Date part
-                            GestureDetector(
-                              onTap: () {
-                                // Add date picker
-                                _showDatePicker(context, controller);
-                              },
-                              child: Row(
-                                children: [
-                                  Text(
-                                    _getDatePart(
-                                      controller.formattedDateTime.value,
+                              // Date part
+                              GestureDetector(
+                                onTap: () {
+                                  // Add date picker
+                                  _showDatePicker(context, controller);
+                                },
+                                child: Row(
+                                  children: [
+                                    Text(
+                                      _getDatePart(
+                                        controller.formattedDateTime.value,
+                                      ),
+                                      style: GoogleFonts.roboto(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.redAccent.shade200,
+                                      ),
                                     ),
-                                    style: GoogleFonts.roboto(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.redAccent.shade200,
-                                    ),
-                                  ),
 
-                                  const SizedBox(width: 4),
+                                    const SizedBox(width: 4),
 
-                                  Text(
-                                    _getTimePart(
-                                      controller.formattedDateTime.value,
+                                    Text(
+                                      _getTimePart(
+                                        controller.formattedDateTime.value,
+                                      ),
+                                      style: GoogleFonts.roboto(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.black87,
+                                      ),
                                     ),
-                                    style: GoogleFonts.roboto(
-                                      fontSize: 12.5,
-                                      fontWeight: FontWeight.w600,
-                                      color: Colors.black87,
-                                    ),
-                                  ),
-                                ],
+                                  ],
+                                ),
                               ),
-                            ),
 
-                            // Forward arrow
-                            IconButton(
-                              onPressed: () => controller.navigateDate(1),
-                              icon: Icon(
-                                Icons.chevron_right,
-                                size: 18,
-                                color: Colors.grey.shade700,
+                              // Forward arrow
+                              IconButton(
+                                onPressed: () => controller.navigateDate(1),
+                                icon: Icon(
+                                  Icons.chevron_right,
+                                  size: 18,
+                                  color: Colors.grey.shade700,
+                                ),
+                                padding: EdgeInsets.zero,
+                                constraints: const BoxConstraints(),
                               ),
-                              padding: EdgeInsets.zero,
-                              constraints: const BoxConstraints(),
-                            ),
 
-                            // Time part (outside the container)
-                          ],
+                              // Time part (outside the container)
+                            ],
+                          ),
                         ),
                       ),
                     ),
@@ -160,7 +158,22 @@ class PtsScreen extends StatelessWidget {
                               hint: 'Select Flight',
                               options: controller.ptsAllFlights,
                               selectedItem: controller.selectedPtsFlight,
-                              displayText: (item) => item.flightInfo,
+                              displayText:
+                                  (item) => Text(
+                                    '  ${item.flightInfo}  |  ${controller.formattedShortDate.value}  |  ${item.departureAirport ?? ''}-${item.arrivalAirport ?? ''}',
+                                    style: GoogleFonts.robotoCondensed(
+                                      fontSize: 15,
+                                      color: Colors.black87,
+                                    ),
+                                  ),
+                              leadingIcon:
+                                  (item) => Image.asset(
+                                    item.isDeparture
+                                        ? "assets/images/outbound.png"
+                                        : "assets/images/inbound.png",
+                                    height: 20,
+                                    width: 20,
+                                  ),
                               filterCondition:
                                   (item, term) => (item.flightInfo)
                                       .toLowerCase()
@@ -168,9 +181,7 @@ class PtsScreen extends StatelessWidget {
                               isSelected: (item, selected) => item == selected,
                               onChanged: (selectedFlight) {
                                 // This will be called whenever a flight is selected
-                                if (selectedFlight != null) {
-                                  controller.fetchPTSOptions(selectedFlight.id);
-                                }
+                                controller.fetchPTSOptions(selectedFlight.id);
                               },
                             ),
                           ],
@@ -180,15 +191,18 @@ class PtsScreen extends StatelessWidget {
 
                     SliverToBoxAdapter(
                       child: Obx(() {
-                        if (controller.selectedPtsFlight.value == null) {
-                          return const SizedBox.shrink();
-                        }
-                        if (controller.isLoadingPtsOptions.value) {
+                        if (controller.isLoadingFlights.value ||
+                            controller.isLoadingPtsOptions.value) {
                           return Padding(
-                            padding: const EdgeInsets.only(top: 20),
+                            padding: const EdgeInsets.only(top: 30),
                             child: CustomLoader(),
                           );
                         }
+
+                        if (controller.selectedPtsFlight.value == null) {
+                          return const SizedBox.shrink();
+                        }
+
                         if (controller.getPTSOptions.isEmpty) {
                           return const SizedBox.shrink();
                         }
@@ -235,10 +249,19 @@ class PtsScreen extends StatelessWidget {
                                         )
                                         .toList();
 
-                                final nonDropdowns =
+                                final textFields =
                                     controller.getPTSOptions
                                         .where(
-                                          (field) => !_isDropdownField(field),
+                                          (field) => _isRegularTextField(field),
+                                        )
+                                        .toList();
+
+                                final timeFields =
+                                    controller.getPTSOptions
+                                        .where(
+                                          (field) =>
+                                              !_isDropdownField(field) &&
+                                              !_isRegularTextField(field),
                                         )
                                         .toList();
 
@@ -273,7 +296,7 @@ class PtsScreen extends StatelessWidget {
                                                 label: dropdownsInRow[0]
                                                     .toUpperCase()
                                                     .replaceAll('_', ' '),
-                                                options: ['Yes', 'No'],
+                                                options: ['JETWAY', 'STEPS'],
                                                 selectedItem:
                                                     controller
                                                         .ptsDropdownSelections[dropdownsInRow[0]]!
@@ -320,25 +343,52 @@ class PtsScreen extends StatelessWidget {
                                   );
                                 }
 
-                                // 2. Render timerField2 widgets in rows of up to 3
-                                for (
-                                  int i = 0;
-                                  i < nonDropdowns.length;
-                                  i += 3
-                                ) {
-                                  final fieldsInRow = nonDropdowns.sublist(
+                                // 2. Render text fields (accepted_pax, mhb_ahl) in rows of up to 3
+                                for (int i = 0; i < textFields.length; i += 2) {
+                                  final fieldsInRow = textFields.sublist(
                                     i,
-                                    i + 3 > nonDropdowns.length
-                                        ? nonDropdowns.length
-                                        : i + 3,
+                                    i + 2 > textFields.length
+                                        ? textFields.length
+                                        : i + 2,
                                   );
 
-                                  // Find the maximum lines needed in this row
-                                  // final maxLinesInRow = fieldsInRow.fold(1, (max, field) {
-                                  //   final label = field.toUpperCase().replaceAll('_', ' ');
-                                  //   final lineCount = '\n'.allMatches(label).length + 1;
-                                  //   return lineCount > max ? lineCount : max;
-                                  // });
+                                  widgets.add(
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 16,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // First field (always exists)
+                                          _buildTextField(
+                                            fieldsInRow[0],
+                                            controller,
+                                            1,
+                                          ),
+
+                                          // Second field (if exists)
+                                          if (fieldsInRow.length > 1)
+                                            SizedBox(width: 10),
+                                          if (fieldsInRow.length > 1)
+                                            _buildTextField(
+                                              fieldsInRow[1],
+                                              controller,
+                                              1,
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                // 2. Render timerField2 widgets in rows of up to 3
+                                for (int i = 0; i < timeFields.length; i += 3) {
+                                  final fieldsInRow = timeFields.sublist(
+                                    i,
+                                    i + 3 > timeFields.length
+                                        ? timeFields.length
+                                        : i + 3,
+                                  );
 
                                   widgets.add(
                                     Padding(
@@ -350,7 +400,6 @@ class PtsScreen extends StatelessWidget {
                                             fieldsInRow[0],
                                             controller,
                                             2,
-                                            context,
                                           ),
 
                                           // Second field (if exists)
@@ -363,7 +412,6 @@ class PtsScreen extends StatelessWidget {
                                                 fieldsInRow[1],
                                                 controller,
                                                 2,
-                                                context,
                                               ),
                                             ),
 
@@ -377,7 +425,6 @@ class PtsScreen extends StatelessWidget {
                                                 fieldsInRow[2],
                                                 controller,
                                                 2,
-                                                context,
                                               ),
                                             ),
                                         ],
@@ -435,12 +482,7 @@ class PtsScreen extends StatelessWidget {
   }
 
   // Helper widget for consistent time field styling
-  Widget _buildTimeField(
-    String field,
-    PtsController controller,
-    int maxLines,
-    BuildContext context,
-  ) {
+  Widget _buildTimeField(String field, PtsController controller, int maxLines) {
     return SizedBox(
       width: _calculateFieldWidth(), // Calculate width based on field count
       height: 110,
@@ -452,7 +494,6 @@ class PtsScreen extends StatelessWidget {
           iconSize: 24,
           labelMaxLines: maxLines,
           ptsController: controller,
-          context: context,
         ),
       ),
     );
@@ -494,6 +535,10 @@ class PtsScreen extends StatelessWidget {
 
   bool _isDropdownField(String field) {
     return field == 'jetway/steps' || field == 'back_steps_used';
+  }
+
+  bool _isRegularTextField(String field) {
+    return field == 'accepted_pax' || field == 'mhb_ahl';
   }
 }
 
@@ -612,6 +657,41 @@ Widget timerField2({
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildTextField(String field, PtsController controller, int lines) {
+  return Expanded(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          field.toUpperCase().replaceAll('_', ' '),
+          style: GoogleFonts.roboto(
+            fontSize: 10.5,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: TextField(
+            controller: controller.ptsTextControllers[field],
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              border: InputBorder.none,
+            ),
+            style: GoogleFonts.roboto(fontSize: 12, color: Colors.black87),
+            maxLines: lines,
+            keyboardType: TextInputType.text,
           ),
         ),
       ],

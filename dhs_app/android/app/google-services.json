@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "564595847008",
+    "firebase_url": "https://dhsys-ab9af-default-rtdb.firebaseio.com",
+    "project_id": "dhsys-ab9af",
+    "storage_bucket": "dhsys-ab9af.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:564595847008:android:5010fcedf5d393243c3805",
+        "android_client_info": {
+          "package_name": "com.aviation.dhsys"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBMm7JXy2cZGgSNt4avXV4xACI-m-XuLtM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

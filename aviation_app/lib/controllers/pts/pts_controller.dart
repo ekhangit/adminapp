@@ -17,6 +17,7 @@ import '../storage/data_storage_controller.dart';
 
 class PtsController extends GetxController {
   RxString formattedDateTime = ''.obs;
+  RxString formattedShortDate = ''.obs;
   Timer? _timer;
 
   Rx<DateTime?> selectedDate = Rx<DateTime?>(null);
@@ -38,6 +39,7 @@ class PtsController extends GetxController {
   }
 
   Future<void> navigateDate(int daysToAdd) async {
+    log('[navigateDate] daysToAdd : $daysToAdd');
     final currentDate = selectedDate.value ?? DateTime.now().toUtc();
     final newDate = currentDate.add(Duration(days: daysToAdd));
 
@@ -51,6 +53,14 @@ class PtsController extends GetxController {
 
     selectedDate.value = newDate;
     _updateTime(); // Add this to update the display
+
+    await fetchPtsAllFlights();
+
+    // Clear previous selections
+    selectedPtsFlight.value = null;
+    getPTSOptions.clear();
+    ptsTimeControllers.clear();
+    ptsDropdownSelections.clear();
   }
 
   void _updateTime() {
@@ -74,6 +84,9 @@ class PtsController extends GetxController {
     }
 
     // print('formattedDateTime: ${formattedDateTime.value}');
+    // Short date format (28 JUL)
+    formattedShortDate.value =
+        DateFormat('dd MMM').format(dateToShow).toUpperCase();
   }
 
   // Add this method to convert time based on selected mode
@@ -131,7 +144,16 @@ class PtsController extends GetxController {
     }
 
     selectedDate.value = newDate;
-    print('[PtsController] Date changed to: ${selectedDate.value}');
+    _updateTime();
+
+    // Fetch flights for the new date
+    await fetchPtsAllFlights();
+
+    // Clear previous selections
+    selectedPtsFlight.value = null;
+    getPTSOptions.clear();
+    ptsTimeControllers.clear();
+    ptsDropdownSelections.clear();
   }
 
   // PTS All Flight
@@ -142,10 +164,14 @@ class PtsController extends GetxController {
 
   Future<void> fetchPtsAllFlights() async {
     isLoadingFlights.value = true; // Start loading
-    final dateToFetch = selectedDate.value ?? DateTime.now().toUtc();
-    final formattedDate = DateFormat('yyyy-MM-dd').format(dateToFetch);
+    // final dateToFetch = selectedDate.value ?? DateTime.now().toUtc();
+    // final formattedDate = DateFormat('yyyy-MM-dd').format(dateToFetch);
 
     try {
+      final dateToFetch = selectedDate.value ?? DateTime.now().toUtc();
+      final formattedDate = DateFormat('yyyy-MM-dd').format(dateToFetch);
+      log('[fetchPtsAllFlights] Fetching flights for date: $formattedDate');
+
       final response = await FlightCommService.instance.ptsAllFlightComm(
         date: formattedDate,
       );
@@ -176,13 +202,18 @@ class PtsController extends GetxController {
 
   final RxMap<String, TextEditingController> ptsTimeControllers =
       <String, TextEditingController>{}.obs;
+
   final RxMap<String, String> ptsDropdownSelections = <String, String>{}.obs;
+
+  final RxMap<String, TextEditingController> ptsTextControllers =
+      <String, TextEditingController>{}.obs;
 
   Future<void> fetchPTSOptions(int flightId) async {
     isLoadingPtsOptions.value = true;
     try {
       // Clear previous selections
       ptsTimeControllers.clear();
+      ptsTextControllers.clear();
       ptsDropdownSelections.clear();
 
       final response = await FlightChatService.instance.getPTSOption(
@@ -202,6 +233,11 @@ class PtsController extends GetxController {
           if (!_isDropdownField(field)) {
             // Initialize with empty string if not already created
             ptsTimeControllers.putIfAbsent(
+              field,
+              () => TextEditingController(text: ''),
+            );
+          } else if (_isRegularTextField(field)) {
+            ptsTextControllers.putIfAbsent(
               field,
               () => TextEditingController(text: ''),
             );
@@ -227,6 +263,10 @@ class PtsController extends GetxController {
 
   bool _isDropdownField(String field) {
     return ["jetway/steps", "back_steps_used"].contains(field);
+  }
+
+  bool _isRegularTextField(String field) {
+    return ["accepted_pax", "mhb_ahl"].contains(field.toLowerCase());
   }
 
   // Update this method to handle time mode
@@ -407,3 +447,4 @@ class PtsController extends GetxController {
     }
   }
 }
+

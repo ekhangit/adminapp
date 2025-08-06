@@ -35,19 +35,6 @@ class FlightCommScreen extends StatelessWidget {
           ),
 
           actions: [
-            // Obx(
-            //   () =>
-            //       controller.selectedFlightIndex.value == -1
-            //           ? IconButton(
-            //             icon: const Icon(
-            //               Icons.date_range,
-            //               size: 20,
-            //               color: Colors.white,
-            //             ),
-            //             onPressed: () => _showDatePicker(context, controller),
-            //           )
-            //           : const SizedBox(),
-            // ),
             Obx(() {
               return controller.selectedFlightIndex.value != -1
                   ? PopupMenuButton<int>(
@@ -117,6 +104,7 @@ class FlightCommScreen extends StatelessWidget {
                           pinned: true,
                           delegate: _FilterHeaderDelegate(controller),
                         ),
+
                         SliverToBoxAdapter(
                           child: Obx(() {
                             if (controller.isFlightCommLoading.value) {
@@ -203,19 +191,6 @@ class FlightCommScreen extends StatelessWidget {
                     return controller.isRefreshing.value
                         ? Container(
                           color: Colors.black.withValues(alpha: 0.25),
-                          // child: Center(
-                          //   child: Container(
-                          //     padding: const EdgeInsets.all(12.0),
-                          //     height: 60,
-                          //     width: 60,
-                          //     child: const Center(
-                          //       child: CircularProgressIndicator(
-                          //         strokeWidth: 2.0,
-                          //         color: AppColors.skyBlueColor,
-                          //       ),
-                          //     ),
-                          //   ),
-                          // ),
                         )
                         : const SizedBox.shrink();
                   }),
@@ -270,59 +245,6 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                 }),
               ),
             ),
-
-            // const SizedBox(height: 8),
-
-            // 🔹 Date-Time
-            // RichText(
-            //   text: TextSpan(
-            //     children: [
-            //       // Back arrow
-            //       WidgetSpan(
-            //         child: GestureDetector(
-            //           onTap: () => controller.navigateDate(-1),
-            //           child: Icon(
-            //             Icons.chevron_left,
-            //             size: 18,
-            //             color: Colors.grey.shade600,
-            //           ),
-            //         ),
-            //       ),
-
-            //       // const TextSpan(text: '   '), // spacing
-            //       TextSpan(
-            //         text: _getDatePart(controller.formattedDateTime.value),
-            //         style: TextStyle(
-            //           fontSize: 12.5,
-            //           fontWeight: FontWeight.w600,
-            //           color: Colors.redAccent.shade200,
-            //         ),
-            //       ),
-            //       const TextSpan(text: '  '), // spacing
-            //       TextSpan(
-            //         text: _getTimePart(controller.formattedDateTime.value),
-            //         style: const TextStyle(
-            //           fontSize: 12.5,
-            //           fontWeight: FontWeight.w600,
-            //           color: Colors.black87,
-            //         ),
-            //       ),
-
-            //       // const TextSpan(text: '   '), // spacing
-            //       // Forward arrow
-            //       WidgetSpan(
-            //         child: GestureDetector(
-            //           onTap: () => controller.navigateDate(1),
-            //           child: Icon(
-            //             Icons.chevron_right,
-            //             size: 18,
-            //             color: Colors.grey.shade600,
-            //           ),
-            //         ),
-            //       ),
-            //     ],
-            //   ),
-            // ),
 
             // Enhanced version with visual integration
             Row(
@@ -387,7 +309,6 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                 // Time part (outside the container)
               ],
             ),
-            // Add time widget separately if needed
           ],
         );
       }),

@@ -248,38 +248,28 @@ class FlightDelay {
   );
 }
 
-
 class FlightsModelMini {
   final int id;
   final String flightInfo;
-  final int? airlineId;
-  final int? departureAirportId;
-  final int? arrivalAirportId;
-  final String? scheduledDepartureTime;
-  final String? scheduledArrivalTime;
-  final String? status;
+  final String? departureAirport;
+  final String? arrivalAirport;
 
   FlightsModelMini({
     required this.id,
     required this.flightInfo,
-     this.airlineId,
-     this.departureAirportId,
-     this.arrivalAirportId,
-     this.scheduledDepartureTime,
-     this.scheduledArrivalTime,
-     this.status,
+    this.departureAirport,
+    this.arrivalAirport,
   });
 
   factory FlightsModelMini.fromJson(Map<String, dynamic> json) {
     return FlightsModelMini(
       id: json['id'],
       flightInfo: json['flight_info'] ?? '',
-      airlineId: json['airline_id'],
-      departureAirportId: json['departure_airport_id'],
-      arrivalAirportId: json['arrival_airport_id'],
-      scheduledDepartureTime: json['scheduled_departure_time'] ?? '',
-      scheduledArrivalTime: json['scheduled_arrival_time'] ?? '',
-      status: json['status'] ?? '',
+      departureAirport: json['departure_airport'],
+      arrivalAirport: json['arrival_airport'],
     );
   }
+
+  bool get isDeparture =>
+      ['FRA', 'MUC', 'DUS', 'HAM', 'STR'].contains(departureAirport);
 }
