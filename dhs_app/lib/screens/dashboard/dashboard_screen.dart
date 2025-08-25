@@ -5,6 +5,7 @@ import 'package:dhs_app/screens/pts/pts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../constant.dart';
 import '../../controllers/storage/data_storage_controller.dart';
@@ -45,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       child: Text(
                         user.name.isNotEmpty ? user.name[0] : "?",
-                        style: TextStyle(
+                        style: GoogleFonts.roboto(
                           color: AppColors.colorPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -59,7 +60,7 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(
                           user.name,
-                          style: TextStyle(
+                          style: GoogleFonts.roboto(
                             color: AppColors.colorPrimary,
                             fontSize: 15.0,
                             fontWeight: FontWeight.w600,

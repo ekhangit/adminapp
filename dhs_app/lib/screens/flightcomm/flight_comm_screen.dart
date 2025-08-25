@@ -151,10 +151,10 @@ class FlightCommScreen extends StatelessWidget {
                               shrinkWrap: true,
                               physics: const NeverScrollableScrollPhysics(),
                               separatorBuilder:
-                                  (context, index) => const Divider(
+                                  (context, index) => Divider(
                                     height: 0,
-                                    thickness: 0.3,
-                                    color: Colors.grey,
+                                    thickness: 0.2,
+                                    color: Colors.grey.shade300,
                                   ),
                               itemBuilder: (context, index) {
                                 final flight = controller.flightList[index];

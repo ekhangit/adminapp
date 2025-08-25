@@ -3,12 +3,14 @@ import 'package:aviation_app/screens/leave/leave_request_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../constant.dart';
 import '../../controllers/storage/data_storage_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_box.dart';
 import '../attendance/attendence_screen.dart';
+import '../myroster/my_roster_screen.dart';
 import '../pts/pts_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
@@ -44,7 +46,7 @@ class DashboardScreen extends StatelessWidget {
                       ),
                       child: Text(
                         user.name.isNotEmpty ? user.name[0] : "?",
-                        style: TextStyle(
+                        style: GoogleFonts.roboto(
                           color: AppColors.colorPrimary,
                           fontWeight: FontWeight.bold,
                           fontSize: 20,
@@ -58,7 +60,7 @@ class DashboardScreen extends StatelessWidget {
                       children: [
                         Text(
                           user.name,
-                          style: TextStyle(
+                          style: GoogleFonts.roboto(
                             color: AppColors.colorPrimary,
                             fontSize: 15.0,
                             fontWeight: FontWeight.w600,
@@ -69,7 +71,9 @@ class DashboardScreen extends StatelessWidget {
                     const Spacer(),
                     CircleAvatar(
                       radius: 20,
-                      backgroundColor: AppColors.colorPrimary.withOpacity(0.2),
+                      backgroundColor: AppColors.colorPrimary.withValues(
+                        alpha: 0.2,
+                      ),
                       child: Icon(
                         Icons.notifications,
                         color: AppColors.colorPrimary,
@@ -83,172 +87,84 @@ class DashboardScreen extends StatelessWidget {
           ),
 
           // ⚪ White content starting after the top, but height wraps content
-          // Column(
-          //   children: [
-          //     const SizedBox(height: 135), // Offset to clear top container
-          //     Expanded(
-          //       child: Container(
-          //         width: double.infinity,
-          //         decoration: BoxDecoration(
-          //           // color: AppColors.colorPrimary.withOpacity(0.95),
-          //           gradient: appThemeGradientSoft2,
-          //           // borderRadius: BorderRadius.only(
-          //           //   topRight: Radius.circular(24),
-          //           //   topLeft: Radius.circular(24),
-          //           // ),
-          //         ),
-          //         child: Center(
-          //           child: SingleChildScrollView(
-          //             child: Column(
-          //               crossAxisAlignment: CrossAxisAlignment.start,
-          //               mainAxisSize: MainAxisSize.min,
-          //               children: [
-          //                 Wrap(
-          //                   spacing: 12,
-          //                   children: [
-          //                     CustomBox2(
-          //                       title: 'Attendance',
-          //                       iconPath: 'assets/images/hr_final.png',
-          //                       onTap:
-          //                           () =>
-          //                               Get.to(() => const AttendanceScreen()),
-          //                     ),
-          //                     CustomBox2(
-          //                       title: 'Flight Comm',
-          //                       iconPath: 'assets/images/flight_comm_final.png',
-          //                       onTap:
-          //                           () =>
-          //                               Get.to(() => const FlightCommScreen()),
-          //                     ),
-
-          //                     CustomBox2(
-          //                       title: 'My Roster',
-          //                       iconPath: 'assets/images/my_duties_final.png',
-          //                       onTap: () => (),
-          //                     ),
-          //                     CustomBox2(
-          //                       title: 'PTS',
-          //                       iconPath: 'assets/images/airlines_final.png',
-          //                       onTap: () => Get.to(() => const PtsScreen()),
-          //                     ),
-
-          //                     CustomBox2(
-          //                       title: 'Flight Tracker',
-          //                       iconPath:
-          //                           'assets/images/flight_tracker_final.png',
-          //                       onTap: () => (),
-          //                     ),
-          //                     CustomBox2(
-          //                       title: 'Flight Watch',
-          //                       iconPath:
-          //                           'assets/images/flight_watch_final.png',
-          //                       onTap: () => (),
-          //                     ),
-          //                     CustomBox2(
-          //                       title: 'Leave Request',
-          //                       iconPath: 'assets/images/airlines_final.png',
-          //                       onTap:
-          //                           () => Get.to(
-          //                             () => const LeaveRequestScreen(),
-          //                           ),
-          //                     ),
-          //                     CustomBox2(
-          //                       title: 'Staff Watch',
-          //                       iconPath: 'assets/images/staff_watch_final.png',
-          //                       onTap: () => (),
-          //                     ),
-          //                   ],
-          //                 ),
-          //               ],
-          //             ),
-          //           ),
-          //         ),
-          //       ),
-          //     ),
-          //   ],
-          // ),
           Column(
             children: [
-              const SizedBox(height: 135),
+              const SizedBox(height: 135), // Offset to clear top container
               Expanded(
                 child: Container(
                   width: double.infinity,
-                  decoration: BoxDecoration(gradient: appThemeGradientSoft2),
-                  child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 20,
-                    ),
-                    child: LayoutBuilder(
-                      builder: (context, constraints) {
-                        final allItems = <CustomBox2>[
-                          CustomBox2(
-                            title: 'Attendance',
-                            iconPath: 'assets/images/hr_final.png',
-                            onTap: () => Get.to(() => const AttendanceScreen()),
-                          ),
-                          CustomBox2(
-                            title: 'Flight Comm',
-                            iconPath: 'assets/images/flight_comm_final.png',
-                            onTap: () => Get.to(() => const FlightCommScreen()),
-                          ),
-                          CustomBox2(
-                            title: 'My Roster',
-                            iconPath: 'assets/images/my_duties_final.png',
-                            onTap: () {},
-                          ),
-                          CustomBox2(
-                            title: 'PTS',
-                            iconPath: 'assets/images/airlines_final.png',
-                            onTap: () => Get.to(() => const PtsScreen()),
-                          ),
-                          CustomBox2(
-                            title: 'Flight Tracker',
-                            iconPath: 'assets/images/flight_tracker_final.png',
-                            onTap: () {},
-                          ),
-                          CustomBox2(
-                            title: 'Flight Watch',
-                            iconPath: 'assets/images/flight_watch_final.png',
-                            onTap: () {},
-                          ),
-                          CustomBox2(
-                            title: 'Leave Request',
-                            iconPath: 'assets/images/airlines_final.png',
-                            onTap:
-                                () => Get.to(() => const LeaveRequestScreen()),
-                          ),
-                          CustomBox2(
-                            title: 'Staff Watch',
-                            iconPath: 'assets/images/staff_watch_final.png',
-                            onTap: () {},
-                          ),
-                          // Add more items as needed...
-                        ];
-
-                        if (allItems.length <= 8) {
-                          return Wrap(
+                  decoration: BoxDecoration(
+                    // color: AppColors.colorPrimary.withOpacity(0.95),
+                    gradient: appThemeGradientSoft2,
+                    // borderRadius: BorderRadius.only(
+                    //   topRight: Radius.circular(24),
+                    //   topLeft: Radius.circular(24),
+                    // ),
+                  ),
+                  child: Center(
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Wrap(
                             spacing: 12,
-                            runSpacing: 12,
-                            children: allItems,
-                          );
-                        } else {
-                          return GridView.builder(
-                            physics: const NeverScrollableScrollPhysics(),
-                            shrinkWrap: true,
-                            itemCount: allItems.length,
-                            padding: const EdgeInsets.only(bottom: 20),
-                            gridDelegate:
-                                const SliverGridDelegateWithFixedCrossAxisCount(
-                                  crossAxisCount: 2,
-                                  crossAxisSpacing: 12,
-                                  mainAxisSpacing: 12,
-                                  childAspectRatio: 1,
-                                ),
-                            itemBuilder: (context, index) => allItems[index],
-                          );
-                        }
-                      },
+                            children: [
+                              CustomBox2(
+                                title: 'Attendance',
+                                iconPath: 'assets/images/hr_final.png',
+                                onTap:
+                                    () =>
+                                        Get.to(() => const AttendanceScreen()),
+                              ),
+                              CustomBox2(
+                                title: 'Flight Comm',
+                                iconPath: 'assets/images/flight_comm_final.png',
+                                onTap:
+                                    () =>
+                                        Get.to(() => const FlightCommScreen()),
+                              ),
+
+                              CustomBox2(
+                                title: 'My Roster',
+                                iconPath: 'assets/images/my_duties_final.png',
+                                onTap: () => Get.to(() => MyRosterScreen()),
+                              ),
+                              CustomBox2(
+                                title: 'PTS',
+                                iconPath: 'assets/images/airlines_final.png',
+                                onTap: () => Get.to(() => const PtsScreen()),
+                              ),
+
+                              CustomBox2(
+                                title: 'Flight Tracker',
+                                iconPath:
+                                    'assets/images/flight_tracker_final.png',
+                                onTap: () => (),
+                              ),
+                              CustomBox2(
+                                title: 'Flight Watch',
+                                iconPath:
+                                    'assets/images/flight_watch_final.png',
+                                onTap: () => (),
+                              ),
+                              CustomBox2(
+                                title: 'Leave Request',
+                                iconPath: 'assets/images/airlines_final.png',
+                                onTap:
+                                    () => Get.to(
+                                      () => const LeaveRequestScreen(),
+                                    ),
+                              ),
+                              CustomBox2(
+                                title: 'Staff Watch',
+                                iconPath: 'assets/images/staff_watch_final.png',
+                                onTap: () => (),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                 ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class CustomButton extends StatelessWidget {
   final String text;
@@ -9,6 +10,7 @@ class CustomButton extends StatelessWidget {
   final bool disabled;
   final Widget loadingWidget;
   final bool isTransparent; // 🔹 New flag
+  final double fontSize;
 
   const CustomButton({
     super.key,
@@ -20,6 +22,7 @@ class CustomButton extends StatelessWidget {
     this.disabled = false,
     this.borerRadius = 50,
     this.isTransparent = false, // 🔹 Default to false
+    this.fontSize = 20.5,
   });
 
   @override
@@ -50,14 +53,14 @@ class CustomButton extends StatelessWidget {
                 ? loadingWidget
                 : Text(
                   text,
-                  style: TextStyle(
+                  style: GoogleFonts.roboto(
                     color:
                         isTransparent
                             ? Colors.white
                             : isButtonDisabled
                             ? Colors.grey.shade600
                             : Colors.white,
-                    fontSize: 20.5,
+                    fontSize: fontSize,
                     fontWeight: FontWeight.w600,
                   ),
                 ),

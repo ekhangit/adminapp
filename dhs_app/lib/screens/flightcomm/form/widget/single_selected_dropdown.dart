@@ -546,7 +546,7 @@ class SingleSelectDropdown extends StatelessWidget {
         children: [
           Text(
             label,
-            style: TextStyle(
+            style: GoogleFonts.roboto(
               fontWeight: FontWeight.w600,
               fontSize: labelFontSize,
               color: Colors.black87,
@@ -562,7 +562,7 @@ class SingleSelectDropdown extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
               decoration: BoxDecoration(
-                color: Colors.grey.shade100,
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(color: Colors.grey.shade400),
               ),
@@ -572,7 +572,7 @@ class SingleSelectDropdown extends StatelessWidget {
                   Expanded(
                     child: Text(
                       selectedItem.value.isEmpty ? hint : selectedItem.value,
-                      style: TextStyle(
+                      style: GoogleFonts.roboto(
                         color:
                             selectedItem.value.isEmpty
                                 ? Colors.grey
@@ -630,7 +630,7 @@ class SingleSelectDropdown extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style: const TextStyle(
+                      style:  GoogleFonts.roboto(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -669,7 +669,7 @@ class SingleSelectDropdown extends StatelessWidget {
                         child: ListTile(
                           title: Text(
                             item,
-                            style: TextStyle(
+                            style: GoogleFonts.roboto(
                               fontWeight:
                                   isSelected
                                       ? FontWeight.bold
@@ -763,17 +763,17 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                   Expanded(
                     child: Row(
                       children: [
-                        if (selectedItem.value != null && leadingIcon != null)
-                          Padding(
-                            padding: const EdgeInsets.only(right: 6),
-                            child: leadingIcon!(selectedItem.value!),
-                          ),
+                        // if (selectedItem.value != null && leadingIcon != null)
+                        //   Padding(
+                        //     padding: const EdgeInsets.only(right: 6),
+                        //     child: leadingIcon!(selectedItem.value!),
+                        //   ),
                         if (selectedItem.value != null)
                           Expanded(child: displayText(selectedItem.value!)),
                         if (selectedItem.value == null)
                           Text(
                             hint,
-                            style: TextStyle(color: Colors.grey, fontSize: 14),
+                            style: GoogleFonts.roboto(color: Colors.grey, fontSize: 14),
                             overflow: TextOverflow.ellipsis,
                           ),
                       ],

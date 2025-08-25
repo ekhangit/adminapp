@@ -46,4 +46,11 @@ class ApiConfig {
 
   // PTS
   static const ptsAllFlights = '/api/v1/flight-comm/pts-all-flights';
+
+  // MY ROSTER
+  static const toadyRoster = '/api/v1/my-roster/today-roster';
+  static const monthlyRoster = '/api/v1/my-roster/monthly-roster';
+  static const customRoster = '/api/v1/my-roster/custom-range';
+  static const addBreakTimeRoster = '/api/v1/my-roster/add-break-time';
+  static const markDutyRoster = '/api/v1/my-roster/mark-duty';
 }

@@ -57,11 +57,6 @@ class PtsScreen extends StatelessWidget {
                               ),
                             )
                             : const Icon(Icons.save, color: Colors.white),
-
-                    // icon:
-                    //     controller.isSendingPts.value
-                    //         ? null
-                    //         : const Icon(Icons.save, color: Colors.white),
                   )
                   : SizedBox(),
         ),
@@ -161,8 +156,8 @@ class PtsScreen extends StatelessWidget {
                               displayText:
                                   (item) => Text(
                                     '  ${item.flightInfo}  |  ${controller.formattedShortDate.value}  |  ${item.departureAirport ?? ''}-${item.arrivalAirport ?? ''}',
-                                    style: GoogleFonts.robotoCondensed(
-                                      fontSize: 15,
+                                    style: GoogleFonts.roboto(
+                                      fontSize: 13.5,
                                       color: Colors.black87,
                                     ),
                                   ),
@@ -528,7 +523,10 @@ class PtsScreen extends StatelessWidget {
           visualDensity: VisualDensity.compact,
         ),
         const SizedBox(width: 4),
-        Text(label, style: const TextStyle(fontSize: 13.5, color: Colors.red)),
+        Text(
+          label,
+          style: GoogleFonts.roboto(fontSize: 13.5, color: Colors.red),
+        ),
       ],
     );
   }
@@ -588,7 +586,7 @@ Widget timerField2({
             alignment: Alignment.centerLeft,
             child: Text(
               label,
-              style: const TextStyle(
+              style: GoogleFonts.roboto(
                 fontWeight: FontWeight.w600,
                 fontSize: 10.5,
                 color: AppColors.colorPrimary,
@@ -645,7 +643,7 @@ Widget timerField2({
                           displayTime.isEmpty ? '00:00' : displayTime,
                           style:
                               timeTextStyle ??
-                              const TextStyle(
+                              GoogleFonts.roboto(
                                 fontSize: 15,
                                 fontWeight: FontWeight.w400,
                                 color: Colors.black54,
@@ -672,8 +670,8 @@ Widget _buildTextField(String field, PtsController controller, int lines) {
         Text(
           field.toUpperCase().replaceAll('_', ' '),
           style: GoogleFonts.roboto(
+            fontWeight: FontWeight.w600,
             fontSize: 10.5,
-            fontWeight: FontWeight.w500,
             color: Colors.black87,
           ),
         ),

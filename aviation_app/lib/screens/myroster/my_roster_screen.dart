@@ -1,6 +1,6 @@
-import 'package:dhs_app/screens/myroster/tabs/custom_roster_tab.dart';
-import 'package:dhs_app/screens/myroster/tabs/monthly_roster_tab.dart';
-import 'package:dhs_app/screens/myroster/tabs/today_roster_tab.dart';
+import 'package:aviation_app/screens/myroster/tabs/custom_roster_tab.dart';
+import 'package:aviation_app/screens/myroster/tabs/monthly_roster_tab.dart';
+import 'package:aviation_app/screens/myroster/tabs/today_roster_tab.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';

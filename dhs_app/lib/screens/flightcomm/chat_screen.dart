@@ -275,19 +275,15 @@ class ChatScreen extends StatelessWidget {
                                                 label: "ACT",
                                                 color: AppColors.colorPrimary,
                                               ),
-                                              if (flight
-                                                  .actualPax
-                                                  .paxC!
-                                                  .isNotEmpty) ...[
+                                              if (flight.actualPax.paxC !=
+                                                  null) ...[
                                                 const SizedBox(width: 6),
                                                 InfoText(
                                                   "J${flight.actualPax.paxC}",
                                                 ),
                                               ],
-                                              if (flight
-                                                  .actualPax
-                                                  .paxY!
-                                                  .isNotEmpty) ...[
+                                              if (flight.actualPax.paxY !=
+                                                  null) ...[
                                                 const SizedBox(width: 6),
                                                 InfoText(
                                                   "Y${flight.actualPax.paxY}",

@@ -26,7 +26,7 @@ class FlightCard extends StatelessWidget {
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
         width: double.infinity,
-        margin: EdgeInsets.symmetric(vertical: 0.07.h),
+        margin: EdgeInsets.symmetric(vertical: 0.25.h),
         padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 0.4.h),
         decoration: BoxDecoration(
           color:
