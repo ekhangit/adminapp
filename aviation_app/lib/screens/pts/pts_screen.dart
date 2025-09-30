@@ -244,19 +244,19 @@ class PtsScreen extends StatelessWidget {
                                         )
                                         .toList();
 
-                                final textFields =
-                                    controller.getPTSOptions
-                                        .where(
-                                          (field) => _isRegularTextField(field),
-                                        )
-                                        .toList();
-
                                 final timeFields =
                                     controller.getPTSOptions
                                         .where(
                                           (field) =>
                                               !_isDropdownField(field) &&
                                               !_isRegularTextField(field),
+                                        )
+                                        .toList();
+
+                                final textFields =
+                                    controller.getPTSOptions
+                                        .where(
+                                          (field) => _isRegularTextField(field),
                                         )
                                         .toList();
 
@@ -338,44 +338,6 @@ class PtsScreen extends StatelessWidget {
                                   );
                                 }
 
-                                // 2. Render text fields (accepted_pax, mhb_ahl) in rows of up to 3
-                                for (int i = 0; i < textFields.length; i += 2) {
-                                  final fieldsInRow = textFields.sublist(
-                                    i,
-                                    i + 2 > textFields.length
-                                        ? textFields.length
-                                        : i + 2,
-                                  );
-
-                                  widgets.add(
-                                    Padding(
-                                      padding: const EdgeInsets.only(
-                                        bottom: 16,
-                                      ),
-                                      child: Row(
-                                        children: [
-                                          // First field (always exists)
-                                          _buildTextField(
-                                            fieldsInRow[0],
-                                            controller,
-                                            1,
-                                          ),
-
-                                          // Second field (if exists)
-                                          if (fieldsInRow.length > 1)
-                                            SizedBox(width: 10),
-                                          if (fieldsInRow.length > 1)
-                                            _buildTextField(
-                                              fieldsInRow[1],
-                                              controller,
-                                              1,
-                                            ),
-                                        ],
-                                      ),
-                                    ),
-                                  );
-                                }
-
                                 // 2. Render timerField2 widgets in rows of up to 3
                                 for (int i = 0; i < timeFields.length; i += 3) {
                                   final fieldsInRow = timeFields.sublist(
@@ -421,6 +383,44 @@ class PtsScreen extends StatelessWidget {
                                                 controller,
                                                 2,
                                               ),
+                                            ),
+                                        ],
+                                      ),
+                                    ),
+                                  );
+                                }
+
+                                // 3. Render text fields (accepted_pax, mhb_ahl) in rows of up to 3
+                                for (int i = 0; i < textFields.length; i += 2) {
+                                  final fieldsInRow = textFields.sublist(
+                                    i,
+                                    i + 2 > textFields.length
+                                        ? textFields.length
+                                        : i + 2,
+                                  );
+
+                                  widgets.add(
+                                    Padding(
+                                      padding: const EdgeInsets.only(
+                                        bottom: 16,
+                                      ),
+                                      child: Row(
+                                        children: [
+                                          // First field (always exists)
+                                          _buildTextField(
+                                            fieldsInRow[0],
+                                            controller,
+                                            1,
+                                          ),
+
+                                          // Second field (if exists)
+                                          if (fieldsInRow.length > 1)
+                                            SizedBox(width: 10),
+                                          if (fieldsInRow.length > 1)
+                                            _buildTextField(
+                                              fieldsInRow[1],
+                                              controller,
+                                              1,
                                             ),
                                         ],
                                       ),
@@ -536,7 +536,10 @@ class PtsScreen extends StatelessWidget {
   }
 
   bool _isRegularTextField(String field) {
-    return field == 'accepted_pax' || field == 'mhb_ahl';
+    return field == 'accepted_pax' ||
+        field == 'mhb_ahl' ||
+        field == 'mhb_ohd' ||
+        field == 'mhb_dhr';
   }
 }
 

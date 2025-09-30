@@ -197,10 +197,6 @@ Widget timerField({
   );
 }
 
-
-
-
-
 Widget _timeAdjustButtons({
   required VoidCallback onIncrement,
   required VoidCallback onDecrement,
@@ -231,18 +227,17 @@ Widget _timeAdjustButton({
   );
 }
 
-
 class TimeInputFormatter extends TextInputFormatter {
   @override
   TextEditingValue formatEditUpdate(
-    TextEditingValue oldValue, 
+    TextEditingValue oldValue,
     TextEditingValue newValue,
   ) {
     // Handle deletion
     if (newValue.text.length < oldValue.text.length) {
       return newValue;
     }
-    
+
     // Auto-format as HHMM
     if (newValue.text.length == 2 && oldValue.text.length == 1) {
       return TextEditingValue(
@@ -250,14 +245,47 @@ class TimeInputFormatter extends TextInputFormatter {
         selection: TextSelection.collapsed(offset: 3),
       );
     }
-    
+
     // Limit to 5 characters (HH:MM)
     if (newValue.text.length > 5) {
       return oldValue;
     }
-    
+
     return newValue;
   }
 }
 
-
+Widget singleLabel(String title, String label, {bool showTitleCenter = false}) {
+  return Column(
+    crossAxisAlignment:
+        showTitleCenter ? CrossAxisAlignment.center : CrossAxisAlignment.start,
+    children: [
+      Text(
+        title,
+        style: const TextStyle(
+          fontWeight: FontWeight.w600,
+          fontSize: 14,
+          color: Colors.black87,
+        ),
+      ),
+      const SizedBox(height: 6),
+      Container(
+        width: double.infinity,
+        padding: const EdgeInsets.all(12.0),
+        decoration: BoxDecoration(
+          color: Colors.grey.shade100,
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(color: Colors.grey, width: 0.2),
+        ),
+        child: Text(
+          label,
+          style: const TextStyle(
+            fontWeight: FontWeight.w400,
+            fontSize: 14,
+            color: Colors.black54,
+          ),
+        ),
+      ),
+    ],
+  );
+}

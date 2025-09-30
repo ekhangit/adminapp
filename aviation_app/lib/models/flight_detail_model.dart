@@ -64,6 +64,9 @@ class FlightDetailModel {
 
   bool get isConnectingFlight =>
       inboundFlight?.isNotEmpty == true || outboundFlight?.isNotEmpty == true;
+
+  bool get isDeparture =>
+      ['FRA', 'MUC', 'DUS', 'HAM', 'STR'].contains(departureAirport.iataCode);
 }
 
 class BasicDetails {
@@ -73,6 +76,8 @@ class BasicDetails {
   final String? atd;
   final String? sta;
   final String? ata;
+  final String? eta;
+  final String? etd;
   final String date;
   final String? callSign;
   final String? gate;
@@ -86,6 +91,8 @@ class BasicDetails {
     this.atd,
     this.sta,
     this.ata,
+    this.eta,
+    this.etd,
     required this.date,
     this.callSign,
     this.gate,
@@ -100,6 +107,8 @@ class BasicDetails {
     atd: json['atd'] ?? '',
     sta: json['sta'] ?? '',
     ata: json['ata'] ?? '',
+    eta: json['eta'] ?? '',
+    etd: json['etd'] ?? '',
     date: json['date'],
     callSign: json['call_sign'] ?? '',
     gate: json['gate'] ?? '',

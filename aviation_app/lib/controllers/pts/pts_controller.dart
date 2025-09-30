@@ -26,6 +26,8 @@ class PtsController extends GetxController {
   final RxBool isLoadingPtsOptions = false.obs;
   final RxBool isSendingPts = false.obs;
 
+
+
   @override
   void onInit() {
     super.onInit();
@@ -447,4 +449,3 @@ class PtsController extends GetxController {
     }
   }
 }
-

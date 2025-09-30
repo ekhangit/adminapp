@@ -1,10 +1,12 @@
 import 'package:aviation_app/screens/flightcomm/form/widget/form_widgets.dart';
 import 'package:aviation_app/screens/flightcomm/form/widget/multi_select_dropdown.dart';
-import 'package:aviation_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
+// import 'package:aviation_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../constant.dart';
 import '../../../controllers/flight/chat_controller.dart';
+// import '../../../controllers/flight/flight_info_controller.dart';
 import '../../../controllers/flight/flight_info_controller.dart';
 import '../../../utils/app_colors.dart';
 
@@ -30,27 +32,17 @@ class TRCForm extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: FlightNoSelectDropdown(
-                    label: "Flight Info",
-                    options: flightInfoController.getFlightNo,
-                    selectedItem: flightInfoController.selectedFlightInfoTRC,
+                  child: singleLabel(
+                    "Flight Info",
+                    controller.flightDetail.value?.basicDetails.flightInfo ??
+                        '',
                   ),
                 ),
                 const SizedBox(width: 12),
-                Expanded(child: singleField("Callsign")),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Row(
-              children: [
-                Expanded(child: singleField("Date")),
-
-                const SizedBox(width: 12),
                 Expanded(
-                  child: AircraftTypeSelectDropdown(
-                    label: "A/C Type",
-                    options: flightInfoController.aircraftTypes,
-                    selectedItem: flightInfoController.selectedAircraft,
+                  child: singleLabel(
+                    "Callsign",
+                    controller.flightDetail.value?.basicDetails.callSign ?? '',
                   ),
                 ),
               ],
@@ -59,19 +51,61 @@ class TRCForm extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: AircraftRegSelectDropdown(
-                    label: "A/C Regin",
-                    options: flightInfoController.aircraftReg,
-                    selectedItem: flightInfoController.selectedAircraftReg,
+                  child: singleLabel(
+                    "Date",
+                    formatDate(
+                      controller.flightDetail.value?.basicDetails.date ?? '--',
+                    ),
                   ),
                 ),
-
                 const SizedBox(width: 12),
-                Expanded(child: singleField("Gate")),
+                Expanded(
+                  child: singleLabel(
+                    "A/C Type",
+                    controller.flightDetail.value?.aircraftType!.icao ?? '',
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 12),
-            formRow("Stand", "Baggage Belt"),
+
+            Row(
+              children: [
+                Expanded(
+                  child: singleLabel(
+                    "A/C Regin",
+                    controller.flightDetail.value?.aircraft?.name ?? '',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: singleLabel(
+                    "Gate",
+                    controller.flightDetail.value?.basicDetails.gate ?? '',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                Expanded(
+                  child: singleLabel(
+                    "Stand",
+                    controller.flightDetail.value?.basicDetails.pos ?? '',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: singleLabel(
+                    "Baggage Belt",
+                    controller.flightDetail.value?.basicDetails.beggageBelt ??
+                        '',
+                  ),
+                ),
+              ],
+            ),
 
             const SizedBox(height: 24),
 
@@ -142,9 +176,13 @@ class TRCForm extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 12),
-            singleField("Before Arrival"),
-            const SizedBox(height: 12),
-            singleField("Before Departure"),
+            Row(
+              children: [
+                Expanded(child: singleField("Before Arrival")),
+                const SizedBox(width: 12),
+                Expanded(child: singleField("Before Departure")),
+              ],
+            ),
             const SizedBox(height: 12),
             singleField("After Departure"),
 
@@ -160,13 +198,53 @@ class TRCForm extends StatelessWidget {
             ),
             const SizedBox(height: 12),
 
-            const Text(
-              "PAX : 98 + 0 INF + 0 JMP",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: Colors.red,
-              ),
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      "PAX : ",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                    Text(
+                      controller.flightDetail.value?.actualPax.totalPax
+                              .toString() ??
+                          "0",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      "BAGS : ",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                    Text(
+                      "0 pcs",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
 
             const SizedBox(height: 24),

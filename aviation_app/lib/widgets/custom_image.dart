@@ -62,7 +62,6 @@ import 'package:cached_network_image/cached_network_image.dart';
 //   }
 // }
 
-
 class CustomImage extends StatelessWidget {
   final String imageUrl;
   final double size;
@@ -93,46 +92,34 @@ class CustomImage extends StatelessWidget {
       padding: EdgeInsets.all(1.0),
       decoration: BoxDecoration(
         shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
-        border: borderColor != null
-            ? Border.all(color: borderColor!, width: borderWidth)
-            : null,
+        border:
+            borderColor != null
+                ? Border.all(color: borderColor!, width: borderWidth)
+                : null,
         borderRadius: isCircular ? null : BorderRadius.circular(borderRadius),
       ),
-      child: isCircular
-          ? ClipOval(
-              child: _buildImage(),
-            )
-          : ClipRRect(
-              borderRadius: BorderRadius.circular(borderRadius),
-              child: _buildImage(),
-            ),
+      child:
+          isCircular
+              ? ClipOval(child: _buildImage())
+              : ClipRRect(
+                borderRadius: BorderRadius.circular(borderRadius),
+                child: _buildImage(),
+              ),
     );
   }
 
   Widget _buildImage() {
     return isNetwork
         ? CachedNetworkImage(
-            imageUrl: imageUrl,
-            fit: boxFit,
-            placeholder: (context, url) => Center(
-              child: Container(
-                decoration: BoxDecoration(
-                  shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
-                  color: Colors.grey[200],
-                ),
+          imageUrl: imageUrl,
+          fit: boxFit,
+          errorWidget:
+              (context, url, error) => Icon(
+                Icons.error_outline,
+                size: 17.5,
+                color: Colors.grey.shade300,
               ),
-            ),
-            errorWidget: (context, url, error) => Container(
-              decoration: BoxDecoration(
-                shape: isCircular ? BoxShape.circle : BoxShape.rectangle,
-                color: Colors.grey[200],
-              ),
-              child: const Icon(Icons.error_outline, size: 17.5),
-            ),
-          )
-        : Image.asset(
-            imageUrl,
-            fit: boxFit,
-          );
+        )
+        : Image.asset(imageUrl, fit: boxFit);
   }
 }

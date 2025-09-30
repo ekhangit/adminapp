@@ -2,6 +2,7 @@ import 'package:aviation_app/screens/flightcomm/form/widget/form_widgets.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
+import '../../../constant.dart';
 import '../../../controllers/flight/chat_controller.dart';
 import '../../../utils/app_colors.dart';
 
@@ -23,53 +24,83 @@ class CheckInForm extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: MultiSelectDropdown(
-            //         label: "Flight No",
-            //         options: controller.flightOptions,
-            //         selectedItems: controller.selectedFlight,
-            //       ),
-            //     ),
-            //     const SizedBox(width: 12),
-            //     Expanded(child: singleField("Callsign")),
-            //   ],
-            // ),
-            // const SizedBox(height: 12),
-            // Row(
-            //   children: [
-            //     Expanded(child: singleField("Date")),
-
-            //     const SizedBox(width: 12),
-            //     Expanded(
-            //       child: MultiSelectDropdown(
-            //         label: "A/C Type",
-            //         options: controller.flightOptions,
-            //         selectedItems: controller.selectedFlight,
-            //       ),
-            //     ),
-            //   ],
-            // ),
-            // const SizedBox(height: 12),
-
-            // Row(
-            //   children: [
-            //     Expanded(
-            //       child: MultiSelectDropdown(
-            //         label: "A/C Regin",
-            //         options: controller.flightOptions,
-            //         selectedItems: controller.selectedFlight,
-            //       ),
-            //     ),
-
-            //     const SizedBox(width: 12),
-
-            //     Expanded(child: singleField("Gate")),
-            //   ],
-            // ),
+            Row(
+              children: [
+                Expanded(
+                  child: singleLabel(
+                    "Flight Info",
+                    controller.flightDetail.value?.basicDetails.flightInfo ??
+                        '',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: singleLabel(
+                    "Callsign",
+                    controller.flightDetail.value?.basicDetails.callSign ?? '',
+                  ),
+                ),
+              ],
+            ),
             const SizedBox(height: 12),
-            formRow("Stand", "Baggage Belt"),
+            Row(
+              children: [
+                Expanded(
+                  child: singleLabel(
+                    "Date",
+                    formatDate(
+                      controller.flightDetail.value?.basicDetails.date ?? '--',
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: singleLabel(
+                    "A/C Type",
+                    controller.flightDetail.value?.aircraftType!.icao ?? '',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                Expanded(
+                  child: singleLabel(
+                    "A/C Regin",
+                    controller.flightDetail.value?.aircraft?.name ?? '',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: singleLabel(
+                    "Gate",
+                    controller.flightDetail.value?.basicDetails.gate ?? '',
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            Row(
+              children: [
+                Expanded(
+                  child: singleLabel(
+                    "Stand",
+                    controller.flightDetail.value?.basicDetails.pos ?? '',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: singleLabel(
+                    "Baggage Belt",
+                    controller.flightDetail.value?.basicDetails.beggageBelt ??
+                        '',
+                  ),
+                ),
+              ],
+            ),
 
             const SizedBox(height: 24),
 
@@ -117,6 +148,69 @@ class CheckInForm extends StatelessWidget {
             singleField("RAMO (SPECIAL)"),
             const SizedBox(height: 12),
             singleField("OTHERS"),
+
+            const SizedBox(height: 24),
+
+            const Text(
+              "Total Onboard",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.colorPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      "PAX : ",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                    Text(
+                      controller.flightDetail.value?.actualPax.totalPax
+                              .toString() ??
+                          "0",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(height: 4),
+                Row(
+                  children: [
+                    Text(
+                      "BAGS : ",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                    Text(
+                      "0 pcs",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w700,
+                        color: Colors.red,
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 24),
+              ],
+            ),
           ],
         ),
       ),

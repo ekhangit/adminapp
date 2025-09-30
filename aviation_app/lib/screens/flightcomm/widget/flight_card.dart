@@ -1,6 +1,7 @@
 import 'package:aviation_app/models/flight_model.dart';
 import 'package:aviation_app/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../../constant.dart';
@@ -8,11 +9,30 @@ import '../../../controllers/flight/flight_comm_controller.dart';
 import '../../../utils/app_colors.dart';
 import 'package:responsive_sizer/responsive_sizer.dart';
 
+String formatFlightInfo(String info) {
+  final regex = RegExp(r'^([A-Z]+)\s?(\d+)$', caseSensitive: false);
+  final match = regex.firstMatch(info.trim());
+
+  if (match != null) {
+    final airline = match.group(1);
+    final number = match.group(2);
+    final spaceCount =
+        number!.length == 3
+            ? 0
+            : number.length == 4
+            ? 0
+            : 0;
+    return '$airline $number${' ' * spaceCount}';
+  }
+
+  return info;
+}
+
 class FlightCard extends StatelessWidget {
+  const FlightCard({super.key, required this.flight, required this.index});
+
   final FlightsModel flight;
   final int index;
-
-  const FlightCard({super.key, required this.flight, required this.index});
 
   @override
   Widget build(BuildContext context) {
@@ -21,22 +41,23 @@ class FlightCard extends StatelessWidget {
     return Obx(() {
       final isSelected = controller.selectedFlightIndex.value == index;
       final unreadCount = flight.unReadCount.value;
+      // final unreadCount = 1;
 
       return AnimatedContainer(
         duration: const Duration(milliseconds: 150),
         curve: Curves.easeInOut,
         width: double.infinity,
-        margin: EdgeInsets.symmetric(vertical: 0.25.h),
-        padding: EdgeInsets.symmetric(horizontal: 1.5.w, vertical: 0.4.h),
+        padding: EdgeInsets.symmetric(horizontal: 2.0.w, vertical: 0.75.h),
         decoration: BoxDecoration(
           color:
               isSelected
                   ? AppColors.colorPrimary.withValues(alpha: 0.15)
                   : unreadCount != 0
-                  ? Colors.yellow.shade100.withValues(alpha: 0.85)
+                  ? Color(0xFFFFFDE6)
                   : flight.status == "late"
                   ? Colors.red.withValues(alpha: 0.25)
                   : Colors.white,
+
           border: Border(
             left: BorderSide(
               color:
@@ -57,245 +78,274 @@ class FlightCard extends StatelessWidget {
           ),
         ),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // Flight status icon
             isSelected
                 ? Icon(
                   Icons.check_circle,
-                  size: 2.2.h,
+                  size: 2.8.h,
                   color: AppColors.colorPrimary,
                 )
-                : Image.asset(
-                  flight.isDeparture
-                      ? "assets/images/outbound.png"
-                      : "assets/images/inbound.png",
-                  height: 2.2.h,
-                  width: 2.2.h,
+                : CustomImage(
+                  imageUrl: flight.airline?.mobilePicture ?? "",
+                  isNetwork: true,
+                  size: 6.5.w,
+                  boxFit: BoxFit.fill,
+                  isCircular: false,
                 ),
-            SizedBox(width: 1.2.w),
-
-            // Flight info section
+            SizedBox(width: 2.5.w),
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Row with logo, flight info, star
+                  // First Row (Flight Info + Route + Aircraft)
                   Row(
-                    crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
-                      CustomImage(
-                        imageUrl: flight.airline?.mobilePicture ?? "",
-                        size: 3.0.h,
-                        boxFit: BoxFit.fill,
-                        isCircular: false,
-                      ),
-                      SizedBox(width: 2.0.w),
-
-                      // Flight Details
                       Expanded(
-                        child: Wrap(
-                          crossAxisAlignment: WrapCrossAlignment.center,
-                          spacing: 1.6.w,
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.center,
                           children: [
-                            SizedBox(
-                              width: 16.w,
+                            // Flight number
+                            Expanded(
+                              flex: 2,
                               child: Text(
                                 formatFlightInfo(flight.flightInfo),
-                                style: GoogleFonts.roboto(
+                                style: GoogleFonts.inter(
                                   fontSize: 15.sp,
-                                  fontWeight: FontWeight.w700,
+                                  fontWeight: FontWeight.w500,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            _divider(opacity: .7),
-                            SizedBox(
-                              width: 19.w,
+                            // SizedBox(width: 1.8.w),
+
+                            // Route
+                            Expanded(
+                              flex: 2,
                               child: Text(
-                                '${flight.departureAirport?.iataCode}-${flight.arrivalAirport?.iataCode}',
-                                style: GoogleFonts.roboto(
+                                '${flight.departureAirport?.iataCode} - ${flight.arrivalAirport?.iataCode}',
+                                style: GoogleFonts.inter(
                                   fontSize: 15.sp,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.w500,
                                 ),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
-                            if (flight.aircraftType != null &&
-                                flight.aircraftType!.icao!.isNotEmpty)
-                              _divider(height: 1.7),
-                            if (flight.aircraftType != null &&
-                                flight.aircraftType!.icao!.isNotEmpty)
-                              Text(
-                                flight.aircraftType!.icao!,
-                                style: GoogleFonts.roboto(
-                                  fontSize: 13.5.sp,
-                                  fontWeight: FontWeight.w600,
+
+                            // Aircraft type and name (only show if available)
+                            Expanded(
+                              flex: 3,
+                              child: _buildAircraftInfo(flight),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      Obx(
+                        () => SvgPicture.asset(
+                          'assets/svg/star.svg',
+                          width: 1.25.w,
+                          height: 1.25.h,
+                          color:
+                              flight.isFavorite.value
+                                  ? Colors.orange
+                                  : Colors.grey.shade400.withValues(
+                                    alpha: 0.75,
+                                  ),
+                        ),
+                      ),
+                    ],
+                  ),
+
+                  // unreadCount == 0
+                  //     ? SizedBox(height: 0.25.h)
+                  //     : SizedBox(height: 0.05.h),
+                  SizedBox(height: 0.5.h),
+
+                  // Second Row (Times + Delay aligned with first row end)
+                  Row(
+                    children: [
+                      Expanded(
+                        flex: 5,
+                        child: Row(
+                          children: [
+                            if (flight.isDeparture) ...[
+                              if (flight.std!.isNotEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "STD",
+                                    formatFlightTime(flight.std!),
+                                    Colors.blue.shade700,
+                                  ),
+                                ),
+
+                              if (flight.atd!.isNotEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "ATD",
+                                    formatFlightTime(flight.atd!),
+                                    flight.isDeparture
+                                        ? (flight.std!.isEmpty)
+                                            ? Colors.blue.shade700
+                                            : flight.departureColor ==
+                                                'greenBtn'
+                                            ? Colors.green.shade700
+                                            : Colors.red.shade700
+                                        : flight.arrivalColor == 'greenBtn'
+                                        ? Colors.green.shade700
+                                        : Colors.red.shade700,
+                                  ),
+                                ),
+                              if (flight.atd!.isEmpty &&
+                                  flight.sta!.isNotEmpty &&
+                                  flight.etd!.isEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "STA",
+                                    formatFlightTime(flight.sta!),
+                                    Colors.blue.shade700,
+                                  ),
+                                ),
+                              if (flight.atd!.isEmpty && flight.etd!.isNotEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "ETD",
+                                    formatFlightTime(flight.etd!),
+                                    Colors.amber.shade700,
+                                  ),
+                                ),
+                            ] else ...[
+                              if (flight.ata!.isEmpty &&
+                                  flight.std!.isNotEmpty &&
+                                  flight.eta!.isEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "STD",
+                                    formatFlightTime(flight.std!),
+                                    Colors.blue.shade700,
+                                  ),
+                                ),
+                              if (flight.sta!.isNotEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "STA",
+                                    formatFlightTime(flight.sta!),
+                                    Colors.blue.shade700,
+                                  ),
+                                ),
+                              if (flight.ata!.isNotEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "ATA",
+                                    formatFlightTime(flight.ata!),
+                                    flight.isDeparture
+                                        ? flight.departureColor == 'greenBtn'
+                                            ? Colors.green.shade700
+                                            : Colors.red.shade700
+                                        : flight.arrivalColor == 'greenBtn'
+                                        ? Colors.green.shade700
+                                        : Colors.red.shade700,
+                                  ),
+                                ),
+                              if (flight.ata!.isEmpty && flight.eta!.isNotEmpty)
+                                Expanded(
+                                  flex: 2,
+                                  child: _timeBlock(
+                                    "ETA",
+                                    formatFlightTime(flight.eta!),
+                                    Colors.amber.shade700,
+                                  ),
+                                ),
+                            ],
+                          ],
+                        ),
+                      ),
+
+                      Expanded(
+                        flex: 4,
+                        child: Row(
+                          children: [
+                            if (flight.flightDelays.isNotEmpty &&
+                                flight.flightDelays[0].delayType != '-' &&
+                                flight.flightDelays[0].delayCode != '-' &&
+                                flight.flightDelays[0].delayDate != '-')
+                              Expanded(
+                                flex: 2,
+                                child: Text(
+                                  "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}",
+                                  style: GoogleFonts.inter(
+                                    fontSize: 12.5.sp,
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.red,
+                                  ),
+                                  overflow: TextOverflow.ellipsis,
+                                  maxLines: 1,
+                                  softWrap: false,
                                 ),
                               ),
-                            if (flight.aircraft != null) _divider(height: 1.7),
-                            if (flight.aircraft != null)
-                              Text(
-                                flight.aircraft!.name,
-                                style: GoogleFonts.roboto(
-                                  fontSize: 13.5.sp,
-                                  fontWeight: FontWeight.w600,
+
+                            if ((flight.isDeparture &&
+                                    flight.departureDelayMinutes != 0) ||
+                                (!flight.isDeparture &&
+                                    flight.arrivalDelayMinutes != 0))
+                              Expanded(
+                                flex: 1,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
+                                    Text(
+                                      flight.isDeparture
+                                          ? flight.formattedDepartureDelay
+                                          : flight.formattedArrivalDelay,
+                                      style: GoogleFonts.inter(
+                                        fontSize: 12.5.sp,
+                                        color:
+                                            flight.isDeparture
+                                                ? flight.departureDelayColor ==
+                                                        'text-success'
+                                                    ? Colors.green
+                                                    : Colors.red
+                                                : flight.arrivalDelayColor ==
+                                                    'text-success'
+                                                ? Colors.green
+                                                : Colors.red,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+
+                                    SizedBox(width: 2.0.w),
+
+                                    unreadCount == 0
+                                        ? SizedBox(width: 2.5.w)
+                                        : Container(
+                                          padding: EdgeInsets.all(0.45.h),
+                                          decoration: BoxDecoration(
+                                            color: AppColors.colorSuccess,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          child: Center(
+                                            child: Text(
+                                              '$unreadCount',
+                                              style: GoogleFonts.inter(
+                                                color: Colors.white,
+                                                fontSize: 12.sp,
+                                                fontWeight: FontWeight.w500,
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                  ],
                                 ),
                               ),
                           ],
                         ),
                       ),
-                      Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          if (unreadCount != 0)
-                            _seenCount(' $unreadCount ', Colors.green),
-                          SizedBox(width: 0.2.h),
-
-                          // Star Icon
-                          Obx(
-                            () => Icon(
-                              flight.isFavorite.value
-                                  ? Icons.star
-                                  : Icons.star_border,
-                              size: 2.0.h,
-                              color:
-                                  flight.isFavorite.value
-                                      ? Colors.orange
-                                      : Colors.black45,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ],
-                  ),
-
-                  SizedBox(height: 0.2.h),
-
-                  // Time & Duration Row
-                  Row(
-                    children: [
-                      if (flight.isDeparture) ...[
-                        if (flight.std!.isNotEmpty)
-                          _timeBlock(
-                            "STD",
-                            formatFlightTime(flight.std!),
-                            Colors.blue.shade700,
-                          ),
-
-                        if (flight.std!.isNotEmpty) SizedBox(width: 2.5.w),
-                        if (flight.atd!.isNotEmpty)
-                          _timeBlock(
-                            "ATD",
-                            formatFlightTime(flight.atd!),
-                            flight.isDeparture
-                                ? (flight.std!.isEmpty)
-                                    ? Colors.blue.shade700
-                                    : flight.departureColor == 'greenBtn'
-                                    ? Colors.green.shade700
-                                    : Colors.red.shade700
-                                : flight.arrivalColor == 'greenBtn'
-                                ? Colors.green.shade700
-                                : Colors.red.shade700,
-                          ),
-                        if (flight.atd!.isEmpty &&
-                            flight.sta!.isNotEmpty &&
-                            flight.etd!.isEmpty)
-                          _timeBlock(
-                            "STA",
-                            formatFlightTime(flight.sta!),
-                            Colors.blue.shade700,
-                          ),
-                        if (flight.atd!.isEmpty && flight.etd!.isNotEmpty)
-                          _timeBlock(
-                            "ETD",
-                            formatFlightTime(flight.etd!),
-                            Colors.amber.shade700,
-                          ),
-                      ] else ...[
-                        if (flight.ata!.isEmpty &&
-                            flight.std!.isNotEmpty &&
-                            flight.eta!.isEmpty)
-                          _timeBlock(
-                            "STD",
-                            formatFlightTime(flight.std!),
-                            Colors.blue.shade700,
-                          ),
-                        if (flight.ata!.isEmpty &&
-                            flight.std!.isNotEmpty &&
-                            flight.eta!.isEmpty)
-                          SizedBox(width: 2.5.w),
-                        if (flight.sta!.isNotEmpty)
-                          _timeBlock(
-                            "STA",
-                            formatFlightTime(flight.sta!),
-                            Colors.blue.shade700,
-                          ),
-                        if (flight.sta!.isNotEmpty) SizedBox(width: 2.5.w),
-                        if (flight.ata!.isNotEmpty)
-                          _timeBlock(
-                            "ATA",
-                            formatFlightTime(flight.ata!),
-                            flight.isDeparture
-                                ? flight.departureColor == 'greenBtn'
-                                    ? Colors.green.shade700
-                                    : Colors.red.shade700
-                                : flight.arrivalColor == 'greenBtn'
-                                ? Colors.green.shade700
-                                : Colors.red.shade700,
-                          ),
-                        if (flight.ata!.isEmpty && flight.eta!.isNotEmpty)
-                          _timeBlock(
-                            "ETA",
-                            formatFlightTime(flight.eta!),
-                            Colors.amber.shade700,
-                          ),
-                      ],
-                      SizedBox(width: 2.0.w),
-                      if (flight.flightDelays.isNotEmpty &&
-                          flight.flightDelays[0].delayType != '-' &&
-                          flight.flightDelays[0].delayCode != '-' &&
-                          flight.flightDelays[0].delayDate != '-')
-                        Text(
-                          "${flight.flightDelays[0].delayType}${flight.flightDelays[0].delayCode}/${flight.flightDelays[0].delayDate}",
-                          style: GoogleFonts.roboto(
-                            fontSize: 13.5.sp,
-                            fontWeight: FontWeight.w600,
-                            color: Colors.red,
-                          ),
-                          overflow: TextOverflow.ellipsis,
-                          maxLines: 1,
-                          softWrap: false,
-                        ),
-
-                      Expanded(child: SizedBox()),
-                      if ((flight.isDeparture &&
-                              flight.departureDelayMinutes != 0) ||
-                          (!flight.isDeparture &&
-                              flight.arrivalDelayMinutes != 0))
-                        Text(
-                          flight.isDeparture
-                              ? flight.formattedDepartureDelay
-                              : flight.formattedArrivalDelay,
-                          style: GoogleFonts.roboto(
-                            fontSize: 13.5.sp,
-                            color:
-                                flight.isDeparture
-                                    ? flight.departureDelayColor ==
-                                            'text-success'
-                                        ? Colors.green
-                                        : Colors.red
-                                    : flight.arrivalDelayColor == 'text-success'
-                                    ? Colors.green
-                                    : Colors.red,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      if ((flight.isDeparture &&
-                              flight.departureDelayMinutes != 0) ||
-                          (!flight.isDeparture &&
-                              flight.arrivalDelayMinutes != 0))
-                        SizedBox(width: 0.5.w),
                     ],
                   ),
                 ],
@@ -307,85 +357,105 @@ class FlightCard extends StatelessWidget {
     });
   }
 
+  // Helper method to build aircraft info
+  Widget _buildAircraftInfo(FlightsModel flight) {
+    final hasAircraftType =
+        flight.aircraftType != null &&
+        flight.aircraftType!.icao != null &&
+        flight.aircraftType!.icao!.isNotEmpty;
+    final hasAircraft = flight.aircraft != null;
+
+    // If no aircraft data, return empty container
+    if (!hasAircraftType && !hasAircraft) {
+      return const SizedBox.shrink();
+    }
+
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.start,
+      children: [
+        SizedBox(width: 0.5.w),
+
+        // Aircraft Type (ICAO)
+        if (hasAircraftType)
+          Flexible(
+            child: Text(
+              flight.aircraftType!.icao!,
+              style: GoogleFonts.inter(
+                fontSize: 13.0.sp,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF287393),
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+
+        // Divider (only show if both type and aircraft are present)
+        if (hasAircraftType && hasAircraft) ...[
+          SizedBox(width: 0.25.w),
+          _divider(height: 1.25),
+          SizedBox(width: 0.25.w),
+        ],
+
+        // Aircraft Name
+        if (hasAircraft)
+          Flexible(
+            child: Text(
+              flight.aircraft!.name,
+              style: GoogleFonts.inter(
+                fontSize: 13.0.sp,
+                fontWeight: FontWeight.w500,
+                color: Color(0xFF1B3668),
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+      ],
+    );
+  }
+
   Widget _divider({
-    double width = 0.35,
+    double width = 0.25,
     double height = 2.0,
     double opacity = .5,
   }) => Container(
     width: width.w,
     height: height.h,
-    color: Colors.black.withValues(alpha: opacity),
+    margin: EdgeInsets.symmetric(horizontal: 1.0.w),
+    color: Colors.grey.withValues(alpha: opacity),
   );
 
   Widget _timeBlock(String label, String time, Color color) {
-    return Row(
-      children: [
-        Container(
-          // width: 7.0.w,
-          // height: 2.0.h,
-          padding: EdgeInsets.symmetric(vertical: 0.01.h, horizontal: 0.5.w),
-          alignment: Alignment.center,
-          decoration: BoxDecoration(
-            color: color,
-            borderRadius: BorderRadius.circular(0.35.h),
-          ),
-          child: Text(
-            label,
-            style: GoogleFonts.roboto(
-              fontSize: 12.5.sp,
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
+    return Container(
+      margin: EdgeInsets.only(right: 3.0.w),
+      child: Row(
+        children: [
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 0.02.h, horizontal: 0.75.w),
+            alignment: Alignment.center,
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(2.0),
+            ),
+            child: Text(
+              label,
+              style: GoogleFonts.inter(
+                fontSize: 12.5.sp,
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+              ),
             ),
           ),
-        ),
-        SizedBox(width: 1.5.w),
-        Text(
-          time,
-          style: GoogleFonts.roboto(
-            fontSize: 15.sp,
-            fontWeight: FontWeight.w600,
+          SizedBox(width: 1.25.w),
+          Text(
+            time,
+            style: GoogleFonts.inter(
+              fontSize: 13.sp,
+              fontWeight: FontWeight.w600,
+              // color: Colors.grey.shade700,
+            ),
           ),
-        ),
-      ],
-    );
-  }
-
-  Widget _seenCount(String label, Color color) {
-    return Container(
-      width: 3.5.w,
-      height: 1.75.h,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(0.55.h),
-      ),
-      child: Text(
-        label,
-        style: GoogleFonts.roboto(
-          fontSize: 11.5.sp,
-          color: Colors.white,
-          fontWeight: FontWeight.w600,
-        ),
+        ],
       ),
     );
-  }
-
-  String formatFlightInfo(String info) {
-    final regex = RegExp(r'^([A-Z]+)\s?(\d+)$', caseSensitive: false);
-    final match = regex.firstMatch(info.trim());
-
-    if (match != null) {
-      final airline = match.group(1);
-      final number = match.group(2);
-      final spaceCount =
-          number!.length == 3
-              ? 0
-              : number.length == 4
-              ? 0
-              : 0;
-      return '$airline $number${' ' * spaceCount}';
-    }
-
-    return info;
   }
 }

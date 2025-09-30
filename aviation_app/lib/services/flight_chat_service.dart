@@ -184,16 +184,29 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      // log("[getSSROption] response : ${response.data}");
+      log("[getSSROption] response : ${response.data}");
 
-      if (response.statusCode == 200 &&
-          response.data['status'] == true &&
-          response.data['body'] != null) {
-        final List rawList = response.data['body'];
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        if (response.data['body'] == {}) {
+          return ResponseClass.success([]);
+        } else if (response.data['body'] is Map) {
+          final Map<String, dynamic> bodyMap = response.data['body'];
 
-        final List<String> ssrData = rawList.map((e) => e.toString()).toList();
-
-        return ResponseClass.success(ssrData);
+          // If it's an empty map, return empty list
+          if (bodyMap.isEmpty) {
+            return ResponseClass.success([]);
+          } else {
+            // Convert map values to list of strings
+            final List<String> ssrData =
+                bodyMap.values.map((e) => e.toString()).toList();
+            return ResponseClass.success(ssrData);
+          }
+        } else {
+          final List rawList = response.data['body'];
+          final List<String> ssrData =
+              rawList.map((e) => e.toString()).toList();
+          return ResponseClass.success(ssrData);
+        }
       } else {
         return ResponseClass.error(
           response.data['message'] ?? 'Unknown error occurred',

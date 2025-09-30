@@ -31,6 +31,45 @@ class FlightCommController extends GetxController {
   var isFlightCommLoading = false.obs;
   var isRefreshing = false.obs;
 
+  // Search Functionality
+  final searchController = TextEditingController();
+  final RxBool isSearching = false.obs;
+  final RxList<FlightsModel> searchResults = <FlightsModel>[].obs;
+
+  // Add these methods
+  void toggleSearch() {
+    isSearching.value = !isSearching.value;
+    if (!isSearching.value) {
+      searchController.clear();
+      searchResults.clear();
+    }
+  }
+
+  void searchFlights(String query) {
+    if (query.isEmpty) {
+      searchResults.clear();
+      return;
+    }
+
+    final searchTerm = query.toLowerCase();
+    searchResults.assignAll(
+      flightList.where((flight) {
+        return flight.flightInfo.toLowerCase().contains(searchTerm) == true ||
+            flight.departureAirport?.iataCode.toLowerCase().contains(
+                  searchTerm,
+                ) ==
+                true ||
+            flight.arrivalAirport?.iataCode.toLowerCase().contains(
+                  searchTerm,
+                ) ==
+                true ||
+            flight.aircraft?.name.toLowerCase().contains(searchTerm) == true ||
+            flight.aircraftType?.icao?.toLowerCase().contains(searchTerm) ==
+                true;
+      }).toList(),
+    );
+  }
+
   @override
   void onInit() {
     super.onInit();
@@ -68,7 +107,7 @@ class FlightCommController extends GetxController {
 
   void _updateTime() {
     final now = DateTime.now().toUtc();
-    final dateToShow = selectedDate.value ?? now;
+    // final dateToShow = selectedDate.value ?? now;
 
     // Check if we're showing today (either no selection or explicitly selected today)
     final isToday =
@@ -78,12 +117,12 @@ class FlightCommController extends GetxController {
 
     if (isToday) {
       // Always use current time for today
-      final formatter = DateFormat('EEEE, dd MMMM yyyy HH:mm:ss \'UTC\'');
+      final formatter = DateFormat('EEEE, dd MMMM yyyy HH:mm \'UTC\'');
       formattedDateTime.value = formatter.format(now); // Use current time
     } else {
       // Show just date for other days
-      final formatter = DateFormat('EEEE, dd MMMM yyyy');
-      formattedDateTime.value = formatter.format(dateToShow);
+      // final formatter = DateFormat('EEEE, dd MMMM yyyy');
+      formattedDateTime.value = '';
     }
 
     // print('formattedDateTime: ${formattedDateTime.value}');
@@ -115,8 +154,8 @@ class FlightCommController extends GetxController {
     'All',
     'Arrivals',
     'Departures',
-    'Cancelled',
     'My Flights',
+    'Cancelled',
   ];
 
   void selectFilter(String filter) {
@@ -207,6 +246,7 @@ class FlightCommController extends GetxController {
 
   @override
   void onClose() {
+    searchController.dispose();
     _timer?.cancel();
     _cleanupFlightChatListeners();
     super.onClose();

@@ -18,6 +18,7 @@ import 'package:aviation_app/utils/app_colors.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../../constant.dart';
 
@@ -89,88 +90,55 @@ class ChatScreen extends StatelessWidget {
                                       children: [
                                         Text(
                                           flight.basicDetails.flightInfo,
-                                          style: const TextStyle(
-                                            color: Colors.red,
+                                          style: GoogleFonts.inter(
                                             fontWeight: FontWeight.w500,
                                             fontSize: 15,
                                           ),
                                         ),
-                                        const SizedBox(width: 6),
-                                        _divider(Colors.red),
-                                        const SizedBox(width: 6),
+                                        const SizedBox(width: 8),
                                         Text(
-                                          "${flight.departureAirport.iataCode}-${flight.arrivalAirport.iataCode}",
-                                          style: const TextStyle(
-                                            color: Colors.red,
+                                          "${flight.departureAirport.iataCode} - ${flight.arrivalAirport.iataCode}",
+                                          style: GoogleFonts.inter(
                                             fontWeight: FontWeight.w500,
                                             fontSize: 15,
                                           ),
                                         ),
-                                        const SizedBox(width: 6),
-                                        Row(
-                                          children: [
-                                            if (flight
-                                                .basicDetails
-                                                .gate!
-                                                .isNotEmpty)
-                                              Text(
-                                                "GATE: ${flight.basicDetails.gate ?? '--'}",
-                                                style: const TextStyle(
-                                                  color: Colors.blue,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 10.5,
-                                                ),
-                                              ),
-                                            if (flight
-                                                .basicDetails
-                                                .gate!
-                                                .isNotEmpty)
-                                              const SizedBox(width: 6),
-                                            if (flight
-                                                .basicDetails
-                                                .pos!
-                                                .isNotEmpty)
-                                              _divider(Colors.blue),
-                                            if (flight
-                                                .basicDetails
-                                                .pos!
-                                                .isNotEmpty)
-                                              const SizedBox(width: 6),
-                                            if (flight
-                                                .basicDetails
-                                                .pos!
-                                                .isNotEmpty)
-                                              Text(
-                                                "POS: ${flight.basicDetails.pos ?? '--'}",
-                                                style: const TextStyle(
-                                                  color: Colors.blue,
-                                                  fontWeight: FontWeight.w500,
-                                                  fontSize: 10.5,
-                                                ),
-                                              ),
-                                          ],
-                                        ),
-
-                                        if (flight.isConnectingFlight) Spacer(),
-                                        if (flight.isConnectingFlight)
-                                          Container(
-                                            padding: const EdgeInsets.all(5.0),
-                                            decoration: BoxDecoration(
-                                              color: Colors.red,
-                                              borderRadius:
-                                                  BorderRadius.circular(4),
-                                            ),
-                                            child: Text(
-                                              flight.inboundFlight!.isNotEmpty
-                                                  ? 'I/B FLT ${flight.inboundFlight!}'
-                                                  : 'O/B FLT ${flight.outboundFlight!}',
-                                              style: const TextStyle(
-                                                color: Colors.white,
-                                                fontWeight: FontWeight.w500,
-                                                fontSize: 8.0,
-                                              ),
-                                            ),
+                                        Spacer(),
+                                        if (flight.aircraft != null) ...[
+                                          InfoText(
+                                            flight.aircraftType!.icao,
+                                            textColor: Color(0xFF287393),
                                           ),
+                                          const SizedBox(width: 6),
+                                          _divider(Colors.black),
+                                          const SizedBox(width: 6),
+                                          InfoText(
+                                            flight.aircraft!.name,
+                                            textColor: Color(0xFF1B3668),
+                                          ),
+                                          const SizedBox(width: 6),
+                                        ],
+
+                                        // if (flight.isConnectingFlight) Spacer(),
+                                        // if (flight.isConnectingFlight)
+                                        //   Container(
+                                        //     padding: const EdgeInsets.all(5.0),
+                                        //     decoration: BoxDecoration(
+                                        //       color: Colors.red,
+                                        //       borderRadius:
+                                        //           BorderRadius.circular(4),
+                                        //     ),
+                                        //     child: Text(
+                                        //       flight.inboundFlight!.isNotEmpty
+                                        //           ? 'I/B FLT ${flight.inboundFlight!}'
+                                        //           : 'O/B FLT ${flight.outboundFlight!}',
+                                        //       style: const TextStyle(
+                                        //         color: Colors.white,
+                                        //         fontWeight: FontWeight.w500,
+                                        //         fontSize: 8.0,
+                                        //       ),
+                                        //     ),
+                                        //   ),
                                       ],
                                     ),
                                     const SizedBox(height: 2),
@@ -178,19 +146,126 @@ class ChatScreen extends StatelessWidget {
                                     // 🔽 Row 2: Operational Details
                                     Container(
                                       alignment: Alignment.centerLeft,
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
+                                      child: Row(
+                                        children: [
+                                          Row(
+                                            children: [
+                                              if (flight
+                                                  .basicDetails
+                                                  .gate!
+                                                  .isNotEmpty)
+                                                Text(
+                                                  "GATE: ${flight.basicDetails.gate ?? '--'}",
+                                                  style: const TextStyle(
+                                                    color: Colors.blue,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 10.5,
+                                                  ),
+                                                ),
+                                              if (flight
+                                                  .basicDetails
+                                                  .gate!
+                                                  .isNotEmpty)
+                                                const SizedBox(width: 6),
+                                              if (flight
+                                                  .basicDetails
+                                                  .pos!
+                                                  .isNotEmpty)
+                                                _divider(Colors.blue),
+                                              if (flight
+                                                  .basicDetails
+                                                  .pos!
+                                                  .isNotEmpty)
+                                                const SizedBox(width: 6),
+                                              if (flight
+                                                  .basicDetails
+                                                  .pos!
+                                                  .isNotEmpty)
+                                                Text(
+                                                  "POS: ${flight.basicDetails.pos ?? '--'}",
+                                                  style: const TextStyle(
+                                                    color: Colors.blue,
+                                                    fontWeight: FontWeight.w500,
+                                                    fontSize: 10.5,
+                                                  ),
+                                                ),
+                                            ],
+                                          ),
+                                          Spacer(),
+
+                                          if ([
+                                            flight.capacity.f,
+                                            flight.capacity.j,
+                                            flight.capacity.c,
+                                            flight.capacity.s,
+                                            flight.capacity.w,
+                                            flight.capacity.y,
+                                            flight.capacity.m,
+                                          ].any(
+                                            (e) => e != null && e.isNotEmpty,
+                                          )) ...[
+                                            InfoBadge(
+                                              label: "CFG",
+                                              color: AppColors.colorPrimary,
+                                            ),
+                                            const SizedBox(width: 6),
+                                            InfoText(
+                                              [
+                                                    flight.capacity.f,
+                                                    flight.capacity.j,
+                                                    flight.capacity.c,
+                                                    flight.capacity.s,
+                                                    flight.capacity.w,
+                                                    flight.capacity.y,
+                                                    flight.capacity.m,
+                                                  ]
+                                                  .where(
+                                                    (e) =>
+                                                        e != null &&
+                                                        e.isNotEmpty,
+                                                  )
+                                                  .join(' '),
+                                            ),
+                                            const SizedBox(width: 6),
+                                          ],
+                                        ],
+                                      ),
+                                    ),
+
+                                    const SizedBox(height: 4),
+
+                                    Container(
+                                      alignment: Alignment.centerLeft,
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.start,
+                                        children: [
+                                          if (flight.isDeparture) ...[
+                                            if (flight
+                                                .basicDetails
+                                                .std!
+                                                .isNotEmpty) ...[
+                                              InfoBadge(
+                                                label: "STD",
+                                                color: Colors.blue.shade700,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                formatFlightTime(
+                                                  flight.basicDetails.std!,
+                                                ),
+                                                textColor: Colors.black87,
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
+
                                             if (flight
                                                 .basicDetails
                                                 .atd!
                                                 .isNotEmpty) ...[
                                               InfoBadge(
                                                 label: "ATD",
-                                                color: Colors.green,
+                                                color: Colors.green.shade700,
                                               ),
                                               const SizedBox(width: 6),
                                               InfoText(
@@ -202,118 +277,164 @@ class ChatScreen extends StatelessWidget {
                                               const SizedBox(width: 6),
                                             ],
 
-                                            if (flight.aircraft != null) ...[
-                                              InfoText(
-                                                flight.aircraftType!.icao,
-                                              ),
-                                              const SizedBox(width: 6),
-                                              _divider(Colors.blue),
-                                              const SizedBox(width: 6),
-                                              InfoText(flight.aircraft!.name),
-                                              const SizedBox(width: 6),
-                                            ],
-                                          ],
-                                        ),
-                                      ),
-                                    ),
-
-                                    const SizedBox(height: 4),
-
-                                    Container(
-                                      alignment: Alignment.centerLeft,
-                                      child: SingleChildScrollView(
-                                        scrollDirection: Axis.horizontal,
-                                        child: Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            if ([
-                                              flight.capacity.f,
-                                              flight.capacity.j,
-                                              flight.capacity.c,
-                                              flight.capacity.s,
-                                              flight.capacity.w,
-                                              flight.capacity.y,
-                                              flight.capacity.m,
-                                            ].any(
-                                              (e) => e != null && e.isNotEmpty,
-                                            )) ...[
+                                            if (flight
+                                                    .basicDetails
+                                                    .atd!
+                                                    .isEmpty &&
+                                                flight
+                                                    .basicDetails
+                                                    .sta!
+                                                    .isNotEmpty &&
+                                                flight
+                                                    .basicDetails
+                                                    .etd!
+                                                    .isEmpty) ...[
                                               InfoBadge(
-                                                label: "CFG",
-                                                color: AppColors.colorPrimary,
+                                                label: "STA",
+                                                color: Colors.blue.shade700,
                                               ),
                                               const SizedBox(width: 6),
                                               InfoText(
-                                                [
-                                                      flight.capacity.f,
-                                                      flight.capacity.j,
-                                                      flight.capacity.c,
-                                                      flight.capacity.s,
-                                                      flight.capacity.w,
-                                                      flight.capacity.y,
-                                                      flight.capacity.m,
-                                                    ]
-                                                    .where(
-                                                      (e) =>
-                                                          e != null &&
-                                                          e.isNotEmpty,
-                                                    )
-                                                    .join(' '),
+                                                formatFlightTime(
+                                                  flight.basicDetails.sta!,
+                                                ),
+                                                textColor: Colors.black87,
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
+                                          ] else ...[
+                                            if (flight
+                                                    .basicDetails
+                                                    .ata!
+                                                    .isEmpty &&
+                                                flight
+                                                    .basicDetails
+                                                    .std!
+                                                    .isNotEmpty &&
+                                                flight
+                                                    .basicDetails
+                                                    .eta!
+                                                    .isEmpty) ...[
+                                              InfoBadge(
+                                                label: "STD",
+                                                color: Colors.blue.shade700,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                formatFlightTime(
+                                                  flight.basicDetails.std!,
+                                                ),
+                                                textColor: Colors.black87,
                                               ),
                                               const SizedBox(width: 6),
                                             ],
 
-                                            if ([
-                                              flight.actualPax.paxC,
-                                              flight.actualPax.paxY,
-                                              flight.actualPax.paxInf,
-                                            ].any(
-                                              (e) => e != null && e.isNotEmpty,
-                                            )) ...[
-                                              _divider(Colors.blue),
-                                              const SizedBox(width: 6),
+                                            if (flight
+                                                .basicDetails
+                                                .sta!
+                                                .isNotEmpty) ...[
                                               InfoBadge(
-                                                label: "ACT",
-                                                color: AppColors.colorPrimary,
+                                                label: "STA",
+                                                color: Colors.blue.shade700,
                                               ),
-                                              if (flight
-                                                  .actualPax
-                                                  .paxC!
-                                                  .isNotEmpty) ...[
-                                                const SizedBox(width: 6),
-                                                InfoText(
-                                                  "J${flight.actualPax.paxC}",
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                formatFlightTime(
+                                                  flight.basicDetails.sta!,
                                                 ),
-                                              ],
-                                              if (flight
-                                                  .actualPax
-                                                  .paxY!
-                                                  .isNotEmpty) ...[
-                                                const SizedBox(width: 6),
-                                                InfoText(
-                                                  "Y${flight.actualPax.paxY}",
+                                                textColor: Colors.black87,
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
+
+                                            if (flight
+                                                .basicDetails
+                                                .ata!
+                                                .isNotEmpty) ...[
+                                              InfoBadge(
+                                                label: "ATA",
+                                                color: Colors.green.shade700,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                formatFlightTime(
+                                                  flight.basicDetails.ata!,
                                                 ),
-                                              ],
-                                              if (flight.actualPax.paxInf !=
-                                                      null &&
-                                                  flight
-                                                      .actualPax
-                                                      .paxInf!
-                                                      .isNotEmpty &&
-                                                  int.tryParse(
-                                                        flight
-                                                            .actualPax
-                                                            .paxInf!,
-                                                      ) !=
-                                                      0) ...[
-                                                const SizedBox(width: 6),
-                                                InfoText(
-                                                  "+ ${flight.actualPax.paxInf} INF",
+                                                textColor: Colors.black87,
+                                              ),
+                                              const SizedBox(width: 6),
+                                            ],
+
+                                            if (flight
+                                                    .basicDetails
+                                                    .ata!
+                                                    .isEmpty &&
+                                                flight
+                                                    .basicDetails
+                                                    .eta!
+                                                    .isNotEmpty) ...[
+                                              InfoBadge(
+                                                label: "ETA",
+                                                color: Colors.amber.shade700,
+                                              ),
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                formatFlightTime(
+                                                  flight.basicDetails.eta!,
                                                 ),
-                                              ],
+                                                textColor: Colors.black87,
+                                              ),
+                                              const SizedBox(width: 6),
                                             ],
                                           ],
-                                        ),
+                                          Spacer(),
+                                          if ([
+                                            flight.actualPax.paxC,
+                                            flight.actualPax.paxY,
+                                            flight.actualPax.paxInf,
+                                          ].any(
+                                            (e) => e != null && e.isNotEmpty,
+                                          )) ...[
+                                            InfoBadge(
+                                              label: "ACT",
+                                              color: AppColors.colorPrimary,
+                                            ),
+                                            if (flight
+                                                .actualPax
+                                                .paxC!
+                                                .isNotEmpty) ...[
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                "J${flight.actualPax.paxC}",
+                                              ),
+                                            ],
+                                            if (flight
+                                                .actualPax
+                                                .paxY!
+                                                .isNotEmpty) ...[
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                "Y${flight.actualPax.paxY}",
+                                              ),
+                                            ],
+                                            if (flight.actualPax.paxInf !=
+                                                    null &&
+                                                flight
+                                                    .actualPax
+                                                    .paxInf!
+                                                    .isNotEmpty &&
+                                                int.tryParse(
+                                                      flight.actualPax.paxInf!,
+                                                    ) !=
+                                                    0) ...[
+                                              const SizedBox(width: 6),
+                                              InfoText(
+                                                "+ ${flight.actualPax.paxInf} INF",
+                                              ),
+                                            ],
+                                            const SizedBox(width: 6),
+                                          ],
+                                        ],
                                       ),
                                     ),
                                   ],
@@ -432,7 +553,7 @@ class ChatScreen extends StatelessWidget {
   }
 
   Widget _divider(Color color) =>
-      Container(width: 1.0, height: 17.5, color: color);
+      Container(width: 1.0, height: 12.5, color: color.withValues(alpha: 0.25));
 
   Widget _chip(String label) {
     final controller = Get.find<ChatController>();

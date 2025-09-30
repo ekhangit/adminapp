@@ -1,6 +1,7 @@
 import 'package:aviation_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../../controllers/flight/flight_info_controller.dart';
 import '../../../utils/app_colors.dart';
 
@@ -19,6 +20,171 @@ class PTSForm extends StatelessWidget {
           top: 16,
           bottom: 100,
         ),
+
+        // child: Column(
+        //   crossAxisAlignment: CrossAxisAlignment.start,
+        //   children: [
+        //     Obx(
+        //       () => Row(
+        //         mainAxisAlignment: MainAxisAlignment.center,
+        //         children: [
+        //           _timeRadio(
+        //             label: "UTC TIME",
+        //             value: "UTC",
+        //             groupValue: controller.selectedTimeMode.value,
+        //             controller: controller,
+        //           ),
+        //           const SizedBox(width: 20),
+        //           _timeRadio(
+        //             label: "LOCAL TIME",
+        //             value: "Local",
+        //             groupValue: controller.selectedTimeMode.value,
+        //             controller: controller,
+        //           ),
+        //         ],
+        //       ),
+        //     ),
+        //     const SizedBox(height: 16),
+
+        //     Obx(() {
+        //       final List<Widget> widgets = [];
+
+        //       final dropdowns =
+        //           controller.getPTSOptions
+        //               .where((field) => _isDropdownField(field))
+        //               .toList();
+
+        //       final nonDropdowns =
+        //           controller.getPTSOptions
+        //               .where((field) => !_isDropdownField(field))
+        //               .toList();
+
+        //       // 1. Render dropdowns two in a row
+        //       for (int i = 0; i < dropdowns.length; i += 2) {
+        //         final dropdownsInRow = dropdowns.sublist(
+        //           i,
+        //           i + 2 > dropdowns.length ? dropdowns.length : i + 2,
+        //         );
+
+        //         widgets.add(
+        //           Padding(
+        //             padding: const EdgeInsets.only(bottom: 16),
+        //             child: Row(
+        //               children: [
+        //                 // First dropdown
+        //                 Expanded(
+        //                   child: Padding(
+        //                     padding: EdgeInsets.only(
+        //                       right: dropdownsInRow.length > 1 ? 8 : 0,
+        //                     ),
+        //                     child: SingleSelectDropdown(
+        //                       labelFontSize: 10.5,
+        //                       showSearchField: false,
+        //                       label: dropdownsInRow[0].toUpperCase().replaceAll(
+        //                         '_',
+        //                         ' ',
+        //                       ),
+        //                       options: ['Yes', 'No'],
+        //                       selectedItem:
+        //                           controller
+        //                               .ptsDropdownSelections[dropdownsInRow[0]]!
+        //                               .obs,
+        //                       hint: 'Select',
+        //                       onChanged: (String? newValue) {
+        //                         if (newValue != null) {
+        //                           controller
+        //                                   .ptsDropdownSelections[dropdownsInRow[0]] =
+        //                               newValue;
+        //                         }
+        //                       },
+        //                     ),
+        //                   ),
+        //                 ),
+
+        //                 // Second dropdown if exists
+        //                 if (dropdownsInRow.length > 1)
+        //                   Expanded(
+        //                     child: SingleSelectDropdown(
+        //                       labelFontSize: 10.5,
+        //                       showSearchField: false,
+        //                       label: dropdownsInRow[1].toUpperCase().replaceAll(
+        //                         '_',
+        //                         ' ',
+        //                       ),
+        //                       options: ['Yes', 'No'],
+        //                       selectedItem:
+        //                           controller
+        //                               .ptsDropdownSelections[dropdownsInRow[1]]!
+        //                               .obs,
+        //                       hint: 'Select',
+        //                       onChanged: (String? newValue) {
+        //                         if (newValue != null) {
+        //                           controller
+        //                                   .ptsDropdownSelections[dropdownsInRow[1]] =
+        //                               newValue;
+        //                         }
+        //                       },
+        //                     ),
+        //                   ),
+        //               ],
+        //             ),
+        //           ),
+        //         );
+        //       }
+
+        //       // 2. Render timerField2 widgets in rows of up to 3
+        //       for (int i = 0; i < nonDropdowns.length; i += 3) {
+        //         final fieldsInRow = nonDropdowns.sublist(
+        //           i,
+        //           i + 3 > nonDropdowns.length ? nonDropdowns.length : i + 3,
+        //         );
+
+        //         // Find the maximum lines needed in this row
+        //         // final maxLinesInRow = fieldsInRow.fold(1, (max, field) {
+        //         //   final label = field.toUpperCase().replaceAll('_', ' ');
+        //         //   final lineCount = '\n'.allMatches(label).length + 1;
+        //         //   return lineCount > max ? lineCount : max;
+        //         // });
+
+        //         widgets.add(
+        //           Padding(
+        //             padding: const EdgeInsets.only(bottom: 8),
+        //             child: Row(
+        //               children: [
+        //                 // First field (always exists)
+        //                 _buildTimeField(fieldsInRow[0], controller, 2),
+
+        //                 // Second field (if exists)
+        //                 if (fieldsInRow.length > 1)
+        //                   Padding(
+        //                     padding: const EdgeInsets.only(left: 8),
+        //                     child: _buildTimeField(
+        //                       fieldsInRow[1],
+        //                       controller,
+        //                       2,
+        //                     ),
+        //                   ),
+
+        //                 // Third field (if exists)
+        //                 if (fieldsInRow.length > 2)
+        //                   Padding(
+        //                     padding: const EdgeInsets.only(left: 8),
+        //                     child: _buildTimeField(
+        //                       fieldsInRow[2],
+        //                       controller,
+        //                       2,
+        //                     ),
+        //                   ),
+        //               ],
+        //             ),
+        //           ),
+        //         );
+        //       }
+
+        //       return Column(children: widgets);
+        //     }),
+        //   ],
+        // ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -52,9 +218,18 @@ class PTSForm extends StatelessWidget {
                       .where((field) => _isDropdownField(field))
                       .toList();
 
-              final nonDropdowns =
+              final timeFields =
                   controller.getPTSOptions
-                      .where((field) => !_isDropdownField(field))
+                      .where(
+                        (field) =>
+                            !_isDropdownField(field) &&
+                            !_isRegularTextField(field),
+                      )
+                      .toList();
+
+              final textFields =
+                  controller.getPTSOptions
+                      .where((field) => _isRegularTextField(field))
                       .toList();
 
               // 1. Render dropdowns two in a row
@@ -82,7 +257,7 @@ class PTSForm extends StatelessWidget {
                                 '_',
                                 ' ',
                               ),
-                              options: ['Yes', 'No'],
+                              options: ['JETWAY', 'STEPS'],
                               selectedItem:
                                   controller
                                       .ptsDropdownSelections[dropdownsInRow[0]]!
@@ -131,18 +306,11 @@ class PTSForm extends StatelessWidget {
               }
 
               // 2. Render timerField2 widgets in rows of up to 3
-              for (int i = 0; i < nonDropdowns.length; i += 3) {
-                final fieldsInRow = nonDropdowns.sublist(
+              for (int i = 0; i < timeFields.length; i += 3) {
+                final fieldsInRow = timeFields.sublist(
                   i,
-                  i + 3 > nonDropdowns.length ? nonDropdowns.length : i + 3,
+                  i + 3 > timeFields.length ? timeFields.length : i + 3,
                 );
-
-                // Find the maximum lines needed in this row
-                // final maxLinesInRow = fieldsInRow.fold(1, (max, field) {
-                //   final label = field.toUpperCase().replaceAll('_', ' ');
-                //   final lineCount = '\n'.allMatches(label).length + 1;
-                //   return lineCount > max ? lineCount : max;
-                // });
 
                 widgets.add(
                   Padding(
@@ -173,6 +341,31 @@ class PTSForm extends StatelessWidget {
                               2,
                             ),
                           ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+
+              // 3. Render text fields (accepted_pax, mhb_ahl) in rows of up to 3
+              for (int i = 0; i < textFields.length; i += 2) {
+                final fieldsInRow = textFields.sublist(
+                  i,
+                  i + 2 > textFields.length ? textFields.length : i + 2,
+                );
+
+                widgets.add(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: Row(
+                      children: [
+                        // First field (always exists)
+                        _buildTextField(fieldsInRow[0], controller, 1),
+
+                        // Second field (if exists)
+                        if (fieldsInRow.length > 1) SizedBox(width: 10),
+                        if (fieldsInRow.length > 1)
+                          _buildTextField(fieldsInRow[1], controller, 1),
                       ],
                     ),
                   ),
@@ -245,6 +438,13 @@ class PTSForm extends StatelessWidget {
 
   bool _isDropdownField(String field) {
     return field == 'jetway/steps' || field == 'back_steps_used';
+  }
+
+  bool _isRegularTextField(String field) {
+    return field == 'accepted_pax' ||
+        field == 'mhb_ahl' ||
+        field == 'mhb_ohd' ||
+        field == 'mhb_dhr';
   }
 }
 
@@ -326,7 +526,9 @@ Widget timerField2({
               ),
               Expanded(
                 child: GestureDetector(
-                  onTap: () => flightInfoController.showManualTimeInput(controller),
+                  onTap:
+                      () =>
+                          flightInfoController.showManualTimeInput(controller),
                   child: GetBuilder<FlightInfoController>(
                     builder: (ctr) {
                       final currentTime = controller.text;
@@ -350,6 +552,42 @@ Widget timerField2({
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+
+Widget _buildTextField(String field, FlightInfoController controller, int lines) {
+  return Expanded(
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          field.toUpperCase().replaceAll('_', ' '),
+          style: GoogleFonts.roboto(
+            fontWeight: FontWeight.w600,
+            fontSize: 10.5,
+            color: Colors.black87,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(4),
+            border: Border.all(color: Colors.grey.shade300),
+          ),
+          child: TextField(
+            controller: controller.ptsTextControllers[field],
+            decoration: InputDecoration(
+              contentPadding: const EdgeInsets.symmetric(horizontal: 12),
+              border: InputBorder.none,
+            ),
+            style: GoogleFonts.roboto(fontSize: 12, color: Colors.black87),
+            maxLines: lines,
+            keyboardType: TextInputType.text,
           ),
         ),
       ],
