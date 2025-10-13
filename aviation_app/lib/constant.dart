@@ -4,13 +4,13 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // Server Configuration
-const apiUrl = "https://staging.avsysdev.com";
+const apiUrl = "https://asg.avsysdev.com";
 
 const String appName = "AvBIS";
 const String fontFamily = "Helvetica";
 
 const LinearGradient appThemeGradientSoft = LinearGradient(
-  colors: [Color(0xFF003862), Color.fromARGB(255, 78, 135, 179)],
+  colors: [Color(0xFF013861), Color(0xFF1773B8)],
   begin: Alignment.topLeft,
   end: Alignment.bottomRight,
 );

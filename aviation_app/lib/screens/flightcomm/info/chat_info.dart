@@ -17,13 +17,15 @@ class ChatInfo extends StatelessWidget {
 
     return CustomScrollView(
       controller: controller.scrollController,
+      reverse: true,
       slivers: [
         // 🔵 Chat Messages
         Obx(() {
           final groupedMessages = _groupMessagesByDate(controller.messages);
           final dateKeys =
-              groupedMessages.keys.toList()
-                ..sort((a, b) => b.compareTo(a)); // Sort dates descending
+              groupedMessages.keys.toList()..sort(
+                (a, b) => b.compareTo(a),
+              ); // Sort dates descending for reverse view
 
           // Return empty widget if there are no messages
           // if (dateKeys.isEmpty) {
@@ -53,12 +55,16 @@ class ChatInfo extends StatelessWidget {
               return Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Date header
-                  _buildDateHeader(date),
-                  // Messages for this date
-                  ...messages.map(
-                    (message) => _buildMessageItem(controller, message),
-                  ),
+                  // Messages for this date (in order for bottom-up display)
+                  ...messages.asMap().entries.map((entry) {
+                    final isFirstMessage = index == 0 && entry.key == 0;
+                    return Padding(
+                      padding: EdgeInsets.only(
+                        bottom: isFirstMessage ? 12.0 : 0.0,
+                      ),
+                      child: _buildMessageItem(controller, entry.value),
+                    );
+                  }),
                 ],
               );
 
@@ -208,24 +214,18 @@ class ChatInfo extends StatelessWidget {
             if (isSentMe) const SizedBox(width: 60),
             Flexible(
               child: Container(
-                padding: const EdgeInsets.only(
-                  top: 4,
-                  bottom: 4,
-                  left: 12,
-                  right: 12,
-                ),
                 decoration: BoxDecoration(
                   borderRadius: BorderRadius.only(
                     topLeft:
                         isSentMe
-                            ? const Radius.circular(12)
-                            : const Radius.circular(0),
+                            ? const Radius.circular(8)
+                            : const Radius.circular(4),
                     topRight:
                         isSentMe
-                            ? Radius.circular(0)
-                            : const Radius.circular(12),
-                    bottomLeft: Radius.circular(12),
-                    bottomRight: Radius.circular(12),
+                            ? const Radius.circular(4)
+                            : const Radius.circular(8),
+                    bottomLeft: const Radius.circular(8),
+                    bottomRight: const Radius.circular(8),
                   ),
                   border:
                       message.messageFrom != null
@@ -285,6 +285,19 @@ class ChatInfo extends StatelessWidget {
 
       grouped.putIfAbsent(messageDay, () => []).add(message);
     }
+
+    // Sort messages within each group by time (newest first for reverse view)
+    grouped.forEach((key, value) {
+      value.sort((a, b) {
+        try {
+          final timeA = DateTime.parse(a.time);
+          final timeB = DateTime.parse(b.time);
+          return timeB.compareTo(timeA); // Descending order
+        } catch (e) {
+          return 0;
+        }
+      });
+    });
 
     return grouped;
   }

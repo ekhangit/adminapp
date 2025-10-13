@@ -25,47 +25,42 @@ Widget buildMessageContent(ChatMessage message) {
 }
 
 Widget _buildRegularMessage(ChatMessage message) {
-  return IntrinsicWidth(
-    child: Container(
-      padding: EdgeInsets.only(
-        right: message.isOwn ? 12 : 16,
-        left: message.isOwn ? 16 : 12,
-        top: 12,
-        bottom: 12,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.only(
-          topLeft:
-              message.isOwn
-                  ? const Radius.circular(12)
-                  : const Radius.circular(0),
-          topRight:
-              message.isOwn ? Radius.circular(0) : const Radius.circular(12),
-          bottomLeft: Radius.circular(12),
-          bottomRight: Radius.circular(12),
-        ),
-      ),
-
-      child: Column(
-        children: [
-          Text(
+  return Column(
+    crossAxisAlignment:
+        message.isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+    children: [
+      IntrinsicWidth(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: const Color(0xFFCAE9FF),
+            borderRadius: BorderRadius.only(
+              topLeft:
+                  message.isOwn
+                      ? const Radius.circular(8)
+                      : const Radius.circular(4),
+              topRight:
+                  message.isOwn
+                      ? const Radius.circular(4)
+                      : const Radius.circular(8),
+              bottomLeft: const Radius.circular(8),
+              bottomRight: const Radius.circular(8),
+            ),
+          ),
+          child: Text(
             message.message,
             style: const TextStyle(color: Colors.black87, fontSize: 15),
           ),
-
-          const SizedBox(height: 1),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Text(
-              formatChatTimestamp(message.time),
-              style: TextStyle(fontSize: 10, color: Colors.black54),
-            ),
-          ),
-        ],
+        ),
       ),
-    ),
+      Padding(
+        padding: const EdgeInsets.only(top: 4, right: 4),
+        child: Text(
+          formatChatTimestamp(message.time),
+          style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+        ),
+      ),
+    ],
   );
 }
 

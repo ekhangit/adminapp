@@ -32,23 +32,31 @@ class ProfileController extends GetxController {
           backgroundColor: AppColors.colorSuccess,
         );
       } else {
-        final message = response.data?['message'] ?? 'Logout failed';
+        final message = response.data?['message'] ?? 'Logout API failed';
         log("[ProfileController] ⚠️ Logout API failed: $message");
+
+        // Even if API fails, clear session and logout locally
+        await DataStorageController.to.clearSession();
+        Get.offAllNamed("/login");
 
         Utils.showFlushbar(
           Get.context!,
-          message,
-          backgroundColor: AppColors.colorWarning,
+          "Logged out successfully.",
+          backgroundColor: AppColors.colorSuccess,
         );
       }
     } catch (e, stack) {
       log("[ProfileController] ❌ Logout exception: $e");
       log("[ProfileController] Stack trace:\n$stack");
 
+      // Even on exception, clear session and logout locally
+      await DataStorageController.to.clearSession();
+      Get.offAllNamed("/login");
+
       Utils.showFlushbar(
         Get.context!,
-        "Logout failed. Try again.",
-        backgroundColor: AppColors.colorWarning,
+        "Logged out successfully.",
+        backgroundColor: AppColors.colorSuccess,
       );
     }
   }

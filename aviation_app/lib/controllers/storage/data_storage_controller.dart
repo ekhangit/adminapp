@@ -6,7 +6,7 @@ import '../../models/user_model.dart';
 
 class DataStorageController extends GetxController {
   static DataStorageController get to => Get.find();
-  late SharedPreferences _prefs;
+  SharedPreferences? _prefs;
   var session = Rxn<Map>();
   var currentSession = Rxn<UserModel>();
   var profileCached = false.obs;
@@ -31,24 +31,28 @@ class DataStorageController extends GetxController {
   );
 
   Future<String> fetchAuthToken() async {
-    await initPrefs();
-    return _prefs.getString("auth") ?? "";
+    if (_prefs == null) {
+      _prefs = await SharedPreferences.getInstance();
+    }
+    return _prefs!.getString("auth") ?? "";
   }
 
   Future<void> initiateSession() async {
-    if ((_prefs.getInt("id") ?? 0) != 0) {
+    if (_prefs == null) return;
+
+    if ((_prefs!.getInt("id") ?? 0) != 0) {
       currentSession.value = UserModel(
-        id: _prefs.getInt("id") ?? 0,
-        name: _prefs.getString("name")!,
-        email: _prefs.getString("email")!,
-        profilePhotoPath: _prefs.getString("picture") ?? "",
+        id: _prefs!.getInt("id") ?? 0,
+        name: _prefs!.getString("name")!,
+        email: _prefs!.getString("email")!,
+        profilePhotoPath: _prefs!.getString("picture") ?? "",
       );
 
       session.value = {
-        "id": _prefs.getInt("id"),
-        "name": _prefs.getString("name")!,
-        "email": _prefs.getString("email")!,
-        "picture": _prefs.getString("picture") ?? "",
+        "id": _prefs!.getInt("id"),
+        "name": _prefs!.getString("name")!,
+        "email": _prefs!.getString("email")!,
+        "picture": _prefs!.getString("picture") ?? "",
       };
     } else {
       session.value = null;
@@ -63,46 +67,59 @@ class DataStorageController extends GetxController {
   }
 
   Future<Map<String, dynamic>> getSessionMap() async {
+    if (_prefs == null) {
+      _prefs = await SharedPreferences.getInstance();
+    }
     return {
-      'id': _prefs.getInt("id"),
-      'name': _prefs.getString("name"),
-      'picture': _prefs.getString("picture") ?? "",
+      'id': _prefs!.getInt("id"),
+      'name': _prefs!.getString("name"),
+      'picture': _prefs!.getString("picture") ?? "",
     };
   }
 
   Future<Map<String, String>> getHeaders() async {
-    return {'Authorization': 'Bearer ${_prefs.getString("auth") ?? ""}'};
+    if (_prefs == null) {
+      _prefs = await SharedPreferences.getInstance();
+    }
+    return {'Authorization': 'Bearer ${_prefs!.getString("auth") ?? ""}'};
   }
 
   Future<void> createAccount(Map<String, dynamic> response) async {
     print("[DataStorageController] createAccount: $response");
 
+    if (_prefs == null) {
+      _prefs = await SharedPreferences.getInstance();
+    }
+
     final user = response['user'];
     final apiToken = response['api_token'];
 
     if (user != null) {
-      _prefs.setInt('id', user['id']);
-      _prefs.setString('name', user['name'] ?? "");
-      _prefs.setString('email', user['email'] ?? "");
-      _prefs.setString('picture', user['profile_photo_path'] ?? "");
+      _prefs!.setInt('id', user['id']);
+      _prefs!.setString('name', user['name'] ?? "");
+      _prefs!.setString('email', user['email'] ?? "");
+      _prefs!.setString('picture', user['profile_photo_path'] ?? "");
     }
 
     if (apiToken != null) {
-      _prefs.setString('auth', apiToken);
+      _prefs!.setString('auth', apiToken);
     }
 
     await initiateSession();
   }
 
   Future<void> updateSession(Map<String, dynamic> value) async {
+    if (_prefs == null) {
+      _prefs = await SharedPreferences.getInstance();
+    }
     value.forEach((key, val) {
       if (val != null) {
         if (val is String) {
-          _prefs.setString(key, val);
+          _prefs!.setString(key, val);
         } else if (val is int) {
-          _prefs.setInt(key, val);
+          _prefs!.setInt(key, val);
         } else if (val is bool) {
-          _prefs.setBool(key, val);
+          _prefs!.setBool(key, val);
         }
       }
     });
@@ -110,7 +127,10 @@ class DataStorageController extends GetxController {
   }
 
   Future<void> clearSession() async {
-    await _prefs.clear();
+    if (_prefs == null) {
+      _prefs = await SharedPreferences.getInstance();
+    }
+    await _prefs!.clear();
     session.value = null;
     currentSession.value = null;
     await initiateSession();

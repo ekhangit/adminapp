@@ -1,4 +1,5 @@
 import 'package:aviation_app/screens/flightcomm/chat_screen.dart';
+import 'package:aviation_app/screens/flightcomm/chat_screen_new.dart';
 import 'package:aviation_app/screens/flightcomm/widget/flight_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -258,7 +259,7 @@ class FlightCommScreen extends StatelessWidget {
                                                     .value ==
                                                 -1) {
                                               Get.to(
-                                                () => const ChatScreen(),
+                                                () => const ChatScreenNew(),
                                                 arguments: flight.id,
                                               );
                                             } else {
