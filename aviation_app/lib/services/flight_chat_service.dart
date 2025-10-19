@@ -103,20 +103,20 @@ class FlightChatService {
 
   // Send Chat
 
-  Future<ResponseClass<bool>> sendMessage(Map<String, dynamic> data) async {
-    try {
-      final response = await BaseService.instance.dio.post(
-        ApiConfig.sendMessage,
-        data: data,
-      );
+  // Future<ResponseClass<bool>> sendMessage(Map<String, dynamic> data) async {
+  //   try {
+  //     final response = await BaseService.instance.dio.post(
+  //       ApiConfig.sendMessage,
+  //       data: data,
+  //     );
 
-      log("[sendMessage] response : ${response.data}");
+  //     log("[sendMessage] response : ${response.data}");
 
-      return ResponseClass.success(true);
-    } catch (e) {
-      return ResponseClass.error(e.toString());
-    }
-  }
+  //     return ResponseClass.success(true);
+  //   } catch (e) {
+  //     return ResponseClass.error(e.toString());
+  //   }
+  // }
 
   Future<ResponseClass<List<FlightNoModel>>> allFlightNo() async {
     try {

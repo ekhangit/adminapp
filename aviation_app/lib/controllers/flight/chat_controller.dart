@@ -37,6 +37,7 @@ class ChatController extends GetxController {
     super.onInit();
     _initializeChat();
     _setupFirestoreListener();
+    _setupTypingListener();
   }
 
   void _initializeChat() {
@@ -112,6 +113,12 @@ class ChatController extends GetxController {
       final flightCommController = Get.find<FlightCommController>();
       staffList.assignAll(flightCommController.flightStaff);
     }
+  }
+
+  void _setupTypingListener() {
+    messageController.addListener(() {
+      isTyping.value = messageController.text.isNotEmpty;
+    });
   }
 
   Future<void> _loadInitialMessages() async {
@@ -206,7 +213,7 @@ class ChatController extends GetxController {
     return ChatMessage.fromJson({
       ...data,
       'sender_name': matchedStaff?.displayName ?? 'User',
-      'station': matchedStaff?.airport!.iataCode ?? 'Unknown',
+      'station': matchedStaff?.airport?.iataCode ?? 'Unknown',
       'created_at': isoTime, // Use consistent UTC ISO format
       'sender_id': senderIdStr,
     });
@@ -243,7 +250,7 @@ class ChatController extends GetxController {
         id: 'optimistic-${DateTime.now().millisecondsSinceEpoch}',
         senderId: currentUser.id,
         senderName: matchedStaff?.displayName ?? 'User',
-        station: matchedStaff?.airport!.iataCode ?? 'Unknown',
+        station: matchedStaff?.airport?.iataCode ?? 'Unknown',
         message: text,
         time: DateTime.now().toUtc().toIso8601String(),
         isOwn: true,
@@ -498,6 +505,9 @@ class ChatController extends GetxController {
 
   RxList<ChatMessage> messages = <ChatMessage>[].obs;
   TextEditingController messageController = TextEditingController();
+
+  // Track if user is typing
+  var isTyping = false.obs;
 
   var flightDetailLoading = false.obs;
 

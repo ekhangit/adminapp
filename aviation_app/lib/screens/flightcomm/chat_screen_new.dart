@@ -1,5 +1,8 @@
+import 'dart:io';
+
 import 'package:aviation_app/controllers/flight/chat_controller.dart';
-import 'package:aviation_app/models/chat_model.dart';
+import 'package:aviation_app/screens/flightcomm/file_preview_screen.dart';
+import 'package:aviation_app/screens/flightcomm/image_preview_screen.dart';
 import 'package:aviation_app/screens/flightcomm/info/arr_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/chat_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/chkin_info.dart';
@@ -13,15 +16,16 @@ import 'package:aviation_app/screens/flightcomm/info/psm_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/ptm_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/sod_info.dart';
 import 'package:aviation_app/screens/flightcomm/info/trc_info.dart';
-import 'package:aviation_app/screens/flightcomm/info/widget/chat_bottom_view.dart';
+import 'package:aviation_app/screens/flightcomm/update_info_screen.dart';
+import 'package:aviation_app/screens/flightcomm/widgets/animated_attachment_option.dart';
 import 'package:aviation_app/utils/app_colors.dart';
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:intl/intl.dart';
-import 'package:visibility_detector/visibility_detector.dart';
+import 'package:image_picker/image_picker.dart';
 
 import '../../constant.dart';
 
@@ -174,74 +178,154 @@ class ChatScreenNew extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(height: 4),
-                  // Row 2: Gate, POS on left and CFG on right
+                  // Row 2 & 3: Gate, POS, Times on left | CFG and ACT on right (vertically aligned)
                   Padding(
                     padding: const EdgeInsets.only(right: 12),
                     child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Left side: Gate and POS
+                        // Left side: Gate, POS and Time badges
                         Expanded(
-                          child: Row(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              if (flight.basicDetails.gate?.isNotEmpty ??
-                                  false) ...[
-                                Text(
-                                  "GATE: ${flight.basicDetails.gate}",
-                                  style: const TextStyle(
-                                    color: Color(0xFF1976D2),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                              ],
-                              if (flight.basicDetails.pos?.isNotEmpty ?? false)
-                                Text(
-                                  "POS: ${flight.basicDetails.pos}",
-                                  style: const TextStyle(
-                                    color: Color(0xFF1976D2),
-                                    fontSize: 10,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
+                              // Row 2: Gate and POS
+                              Row(
+                                children: [
+                                  if (flight.basicDetails.gate?.isNotEmpty ??
+                                      false) ...[
+                                    Text(
+                                      "GATE: ${flight.basicDetails.gate}",
+                                      style: const TextStyle(
+                                        color: Color(0xFF1976D2),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 8),
+                                  ],
+                                  if (flight.basicDetails.pos?.isNotEmpty ??
+                                      false)
+                                    Text(
+                                      "POS: ${flight.basicDetails.pos}",
+                                      style: const TextStyle(
+                                        color: Color(0xFF1976D2),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                      ),
+                                    ),
+                                ],
+                              ),
+                              const SizedBox(height: 4),
+                              // Row 3: Time badges
+                              Row(
+                                children: [
+                                  if (flight.isDeparture) ...[
+                                    // Show STD first
+                                    if (flight.basicDetails.std?.isNotEmpty ??
+                                        false) ...[
+                                      _buildTimeBadgeWithLabelBg(
+                                        "STD",
+                                        formatFlightTime(
+                                          flight.basicDetails.std!,
+                                        ),
+                                        const Color(0xFF1976D2),
+                                      ),
+                                      const SizedBox(width: 6),
+                                    ],
+                                    // Then show ATD if exists, else show STA
+                                    if (flight.basicDetails.atd?.isNotEmpty ??
+                                        false)
+                                      _buildTimeBadgeWithLabelBg(
+                                        "ATD",
+                                        formatFlightTime(
+                                          flight.basicDetails.atd!,
+                                        ),
+                                        const Color(0xFFD32F2F),
+                                      )
+                                    else if (flight
+                                            .basicDetails
+                                            .sta
+                                            ?.isNotEmpty ??
+                                        false)
+                                      _buildTimeBadgeWithLabelBg(
+                                        "STA",
+                                        formatFlightTime(
+                                          flight.basicDetails.sta!,
+                                        ),
+                                        const Color(0xFF1976D2),
+                                      ),
+                                  ] else ...[
+                                    if (flight.basicDetails.sta?.isNotEmpty ??
+                                        false) ...[
+                                      _buildTimeBadgeWithLabelBg(
+                                        "STA",
+                                        formatFlightTime(
+                                          flight.basicDetails.sta!,
+                                        ),
+                                        const Color(0xFF1976D2),
+                                      ),
+                                      const SizedBox(width: 6),
+                                    ],
+                                    if (flight.basicDetails.ata?.isNotEmpty ??
+                                        false) ...[
+                                      _buildTimeBadgeWithLabelBg(
+                                        "ATA",
+                                        formatFlightTime(
+                                          flight.basicDetails.ata!,
+                                        ),
+                                        const Color(0xFFD32F2F),
+                                      ),
+                                    ],
+                                  ],
+                                ],
+                              ),
                             ],
                           ),
                         ),
+                        // Right side: CFG and ACT vertically aligned
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            // CFG
+                            if (_buildCfgString(flight.capacity).isNotEmpty)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildBadge("CFG", AppColors.colorPrimary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _buildCfgString(flight.capacity),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.colorPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            const SizedBox(height: 4),
+                            // ACT
+                            if (_buildActString(flight.actualPax).isNotEmpty)
+                              Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  _buildBadge("ACT", AppColors.colorPrimary),
+                                  const SizedBox(width: 4),
+                                  Text(
+                                    _buildActString(flight.actualPax),
+                                    style: const TextStyle(
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppColors.colorPrimary,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                          ],
+                        ),
                       ],
                     ),
-                  ),
-                  const SizedBox(height: 4),
-                  // Row 3: Time badges (STD/ATD or STA/ATA - show ATD/ATA if exists, otherwise STD/STA)
-                  Row(
-                    children: [
-                      if (flight.isDeparture) ...[
-                        if (flight.basicDetails.atd?.isNotEmpty ?? false)
-                          _buildTimeBadgeWithLabelBg(
-                            "ATD",
-                            formatFlightTime(flight.basicDetails.atd!),
-                            const Color(0xFFD32F2F),
-                          )
-                        else if (flight.basicDetails.std?.isNotEmpty ?? false)
-                          _buildTimeBadgeWithLabelBg(
-                            "STD",
-                            formatFlightTime(flight.basicDetails.std!),
-                            const Color(0xFF1976D2),
-                          ),
-                      ] else ...[
-                        if (flight.basicDetails.ata?.isNotEmpty ?? false)
-                          _buildTimeBadgeWithLabelBg(
-                            "ATA",
-                            formatFlightTime(flight.basicDetails.ata!),
-                            const Color(0xFFD32F2F),
-                          )
-                        else if (flight.basicDetails.sta?.isNotEmpty ?? false)
-                          _buildTimeBadgeWithLabelBg(
-                            "STA",
-                            formatFlightTime(flight.basicDetails.sta!),
-                            const Color(0xFF1976D2),
-                          ),
-                      ],
-                    ],
                   ),
                 ],
               ),
@@ -252,41 +336,6 @@ class ChatScreenNew extends StatelessWidget {
     });
   }
 
-  Widget _buildSmallInfoChip(String text, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        text,
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
-
-  Widget _buildTimeBadge(String label, String time, Color color) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
-      decoration: BoxDecoration(
-        color: color,
-        borderRadius: BorderRadius.circular(4),
-      ),
-      child: Text(
-        '$label $time',
-        style: const TextStyle(
-          color: Colors.white,
-          fontSize: 9,
-          fontWeight: FontWeight.w600,
-        ),
-      ),
-    );
-  }
 
   Widget _buildTimeBadgeWithLabelBg(String label, String time, Color color) {
     return Row(
@@ -320,64 +369,6 @@ class ChatScreenNew extends StatelessWidget {
     );
   }
 
-  Widget _buildFlightDetailsBadges(dynamic flight) {
-    return Row(
-      children: [
-        // STD/ATD or STA/ATA
-        if (flight.isDeparture) ...[
-          if (flight.basicDetails.std?.isNotEmpty ?? false) ...[
-            _buildBadge("STD", Colors.blue.shade700),
-            const SizedBox(width: 4),
-            _buildTimeText(flight.basicDetails.std),
-            const SizedBox(width: 8),
-          ],
-          if (flight.basicDetails.atd?.isNotEmpty ?? false) ...[
-            _buildBadge("ATD", Colors.green.shade700),
-            const SizedBox(width: 4),
-            _buildTimeText(flight.basicDetails.atd),
-            const SizedBox(width: 8),
-          ],
-        ] else ...[
-          if (flight.basicDetails.sta?.isNotEmpty ?? false) ...[
-            _buildBadge("STA", Colors.blue.shade700),
-            const SizedBox(width: 4),
-            _buildTimeText(flight.basicDetails.sta),
-            const SizedBox(width: 8),
-          ],
-          if (flight.basicDetails.ata?.isNotEmpty ?? false) ...[
-            _buildBadge("ATA", Colors.green.shade700),
-            const SizedBox(width: 4),
-            _buildTimeText(flight.basicDetails.ata),
-            const SizedBox(width: 8),
-          ],
-        ],
-        const Spacer(),
-        // Aircraft Type and Registration
-        if (flight.aircraft != null) ...[
-          _buildBadge("ACT", AppColors.colorPrimary),
-          const SizedBox(width: 4),
-          Text(
-            flight.aircraftType?.icao ?? '',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-          const SizedBox(width: 4),
-          Text(
-            flight.aircraft?.name ?? '',
-            style: const TextStyle(
-              fontSize: 11,
-              fontWeight: FontWeight.w600,
-              color: Colors.black87,
-            ),
-          ),
-        ],
-      ],
-    );
-  }
-
   Widget _buildBadge(String label, Color color) {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -405,6 +396,76 @@ class ChatScreenNew extends StatelessWidget {
         color: Colors.black87,
       ),
     );
+  }
+
+  /// Build CFG string from capacity data
+  /// Example: "C12" or "C12 M162" or "Y174"
+  String _buildCfgString(dynamic capacity) {
+    if (capacity == null) return '';
+
+    final List<String> parts = [];
+
+    // Check each capacity field and add if not empty
+    if (capacity.f?.isNotEmpty == true && capacity.f != 'null') {
+      parts.add(capacity.f!);
+    }
+    if (capacity.j?.isNotEmpty == true && capacity.j != 'null') {
+      parts.add(capacity.j!);
+    }
+    if (capacity.c?.isNotEmpty == true && capacity.c != 'null') {
+      parts.add(capacity.c!);
+    }
+    if (capacity.s?.isNotEmpty == true && capacity.s != 'null') {
+      parts.add(capacity.s!);
+    }
+    if (capacity.w?.isNotEmpty == true && capacity.w != 'null') {
+      parts.add(capacity.w!);
+    }
+    if (capacity.y?.isNotEmpty == true && capacity.y != 'null') {
+      parts.add(capacity.y!);
+    }
+    if (capacity.m?.isNotEmpty == true && capacity.m != 'null') {
+      parts.add(capacity.m!);
+    }
+
+    return parts.join(' ');
+  }
+
+  /// Build ACT string from actual passenger data
+  /// Example: "C12 M158 +1 INF" or "Y174"
+  String _buildActString(dynamic actualPax) {
+    if (actualPax == null) return '';
+
+    final List<String> parts = [];
+
+    // Helper to check if value is not empty and not "0"
+    bool hasValue(String? value) {
+      return value?.isNotEmpty == true &&
+          value != 'null' &&
+          value != '0' &&
+          value != '';
+    }
+
+    // Check each passenger class and add if not empty and not zero
+    if (hasValue(actualPax.paxA)) {
+      parts.add('A${actualPax.paxA}');
+    }
+    if (hasValue(actualPax.paxC)) {
+      parts.add('C${actualPax.paxC}');
+    }
+    if (hasValue(actualPax.paxW)) {
+      parts.add('W${actualPax.paxW}');
+    }
+    if (hasValue(actualPax.paxY)) {
+      parts.add('Y${actualPax.paxY}');
+    }
+
+    // Add infants separately with "+X INF" format
+    if (hasValue(actualPax.paxInf)) {
+      parts.add('+${actualPax.paxInf} INF');
+    }
+
+    return parts.join(' ');
   }
 
   /// Tab Bar
@@ -584,6 +645,49 @@ class ChatScreenNew extends StatelessWidget {
       ),
       child: Row(
         children: [
+          // Flight arrow button (left side) - hide when typing
+          Obx(
+            () =>
+                !controller.isTyping.value
+                    ? Row(
+                      children: [
+                        GestureDetector(
+                          onTap: () {
+                            Get.to(
+                              () => UpdateInfoScreen(),
+                              arguments:
+                                  controller
+                                      .flightDetail
+                                      .value!
+                                      .basicDetails
+                                      .id,
+                            );
+                          },
+                          child: Container(
+                            height: 48,
+                            width: 48,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
+                              gradient: appThemeGradientSoft,
+                            ),
+                            child: Center(
+                              child: SvgPicture.asset(
+                                'assets/svg/flight_arrow.svg',
+                                width: 20,
+                                height: 20,
+                                colorFilter: const ColorFilter.mode(
+                                  Colors.white,
+                                  BlendMode.srcIn,
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                      ],
+                    )
+                    : const SizedBox.shrink(),
+          ),
           Expanded(
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
@@ -616,9 +720,7 @@ class ChatScreenNew extends StatelessWidget {
                   ),
                   const SizedBox(width: 8),
                   GestureDetector(
-                    onTap: () {
-                      // Handle attachment
-                    },
+                    onTap: () => _showAttachmentOptions(controller),
                     child: SvgPicture.asset(
                       'assets/svg/attachment.svg',
                       width: 20,
@@ -672,6 +774,199 @@ class ChatScreenNew extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+
+  /// Handle camera capture
+  Future<void> _handleCameraCapture(ChatController controller) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: ImageSource.camera,
+        imageQuality: 80,
+      );
+
+      if (photo != null) {
+        final File imageFile = File(photo.path);
+
+        // Show preview screen
+        Get.to(
+          () => ImagePreviewScreen(
+            imageFile: imageFile,
+            onSend: (file) {
+              // TODO: Implement image upload and send
+              // controller.sendImageMessage(file);
+              debugPrint('Sending image: ${file.path}');
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error capturing image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to capture image',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
+  }
+
+  /// Handle gallery picker
+  Future<void> _handleGalleryPicker(ChatController controller) async {
+    try {
+      final ImagePicker picker = ImagePicker();
+      final XFile? photo = await picker.pickImage(
+        source: ImageSource.gallery,
+        imageQuality: 80,
+      );
+
+      if (photo != null) {
+        final File imageFile = File(photo.path);
+
+        // Show preview screen
+        Get.to(
+          () => ImagePreviewScreen(
+            imageFile: imageFile,
+            onSend: (file) {
+              // TODO: Implement image upload and send
+              // controller.sendImageMessage(file);
+              debugPrint('Sending image: ${file.path}');
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to select image',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
+  }
+
+  /// Handle file picker
+  Future<void> _handleFilePicker(ChatController controller) async {
+    try {
+      FilePickerResult? result = await FilePicker.platform.pickFiles(
+        type: FileType.any,
+        allowMultiple: false,
+      );
+
+      if (result != null && result.files.single.path != null) {
+        final file = File(result.files.single.path!);
+        final fileName = result.files.single.name;
+        final fileSize = _formatFileSize(result.files.single.size);
+
+        // Show preview screen
+        Get.to(
+          () => FilePreviewScreen(
+            file: file,
+            fileName: fileName,
+            fileSize: fileSize,
+            onSend: (file) {
+              // TODO: Implement file upload and send
+              // controller.sendFileMessage(file, fileName);
+              debugPrint('Sending file: ${file.path}');
+            },
+          ),
+        );
+      }
+    } catch (e) {
+      debugPrint('Error picking file: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to select file',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+      );
+    }
+  }
+
+  /// Format file size to human readable format
+  String _formatFileSize(int bytes) {
+    if (bytes < 1024) {
+      return '$bytes B';
+    } else if (bytes < 1024 * 1024) {
+      return '${(bytes / 1024).toStringAsFixed(1)} KB';
+    } else if (bytes < 1024 * 1024 * 1024) {
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    } else {
+      return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
+    }
+  }
+
+  /// Show attachment options bottom sheet
+  void _showAttachmentOptions(ChatController controller) {
+    Get.bottomSheet(
+      Container(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(24),
+            topRight: Radius.circular(24),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(bottom: 20),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Attachment options
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                AnimatedAttachmentOption(
+                  svgPath: 'assets/svg/chat_camera.svg',
+                  label: 'Camera',
+                  index: 0,
+                  onTap: () async {
+                    Get.back();
+                    await _handleCameraCapture(controller);
+                  },
+                ),
+                const SizedBox(width: 20),
+                AnimatedAttachmentOption(
+                  svgPath: 'assets/svg/chat_gallery.svg',
+                  label: 'Gallery',
+                  index: 1,
+                  onTap: () async {
+                    Get.back();
+                    await _handleGalleryPicker(controller);
+                  },
+                ),
+                const SizedBox(width: 20),
+                AnimatedAttachmentOption(
+                  svgPath: 'assets/svg/chat_file.svg',
+                  label: 'File',
+                  index: 2,
+                  onTap: () async {
+                    Get.back();
+                    await _handleFilePicker(controller);
+                  },
+                ),
+              ],
+            ),
+            const SizedBox(height: 10),
+          ],
+        ),
+      ),
+      isDismissible: true,
+      enableDrag: true,
     );
   }
 }

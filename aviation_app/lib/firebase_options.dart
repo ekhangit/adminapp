@@ -26,7 +26,10 @@ class DefaultFirebaseOptions {
       case TargetPlatform.android:
         return android;
       case TargetPlatform.iOS:
-        return ios;
+        throw UnsupportedError(
+          'DefaultFirebaseOptions have not been configured for ios - '
+          'you can reconfigure this by running the FlutterFire CLI again.',
+        );
       case TargetPlatform.macOS:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for macos - '
@@ -50,21 +53,11 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBsGDDIDgmne1Fu0vmp4dnSVTzN6STpHwg',
-    appId: '1:773569883624:android:9c70ecdf2a9abdb621085d',
-    messagingSenderId: '773569883624',
-    projectId: 'gsrm-44069',
-    databaseURL: 'https://gsrm-44069-default-rtdb.firebaseio.com',
-    storageBucket: 'gsrm-44069.firebasestorage.app',
-  );
-
-  static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyCluI3FrIFz9DiCMGKmSLCS7qE4ScC4kjU',
-    appId: '1:773569883624:ios:11239c71967e484021085d',
-    messagingSenderId: '773569883624',
-    projectId: 'gsrm-44069',
-    databaseURL: 'https://gsrm-44069-default-rtdb.firebaseio.com',
-    storageBucket: 'gsrm-44069.firebasestorage.app',
-    iosBundleId: 'com.example.aviationApp',
+    apiKey: 'AIzaSyAtuIr3hCOP_za-q8Dc7_HhaGVyLXd5VVY',
+    appId: '1:715521065715:android:14fa32e1f30a3ec11f2d86',
+    messagingSenderId: '715521065715',
+    projectId: 'asgsys-565cb',
+    databaseURL: 'https://asgsys-565cb-default-rtdb.firebaseio.com',
+    storageBucket: 'asgsys-565cb.firebasestorage.app',
   );
 }

@@ -267,6 +267,8 @@ class FlightCard extends StatelessWidget {
                         ),
                       ),
 
+                      SizedBox(width: 0.75.w),
+
                       Expanded(
                         flex: 4,
                         child: Row(
@@ -381,9 +383,9 @@ class FlightCard extends StatelessWidget {
             child: Text(
               flight.aircraftType!.icao!,
               style: GoogleFonts.inter(
-                fontSize: 13.0.sp,
+                fontSize: 13.5.sp,
                 fontWeight: FontWeight.w500,
-                color: Color(0xFF287393),
+                color: Color(0xFF1B3668),
               ),
               overflow: TextOverflow.ellipsis,
             ),
@@ -402,7 +404,7 @@ class FlightCard extends StatelessWidget {
             child: Text(
               flight.aircraft!.name,
               style: GoogleFonts.inter(
-                fontSize: 13.0.sp,
+                fontSize: 13.5.sp,
                 fontWeight: FontWeight.w500,
                 color: Color(0xFF1B3668),
               ),

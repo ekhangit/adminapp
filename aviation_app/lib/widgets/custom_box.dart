@@ -146,24 +146,40 @@ class CustomBox2 extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: (MediaQuery.of(context).size.width - 50) / 2,
-        margin: const EdgeInsets.only(bottom: 5),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Image.asset(iconPath, width: 70, height: 70),
-            const SizedBox(height: 12),
-            Text(
-              title,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontWeight: FontWeight.w600,
-                fontSize: 13.0,
-                color: Colors.white,
-              ),
-            ),
-          ],
+        margin: const EdgeInsets.all(4),
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 12),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            // Calculate responsive image size based on available space
+            final imageSize = (constraints.maxHeight * 0.5).clamp(40.0, 70.0);
+
+            return Column(
+              mainAxisSize: MainAxisSize.min,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Flexible(
+                  child: Image.asset(
+                    iconPath,
+                    width: imageSize,
+                    height: imageSize,
+                    fit: BoxFit.contain,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  title,
+                  textAlign: TextAlign.center,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w600,
+                    fontSize: 12.5,
+                    color: Colors.white,
+                  ),
+                ),
+              ],
+            );
+          },
         ),
       ),
     );

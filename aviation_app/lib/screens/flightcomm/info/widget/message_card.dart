@@ -1,6 +1,4 @@
-import 'dart:ui';
 import 'package:intl/intl.dart';
-
 import 'package:flutter/material.dart';
 
 import '../../../../models/flight_detail_model.dart';
@@ -13,23 +11,74 @@ Widget buildMessageCard(MessageData message, Color backgroundColor) {
   final dateFormat = DateFormat('yyyy-MM-dd HH:mm:ss');
 
   return Container(
-    margin: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-    padding: EdgeInsets.all(16),
+    width: double.infinity,
+    margin: const EdgeInsets.only(bottom: 12),
+    padding: const EdgeInsets.all(16),
     decoration: BoxDecoration(
       color: backgroundColor,
-      borderRadius: BorderRadius.circular(8),
-      border: Border.all(color: Colors.grey.shade300),
+      borderRadius: BorderRadius.circular(12),
+      boxShadow: [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.08),
+          blurRadius: 8,
+          offset: const Offset(0, 2),
+        ),
+      ],
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(formattedMessage),
-        Divider(color: Colors.black54, thickness: 0.25, height: 30),
+        // MVT Header
+        const Text(
+          'MVT',
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: FontWeight.w700,
+            color: Colors.black87,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 12),
+
+        // Message Content
         Text(
-          'Source: ${message.source}\n'
-          'Received: ${dateFormat.format(receivedTime)}\n'
+          formattedMessage,
+          style: const TextStyle(
+            fontSize: 13,
+            fontWeight: FontWeight.w500,
+            color: Colors.black87,
+            height: 1.5,
+          ),
+        ),
+
+        const SizedBox(height: 16),
+
+        // Source, Received and Updated info
+        Text(
+          'Source: ${message.source}',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          'Received: ${dateFormat.format(receivedTime)}',
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: Colors.grey.shade600,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
           'Updated: ${dateFormat.format(updatedTime)}',
-          style: const TextStyle(fontSize: 14),
+          style: TextStyle(
+            fontSize: 12,
+            fontWeight: FontWeight.w400,
+            color: Colors.grey.shade600,
+          ),
         ),
       ],
     ),

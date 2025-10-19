@@ -244,6 +244,11 @@ class FlightCommController extends GetxController {
     }
   }
 
+  // Check if there are any cancelled flights
+  bool hasCancelledFlights() {
+    return cancelledFlightList.isNotEmpty;
+  }
+
   @override
   void onClose() {
     searchController.dispose();

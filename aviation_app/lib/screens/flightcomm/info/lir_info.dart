@@ -17,9 +17,35 @@ class LirInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // LIR Section
           if (messages?.lir.isNotEmpty ?? false) ...[
-            ...messages!.lir.map(
-              (msg) => buildMessageCard(msg, Colors.yellow.shade100),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 12),
+                    child: Text(
+                      "LIR",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ),
+                  ...messages!.lir.map(
+                    (msg) => buildMessageCard(msg, Colors.yellow.shade100),
+                  ),
+                ],
+              ),
             ),
           ],
         ],

@@ -1,41 +1,22 @@
 {
   "project_info": {
-    "project_number": "773569883624",
-    "firebase_url": "https://gsrm-44069-default-rtdb.firebaseio.com",
-    "project_id": "gsrm-44069",
-    "storage_bucket": "gsrm-44069.firebasestorage.app"
+    "project_number": "715521065715",
+    "firebase_url": "https://asgsys-565cb-default-rtdb.firebaseio.com",
+    "project_id": "asgsys-565cb",
+    "storage_bucket": "asgsys-565cb.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:773569883624:android:9c70ecdf2a9abdb621085d",
+        "mobilesdk_app_id": "1:715521065715:android:14fa32e1f30a3ec11f2d86",
         "android_client_info": {
-          "package_name": "com.example.aviationApp"
+          "package_name": "com.example.asgApp"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBsGDDIDgmne1Fu0vmp4dnSVTzN6STpHwg"
-        }
-      ],
-      "services": {
-        "appinvite_service": {
-          "other_platform_oauth_client": []
-        }
-      }
-    },
-    {
-      "client_info": {
-        "mobilesdk_app_id": "1:773569883624:android:c5af079af330bf3121085d",
-        "android_client_info": {
-          "package_name": "com.example.aviation_app"
-        }
-      },
-      "oauth_client": [],
-      "api_key": [
-        {
-          "current_key": "AIzaSyBsGDDIDgmne1Fu0vmp4dnSVTzN6STpHwg"
+          "current_key": "AIzaSyAtuIr3hCOP_za-q8Dc7_HhaGVyLXd5VVY"
         }
       ],
       "services": {

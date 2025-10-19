@@ -1,4 +1,3 @@
-import 'package:aviation_app/screens/flightcomm/chat_screen.dart';
 import 'package:aviation_app/screens/flightcomm/chat_screen_new.dart';
 import 'package:aviation_app/screens/flightcomm/widget/flight_card.dart';
 import 'package:flutter/material.dart';
@@ -463,7 +462,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                     iconPath: 'assets/svg/cancel_flight.svg',
                     isSelected: controller.selectedFilter.value == "Cancelled",
                     onTap: () => controller.selectFilter("Cancelled"),
-                    isCancelledFlight: true,
+                    hasCancelledFlights: controller.hasCancelledFlights(),
                   ),
                 ],
               ),
@@ -480,8 +479,11 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
     required String iconPath,
     required bool isSelected,
     required VoidCallback onTap,
-    bool? isCancelledFlight = false,
+    bool hasCancelledFlights = false,
   }) {
+    // Determine if we should show red color (only for cancelled tab with cancelled flights)
+    final shouldShowRed = hasCancelledFlights && label == "Canceled";
+
     return Expanded(
       child: GestureDetector(
         onTap: onTap,
@@ -513,7 +515,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                 width: 14,
                 height: 14,
                 color:
-                    isCancelledFlight!
+                    shouldShowRed
                         ? Colors.red
                         : isSelected
                         ? Colors.white
@@ -526,7 +528,7 @@ class _FilterHeaderDelegate extends SliverPersistentHeaderDelegate {
                   fontSize: 10,
                   fontWeight: FontWeight.w500,
                   color:
-                      isCancelledFlight
+                      shouldShowRed
                           ? Colors.red
                           : isSelected
                           ? Colors.white

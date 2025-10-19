@@ -559,8 +559,11 @@ Widget timerField2({
   );
 }
 
-
-Widget _buildTextField(String field, FlightInfoController controller, int lines) {
+Widget _buildTextField(
+  String field,
+  FlightInfoController controller,
+  int lines,
+) {
   return Expanded(
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,

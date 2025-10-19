@@ -52,5 +52,9 @@
 		<true/>
 		<key>UIStatusBarHidden</key>
 		<false/>
+		<key>NSCameraUsageDescription</key>
+		<string>This app needs access to the camera to capture and send photos.</string>
+		<key>NSPhotoLibraryUsageDescription</key>
+		<string>This app needs access to the photo library to select and send photos.</string>
 	</dict>
 </plist>
