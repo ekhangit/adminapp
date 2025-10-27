@@ -151,7 +151,7 @@ class CustomBox2 extends StatelessWidget {
         child: LayoutBuilder(
           builder: (context, constraints) {
             // Calculate responsive image size based on available space
-            final imageSize = (constraints.maxHeight * 0.5).clamp(40.0, 70.0);
+            final imageSize = (constraints.maxHeight * 0.55).clamp(50.0, 85.0);
 
             return Column(
               mainAxisSize: MainAxisSize.min,
@@ -173,7 +173,7 @@ class CustomBox2 extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                     fontWeight: FontWeight.w600,
-                    fontSize: 12.5,
+                    fontSize: 14,
                     color: Colors.white,
                   ),
                 ),

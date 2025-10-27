@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "715521065715",
-    "firebase_url": "https://asgsys-565cb-default-rtdb.firebaseio.com",
-    "project_id": "asgsys-565cb",
-    "storage_bucket": "asgsys-565cb.firebasestorage.app"
+    "project_number": "985585335054",
+    "firebase_url": "https://global-a4f3a-default-rtdb.firebaseio.com",
+    "project_id": "global-a4f3a",
+    "storage_bucket": "global-a4f3a.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:715521065715:android:14fa32e1f30a3ec11f2d86",
+        "mobilesdk_app_id": "1:985585335054:android:33815655ce01195037355f",
         "android_client_info": {
-          "package_name": "com.example.asgApp"
+          "package_name": "com.example.globalApp"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAtuIr3hCOP_za-q8Dc7_HhaGVyLXd5VVY"
+          "current_key": "AIzaSyD1pq2E_4z6vQeuGauHJOew3HjMN_smJM8"
         }
       ],
       "services": {

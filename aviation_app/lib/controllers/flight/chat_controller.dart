@@ -208,7 +208,14 @@ class ChatController extends GetxController {
 
     // Get the timestamp and convert to ISO string
     final timestamp = data['created_at'] as Timestamp?;
+    print('[ChatController] Raw Firestore timestamp: $timestamp');
+
+    final dateTime = timestamp?.toDate();
+    print('[ChatController] Converted DateTime: $dateTime');
+    print('[ChatController] DateTime UTC: ${dateTime?.toUtc()}');
+
     final isoTime = timestamp?.toDate().toUtc().toIso8601String() ?? '';
+    print('[ChatController] ISO String: $isoTime');
 
     return ChatMessage.fromJson({
       ...data,

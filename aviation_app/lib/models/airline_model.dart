@@ -3,8 +3,15 @@ class AirlineModel {
   final String? iata;
   final String? icao;
   final String? name;
+  final String? logoUrl;
 
-  AirlineModel({required this.id, this.iata, this.icao, this.name});
+  AirlineModel({
+    required this.id,
+    this.iata,
+    this.icao,
+    this.name,
+    this.logoUrl,
+  });
 
   factory AirlineModel.fromJson(Map<String, dynamic> json) {
     return AirlineModel(
@@ -12,6 +19,7 @@ class AirlineModel {
       iata: json['iata'] ?? '',
       icao: json['icao'] ?? '',
       name: json['name'] ?? '',
+      logoUrl: json['logo_url'] ?? '',
     );
   }
 }

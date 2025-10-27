@@ -27,7 +27,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[flightChatDetail] response : ${response.data}");
+      // log("[flightChatDetail] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -283,7 +283,7 @@ class FlightChatService {
         ApiConfig.getAirlines,
       );
 
-      // log("[getAirlines] response : ${response.data}");
+      log("[getAirlines] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&

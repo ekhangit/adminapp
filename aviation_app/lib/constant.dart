@@ -16,6 +16,7 @@ const LinearGradient appThemeGradientSoft = LinearGradient(
 );
 
 const LinearGradient appThemeGradientSoft2 = LinearGradient(
+
   colors: [Color(0xFF003862), Color.fromARGB(255, 78, 135, 179)],
   begin: Alignment.topCenter,
   end: Alignment.bottomCenter,
@@ -56,7 +57,7 @@ String formatDate(String rawDate) {
 
 String formatChatTimestamp(String raw) {
   try {
-    final parsed = DateTime.parse(raw); // "2025-05-22 21:22:57"
+    final parsed = DateTime.parse(raw).toLocal(); // Convert UTC to local time
     final formatted = DateFormat("HH:mm").format(parsed);
     return formatted;
   } catch (_) {

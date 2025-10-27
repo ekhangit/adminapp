@@ -1,3 +1,4 @@
+import 'package:aviation_app/controllers/flight/airline_controller.dart';
 import 'package:aviation_app/models/flight_model.dart';
 import 'package:aviation_app/widgets/custom_image.dart';
 import 'package:flutter/material.dart';
@@ -37,6 +38,11 @@ class FlightCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<FlightCommController>();
+
+    // Get airline controller for cached logos
+    final airlineController = Get.isRegistered<AirlineController>()
+        ? Get.find<AirlineController>()
+        : null;
 
     return Obx(() {
       final isSelected = controller.selectedFlightIndex.value == index;
@@ -86,7 +92,7 @@ class FlightCard extends StatelessWidget {
                   color: AppColors.colorPrimary,
                 )
                 : CustomImage(
-                  imageUrl: flight.airline?.mobilePicture ?? "",
+                  imageUrl: _getAirlineLogo(flight, airlineController),
                   isNetwork: true,
                   size: 6.5.w,
                   boxFit: BoxFit.fill,
@@ -459,5 +465,22 @@ class FlightCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  /// Get airline logo from cached controller or fallback to flight's airline data
+  String _getAirlineLogo(
+    FlightsModel flight,
+    AirlineController? airlineController,
+  ) {
+    // First try to get from cached airlines using airlineId
+    if (airlineController != null) {
+      final cachedLogo = airlineController.getAirlineLogoById(flight.airlineId);
+      if (cachedLogo != null && cachedLogo.isNotEmpty) {
+        return cachedLogo;
+      }
+    }
+
+    // Fallback to flight's airline data
+    return flight.airline?.mobilePicture ?? "";
   }
 }

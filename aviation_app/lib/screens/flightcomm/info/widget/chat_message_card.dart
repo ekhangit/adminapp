@@ -33,7 +33,7 @@ Widget _buildRegularMessage(ChatMessage message) {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: const Color(0xFFCAE9FF),
+            color: message.isOwn ? const Color(0xFFCAE9FF) : Colors.white,
             borderRadius: BorderRadius.only(
               topLeft:
                   message.isOwn
@@ -53,13 +53,15 @@ Widget _buildRegularMessage(ChatMessage message) {
           ),
         ),
       ),
-      Padding(
-        padding: const EdgeInsets.only(top: 4, right: 4),
-        child: Text(
-          formatChatTimestamp(message.time),
-          style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+      // Only show timestamp for own messages
+      if (message.isOwn)
+        Padding(
+          padding: const EdgeInsets.only(top: 4, right: 4),
+          child: Text(
+            formatChatTimestamp(message.time),
+            style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+          ),
         ),
-      ),
     ],
   );
 }

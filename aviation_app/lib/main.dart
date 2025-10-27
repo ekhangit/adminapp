@@ -3,7 +3,9 @@ import 'package:aviation_app/controllers/storage/data_storage_controller.dart';
 import 'package:aviation_app/firebase_options.dart';
 import 'package:aviation_app/routes/AppPages.dart';
 import 'package:aviation_app/services/base_service.dart';
+import 'package:aviation_app/services/notification_service.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:get/get.dart';
@@ -13,11 +15,18 @@ Future<void> main() async {
   WidgetsBinding widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
 
+  // Register background message handler
+  FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
+
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
   removeSplash();
 
   await Get.putAsync(() async => DataStorageController(), permanent: true);
   await Get.putAsync(() async => BaseService().init(), permanent: true);
+
+  // Initialize notification service
+  await NotificationService.instance.initialize();
+
   final authToken = await DataStorageController.to.fetchAuthToken();
 
   print("MyApp Login bool: $authToken");
