@@ -5,6 +5,7 @@ import 'package:aviation_app/screens/flightcomm/form/fhr_form.dart';
 import 'package:aviation_app/screens/flightcomm/form/occ_form.dart';
 import 'package:aviation_app/screens/flightcomm/form/pts_form.dart';
 import 'package:aviation_app/screens/flightcomm/form/ssr_form.dart';
+import 'package:aviation_app/screens/flightcomm/form/staff_form.dart';
 import 'package:aviation_app/screens/flightcomm/form/trc_form.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -166,6 +167,8 @@ class UpdateInfoScreen extends StatelessWidget {
         return const DSRForm();
       case "FHR":
         return const FHRForm();
+      case "STAFF":
+        return const StaffForm();
       case "OCC":
         return const OCCForm();
       default:
