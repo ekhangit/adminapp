@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "405025524775",
+    "firebase_url": "https://gsrm-avbis-default-rtdb.firebaseio.com",
+    "project_id": "gsrm-avbis",
+    "storage_bucket": "gsrm-avbis.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:405025524775:android:7fa6d148887a74f6731202",
+        "android_client_info": {
+          "package_name": "com.avbis.gsrmlive"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkRZ8qP9gwSq0mDXFXML4JITGN_EUtT5g"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

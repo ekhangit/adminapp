@@ -121,9 +121,9 @@ class CheckInForm extends StatelessWidget {
             singleField("Select or Add Gate", showLabel: false),
             const SizedBox(height: 12),
 
-            singleField("Select or Add Gate SPVIR", showLabel: false),
+            singleField("Select or Add Gate SPVR", showLabel: false),
             const SizedBox(height: 12),
-            singleField("SPVIR RMKS", maxLines: 2),
+            singleField("SPVR RMKS", maxLines: 2),
 
             const SizedBox(height: 24),
 
@@ -145,7 +145,7 @@ class CheckInForm extends StatelessWidget {
             const SizedBox(height: 12),
             singleField("DOCS CHECK"),
             const SizedBox(height: 12),
-            singleField("RAMO (SPECIAL)"),
+            singleField("RAMP (SPECIAL)"),
             const SizedBox(height: 12),
             singleField("OTHERS"),
 

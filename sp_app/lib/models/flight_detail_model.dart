@@ -11,7 +11,7 @@ class FlightDetailModel {
   final TrcData? trc;
   final CkinData? ckin;
   final ArrData? arr;
-  final List<PicData> picData = [];
+  final List<PicData> picData;
   final FlightMessages messages;
   final List<SodData> sodData;
 
@@ -28,6 +28,7 @@ class FlightDetailModel {
     this.trc,
     this.ckin,
     this.arr,
+    required this.picData,
     required this.messages,
     required this.sodData,
   });
@@ -37,6 +38,7 @@ class FlightDetailModel {
     final trcJson = json['trc'];
     final ckinJson = json['ckin'];
     final arrJson = json['arr'];
+    final picJson = json['pic'] ?? [];
     final messagesJson = json['messages'] ?? {};
     final sodJson = json['sod'] ?? [];
 
@@ -57,6 +59,7 @@ class FlightDetailModel {
       trc: trcJson != null ? TrcData.fromJson(trcJson) : null,
       ckin: ckinJson != null ? CkinData.fromJson(ckinJson) : null,
       arr: arrJson != null ? ArrData.fromJson(arrJson) : null,
+      picData: List<PicData>.from(picJson.map((x) => PicData.fromJson(x))),
       messages: FlightMessages.fromJson(messagesJson),
       sodData: List<SodData>.from(sodJson.map((x) => SodData.fromJson(x))),
     );
@@ -637,7 +640,59 @@ class ArrData {
   );
 }
 
-class PicData {}
+class PicData {
+  final int flightId;
+  final int senderId;
+  final String attachment;
+  final String createdAt;
+  final PicUser user;
+
+  PicData({
+    required this.flightId,
+    required this.senderId,
+    required this.attachment,
+    required this.createdAt,
+    required this.user,
+  });
+
+  factory PicData.fromJson(Map<String, dynamic> json) {
+    return PicData(
+      flightId: json['flight_id'] ?? 0,
+      senderId: json['sender_id'] ?? 0,
+      attachment: json['attachment'] ?? '',
+      createdAt: json['created_at'] ?? '',
+      user: PicUser.fromJson(json['user'] ?? {}),
+    );
+  }
+
+  // Helper to get full attachment URL
+  String getAttachmentUrl(String baseUrl) {
+    if (attachment.startsWith('http')) {
+      return attachment;
+    }
+    return '$baseUrl/$attachment';
+  }
+
+  // Helper to get file extension
+  String getFileExtension() {
+    final parts = attachment.split('.');
+    return parts.isNotEmpty ? parts.last.toLowerCase() : '';
+  }
+}
+
+class PicUser {
+  final int id;
+  final String name;
+
+  PicUser({required this.id, required this.name});
+
+  factory PicUser.fromJson(Map<String, dynamic> json) {
+    return PicUser(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+    );
+  }
+}
 
 class FlightMessages {
   final List<MessageData> mvtDeparture;
@@ -744,7 +799,7 @@ class SodData {
     flightId: json['flight_id'] as int?,
     serviceAbbr:
         json['service_abbr']?.toString() ?? json['abbr']?.toString() ?? '',
-    type: json['type']?.toString() ?? '',
+    type: json['type']?.toString() ?? json['sla_type']?.toString() ?? '',
     // slaTimeIn: json['sla_time_in']?.toString() ?? '',
     // slaTimeOut: json['sla_time_out']?.toString() ?? '',
     startTime: json['start_time'] as String?,

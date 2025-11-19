@@ -41,18 +41,16 @@ class ARRForm extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: timerField(
+                    child: timerField2ForChat(
                       label: "START TIME",
-                      showHint: false,
                       controller: controller.startTimeController,
                       onTap: () => controller.pickTime(true),
                     ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: timerField(
+                    child: timerField2ForChat(
                       label: "END TIME",
-                      showHint: false,
                       controller: controller.endTimeController,
                       onTap: () => controller.pickTime(false),
                     ),
@@ -65,30 +63,24 @@ class ARRForm extends StatelessWidget {
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
+              child: Column(
                 children: [
-                  Expanded(
-                    child: singleField(
-                      "MHB AHL",
-                      showLabel: false,
-                      controller: controller.mhbAHLController,
-                    ),
+                  singleField(
+                    "MHB AHL",
+                    showLabel: false,
+                    controller: controller.mhbAHLController,
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: singleField(
-                      "OHD",
-                      showLabel: false,
-                      controller: controller.ohdController,
-                    ),
+                  const SizedBox(height: 12),
+                  singleField(
+                    "OHD",
+                    showLabel: false,
+                    controller: controller.ohdController,
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: singleField(
-                      "DPR",
-                      showLabel: false,
-                      controller: controller.dprController,
-                    ),
+                  const SizedBox(height: 12),
+                  singleField(
+                    "DPR",
+                    showLabel: false,
+                    controller: controller.dprController,
                   ),
                 ],
               ),

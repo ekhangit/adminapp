@@ -188,8 +188,8 @@ class ChatController extends GetxController {
       // typeCounts[type] = (typeCounts[type] ?? 0) + 1;
       log('Message Type: $type');
 
-      if (type == 'fhr') {
-        log('FHR Message: ${message.message.toString()}');
+      if (type == 'pts') {
+        log('PTS Message: ${message.message.toString()}');
       }
     }
   }
@@ -208,14 +208,14 @@ class ChatController extends GetxController {
 
     // Get the timestamp and convert to ISO string
     final timestamp = data['created_at'] as Timestamp?;
-    print('[ChatController] Raw Firestore timestamp: $timestamp');
+    // print('[ChatController] Raw Firestore timestamp: $timestamp');
 
-    final dateTime = timestamp?.toDate();
-    print('[ChatController] Converted DateTime: $dateTime');
-    print('[ChatController] DateTime UTC: ${dateTime?.toUtc()}');
+    // final dateTime = timestamp?.toDate();
+    // print('[ChatController] Converted DateTime: $dateTime');
+    // print('[ChatController] DateTime UTC: ${dateTime?.toUtc()}');
 
     final isoTime = timestamp?.toDate().toUtc().toIso8601String() ?? '';
-    print('[ChatController] ISO String: $isoTime');
+    // print('[ChatController] ISO String: $isoTime');
 
     return ChatMessage.fromJson({
       ...data,
@@ -226,16 +226,30 @@ class ChatController extends GetxController {
     });
   }
 
-  void _scrollToBottom() {
-    if (scrollController.hasClients && !_isInitialLoad) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+  void _scrollToBottom({bool instant = false}) {
+    if (!scrollController.hasClients) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!scrollController.hasClients) return;
+
+      // Add a small delay to ensure the widget has fully rebuilt
+      Future.delayed(const Duration(milliseconds: 50), () {
+        if (!scrollController.hasClients) return;
+
+        if (instant || _isInitialLoad) {
+          // Instant scroll - in reverse mode, minScrollExtent is at the top (newest messages)
+          scrollController.jumpTo(scrollController.position.minScrollExtent);
+        } else {
+          // Animated scroll - in reverse mode, minScrollExtent is at the top (newest messages)
+          scrollController.animateTo(
+            scrollController.position.minScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
       });
-    }
+    });
+
     _isInitialLoad = false;
   }
 
@@ -267,7 +281,7 @@ class ChatController extends GetxController {
 
       // Add optimistically to UI
       messages.add(optimisticMessage);
-      _scrollToBottom();
+      _scrollToBottom(instant: true);
 
       final docRef = await FirebaseFirestore.instance
           .collection('chats')
@@ -340,14 +354,14 @@ class ChatController extends GetxController {
             .where('sender_id', isEqualTo: message.senderId.toString())
             .limit(1);
 
-        log(
-          '[ChatController] markVisibleMessagesAsRead Querying for message: $query',
-        );
+        // log(
+        //   '[ChatController] markVisibleMessagesAsRead Querying for message: $query',
+        // );
 
         final snapshot = await query.get();
-        log(
-          '[ChatController] markVisibleMessagesAsRead Query result: ${snapshot.docs.length} docs found',
-        );
+        // log(
+        //   '[ChatController] markVisibleMessagesAsRead Query result: ${snapshot.docs.length} docs found',
+        // );
         if (snapshot.docs.isNotEmpty) {
           final doc = snapshot.docs.first;
           batch.update(doc.reference, {
@@ -355,7 +369,7 @@ class ChatController extends GetxController {
           });
           batchCount++;
 
-          log('[ChatController]  Message marked as read: ${message.readBy}');
+          // log('[ChatController]  Message marked as read: ${message.readBy}');
 
           // Update local message state
           if (message.readBy == null) {
@@ -531,7 +545,6 @@ class ChatController extends GetxController {
       );
 
       if (response.isSuccess && response.data != null) {
-        // log('[fetchFlightChatDetail] Flight detail fetched successfully.');
         flightDetail.value = response.data!;
       } else {
         log('[fetchFlightChatDetail] API Error: ${response.errorMessage}');

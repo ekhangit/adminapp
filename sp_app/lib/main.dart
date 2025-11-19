@@ -28,10 +28,17 @@ Future<void> main() async {
   await NotificationService.instance.initialize();
 
   final authToken = await DataStorageController.to.fetchAuthToken();
+  final isLoggedIn = authToken.isNotEmpty;
+
+  // Enable notifications if user is already logged in
+  if (isLoggedIn) {
+    NotificationService.instance.enableNotifications();
+    print("MyApp: User logged in - Notifications enabled");
+  }
 
   print("MyApp Login bool: $authToken");
 
-  runApp(MyApp(isLoggedIn: authToken.isNotEmpty));
+  runApp(MyApp(isLoggedIn: isLoggedIn));
 }
 
 Future removeSplash() async {

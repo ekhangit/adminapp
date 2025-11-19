@@ -17,9 +17,10 @@ class StaffForm extends StatelessWidget {
     final flightInfoController = Get.find<FlightInfoController>();
 
     // Get staff names for dropdown
-    final staffNames = controller.staffList
-        .map((staff) => staff.displayName ?? 'Unknown')
-        .toList();
+    final staffNames =
+        controller.staffList
+            .map((staff) => staff.displayName ?? 'Unknown')
+            .toList();
 
     return SingleChildScrollView(
       child: Padding(
@@ -89,8 +90,7 @@ class StaffForm extends StatelessWidget {
                 Expanded(
                   child: singleLabel(
                     "Airport",
-                    controller
-                            .flightDetail.value?.departureAirport.iataCode ??
+                    controller.flightDetail.value?.departureAirport.iataCode ??
                         'N/A',
                   ),
                 ),
@@ -114,25 +114,25 @@ class StaffForm extends StatelessWidget {
             ...controller.flightDetail.value?.sodData
                     .where((sod) => !sod.isEmpty)
                     .map((sod) {
-                  return Column(
-                    children: [
-                      _buildServiceSection(
-                        serviceAbbr: sod.serviceAbbr ?? 'Service',
-                        startTime: sod.startTime,
-                        endTime: sod.endTime,
-                        staffNames: staffNames,
-                        controller: controller,
-                        onTimeChanged: (time) {
-                          // Handle time change
-                        },
-                        onStaffSelected: (staff) {
-                          // Handle staff selection
-                        },
-                      ),
-                      const SizedBox(height: 20),
-                    ],
-                  );
-                }) ??
+                      return Column(
+                        children: [
+                          _buildServiceSection(
+                            serviceAbbr: sod.serviceAbbr ?? 'Service',
+                            startTime: sod.startTime,
+                            endTime: sod.endTime,
+                            staffNames: staffNames,
+                            controller: controller,
+                            onTimeChanged: (time) {
+                              // Handle time change
+                            },
+                            onStaffSelected: (staff) {
+                              // Handle staff selection
+                            },
+                          ),
+                          const SizedBox(height: 20),
+                        ],
+                      );
+                    }) ??
                 [],
 
             // If no SOD data, show a default check-in service

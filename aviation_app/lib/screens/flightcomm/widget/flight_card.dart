@@ -40,9 +40,10 @@ class FlightCard extends StatelessWidget {
     final controller = Get.find<FlightCommController>();
 
     // Get airline controller for cached logos
-    final airlineController = Get.isRegistered<AirlineController>()
-        ? Get.find<AirlineController>()
-        : null;
+    final airlineController =
+        Get.isRegistered<AirlineController>()
+            ? Get.find<AirlineController>()
+            : null;
 
     return Obx(() {
       final isSelected = controller.selectedFlightIndex.value == index;

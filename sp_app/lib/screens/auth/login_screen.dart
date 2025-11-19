@@ -24,16 +24,11 @@ class LoginScreen extends StatelessWidget {
         backgroundColor: AppColors.backgroundColor,
         appBar: AppBar(
           backgroundColor: Colors.white,
-          automaticallyImplyLeading: true,
           title: const Text(
             "Login",
             style: TextStyle(color: AppColors.appBarTextColor),
           ),
-          centerTitle: false,
-          leading: IconButton(
-            onPressed: () => Get.back(),
-            icon: Icon(Icons.arrow_back_ios, color: AppColors.appBarTextColor),
-          ),
+          centerTitle: true,
         ),
         body: Stack(
           children: [
@@ -51,9 +46,9 @@ class LoginScreen extends StatelessWidget {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        Image.asset("assets/images/logo_gsrm.png", height: 100),
+                        Image.asset("assets/images/logo_new.png", height: 70),
 
-                        const SizedBox(height: 30),
+                        const SizedBox(height: 40),
 
                         // Email Field
                         Obx(

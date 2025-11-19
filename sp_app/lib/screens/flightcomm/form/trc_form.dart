@@ -62,7 +62,7 @@ class TRCForm extends StatelessWidget {
                 Expanded(
                   child: singleLabel(
                     "A/C Type",
-                    controller.flightDetail.value?.aircraftType!.icao ?? '',
+                    controller.flightDetail.value?.aircraftType?.icao ?? '',
                   ),
                 ),
               ],

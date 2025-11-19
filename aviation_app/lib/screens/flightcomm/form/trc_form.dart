@@ -1,6 +1,6 @@
 import 'package:aviation_app/screens/flightcomm/form/widget/form_widgets.dart';
 import 'package:aviation_app/screens/flightcomm/form/widget/multi_select_dropdown.dart';
-// import 'package:aviation_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
+// import 'package:sp_app/screens/flightcomm/form/widget/single_selected_dropdown.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
@@ -62,7 +62,7 @@ class TRCForm extends StatelessWidget {
                 Expanded(
                   child: singleLabel(
                     "A/C Type",
-                    controller.flightDetail.value?.aircraftType!.icao ?? '',
+                    controller.flightDetail.value?.aircraftType?.icao ?? '',
                   ),
                 ),
               ],

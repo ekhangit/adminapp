@@ -178,7 +178,6 @@ class MultiSelectDropdown extends StatelessWidget {
   }
 }
 
-
 class GenericMultiSelectDropdown<T> extends StatelessWidget {
   final String label;
   final List<T> options;
@@ -271,9 +270,12 @@ class GenericMultiSelectDropdown<T> extends StatelessWidget {
                 borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
               ),
               child: Obx(() {
-                final filteredOptions = options
-                    .where((item) => filterCondition(item, searchTerm.value))
-                    .toList();
+                final filteredOptions =
+                    options
+                        .where(
+                          (item) => filterCondition(item, searchTerm.value),
+                        )
+                        .toList();
 
                 final allSelected = selectedItems.length == options.length;
 

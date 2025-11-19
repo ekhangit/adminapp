@@ -297,6 +297,60 @@ class FlightCommScreen extends StatelessWidget {
                           ),
                         ),
                       ),
+
+                      // 📊 Bottom Status Bar
+                      Obx(() {
+                        if (controller.isFlightCommLoading.value) {
+                          return const SizedBox.shrink();
+                        }
+
+                        final displayList =
+                            controller.isSearching.value
+                                ? controller.searchResults
+                                : controller.flightList;
+
+                        if (displayList.isEmpty) {
+                          return const SizedBox.shrink();
+                        }
+
+                        final totalCount = displayList.length;
+                        final startCount = totalCount > 0 ? 1 : 0;
+
+                        return Container(
+                          padding: const EdgeInsets.symmetric(
+                            vertical: 12.0,
+                            horizontal: 16.0,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.colorWhite,
+                            border: Border(
+                              top: BorderSide(
+                                color: Colors.grey.shade300,
+                                width: 1,
+                              ),
+                            ),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.1),
+                                blurRadius: 4,
+                                offset: const Offset(0, -2),
+                              ),
+                            ],
+                          ),
+                          child: Center(
+                            child: Text(
+                              controller.isSearching.value
+                                  ? 'Showing $startCount to $totalCount of $totalCount search results'
+                                  : 'Showing $startCount to $totalCount of $totalCount flights',
+                              style: GoogleFonts.roboto(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                                color: Colors.grey.shade700,
+                              ),
+                            ),
+                          ),
+                        );
+                      }),
                     ],
                   ),
 

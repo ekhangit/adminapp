@@ -10,6 +10,7 @@ import 'package:get/get.dart';
 
 import '../../services/auth_service.dart';
 import '../../services/base_service.dart';
+import '../../services/notification_service.dart';
 import '../../utils/utils.dart';
 import '../storage/data_storage_controller.dart';
 
@@ -123,6 +124,10 @@ class LoginController extends GetxController {
           );
           return;
         }
+
+        // Enable notifications after successful login
+        log("[LoginController] Enabling notifications...");
+        NotificationService.instance.enableNotifications();
 
         if (FocusManager.instance.primaryFocus?.hasFocus ?? false) {
           FocusManager.instance.primaryFocus?.unfocus();

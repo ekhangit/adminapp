@@ -386,16 +386,16 @@ class ChatScreenNew extends StatelessWidget {
     );
   }
 
-  Widget _buildTimeText(String? time) {
-    return Text(
-      time ?? '--',
-      style: const TextStyle(
-        fontSize: 11,
-        fontWeight: FontWeight.w600,
-        color: Colors.black87,
-      ),
-    );
-  }
+  // Widget _buildTimeText(String? time) {
+  //   return Text(
+  //     time ?? '--',
+  //     style: const TextStyle(
+  //       fontSize: 11,
+  //       fontWeight: FontWeight.w600,
+  //       color: Colors.black87,
+  //     ),
+  //   );
+  // }
 
   /// Build CFG string from capacity data
   /// Example: "C12" or "C12 M162" or "Y174"
@@ -472,7 +472,7 @@ class ChatScreenNew extends StatelessWidget {
     final tabs = [
       'Chat',
       'TRC',
-      'CHKIN',
+      'CKIN',
       'ARR',
       'PIC',
       'MVT',
@@ -560,7 +560,7 @@ class ChatScreenNew extends StatelessWidget {
       case 'TRC':
         return Container(color: const Color(0xFFF5F5F5), child: TrcInfo());
 
-      case 'CHKIN':
+      case 'CKIN':
         return Container(color: const Color(0xFFF5F5F5), child: ChkinInfo());
 
       case 'ARR':

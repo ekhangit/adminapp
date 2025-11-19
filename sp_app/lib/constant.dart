@@ -57,7 +57,7 @@ String formatDate(String rawDate) {
 String formatChatTimestamp(String raw) {
   try {
     final parsed = DateTime.parse(raw).toLocal(); // Convert UTC to local time
-    final formatted = DateFormat("HH:mm").format(parsed);
+    final formatted = DateFormat("HH:mm MMM dd, yyyy").format(parsed);
     return formatted;
   } catch (_) {
     return raw; // fallback if parsing fails

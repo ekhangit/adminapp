@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import '../../../controllers/flight/chat_controller.dart';
 import '../../../models/flight_detail_model.dart';
+import '../../../utils/app_colors.dart';
 import 'package:intl/intl.dart';
 
 class SodInfo extends StatelessWidget {
@@ -41,161 +42,268 @@ class SodInfo extends StatelessWidget {
   Widget _buildSodCard(SodData sod) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(0),
       decoration: BoxDecoration(
-        color: Colors.grey.shade100,
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.grey.shade300),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.grey.shade300, width: 1),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Container(
-                padding: EdgeInsets.all(2.0),
-                decoration: BoxDecoration(
-                  color: Colors.blueAccent,
-                  borderRadius: BorderRadius.circular(4),
-                ),
-                child: Text(
-                  sod.serviceAbbr!,
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.white,
-                    fontWeight: FontWeight.w400,
+          // Header section with colored background
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            decoration: BoxDecoration(
+              color: AppColors.colorPrimary.withOpacity(0.1),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(12),
+              ),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.colorPrimary,
+                    borderRadius: BorderRadius.circular(6),
+                  ),
+                  child: Text(
+                    sod.serviceAbbr ?? 'N/A',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: Colors.white,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 0.5,
+                    ),
                   ),
                 ),
-              ),
-              Text(
-                sod.type ?? '',
-                style: TextStyle(
-                  color: Colors.grey.shade700,
-                  fontStyle: FontStyle.italic,
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 8,
+                    vertical: 4,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.shade100,
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                  child: Text(
+                    sod.duration ?? '00:00',
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.orange.shade900,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
                 ),
-              ),
-              // Chip(
-              //   label: Text('${sod.employees.length}/${sod.requiredStaff}'),
-              //   backgroundColor:
-              //       sod.employees.length >= sod.requiredStaff
-              //           ? Colors.green.shade100
-              //           : Colors.orange.shade100,
-              // ),
-            ],
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          // _buildTimeRow('Start Time', sod.startTime!),
-          // _buildTimeRow('Release Time', sod.endTime!),
-          _buildTimeRow('Start Time', _formatDateTime(sod.startTime)),
-          _buildTimeRow('Release Time', _formatDateTime(sod.endTime)),
-          _buildTimeRow('Duration', sod.duration!),
-          if (sod.employees != null && sod.employees!.isNotEmpty) ...[
-            const SizedBox(height: 8),
-            const Text(
-              'Assigned Staff:',
-              style: TextStyle(fontWeight: FontWeight.w500),
-            ),
-            ...sod.employees!.map(
-              (emp) => Padding(
-                padding: const EdgeInsets.only(left: 0, top: 4),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text('${emp.airport} - ${emp.name}'),
-                    SizedBox(height: 6),
 
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 2,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.green,
+          // Content section
+          Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                _buildTimeRow('Start Time', _formatDateTime(sod.startTime)),
+                const SizedBox(height: 8),
+                _buildTimeRow('End Time', _formatDateTime(sod.endTime)),
 
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'PLN',
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
+                // Assigned Staff Section
+                if (sod.employees != null && sod.employees!.isNotEmpty) ...[
+                  const SizedBox(height: 16),
+                  const Divider(height: 1),
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      const Icon(
+                        Icons.people_outline,
+                        size: 18,
+                        color: AppColors.colorPrimary,
+                      ),
+                      const SizedBox(width: 8),
+                      Text(
+                        'Assigned Staff (${sod.employees!.length})',
+                        style: const TextStyle(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 13,
+                          color: AppColors.colorPrimary,
                         ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${emp.plannedTimeIn} - ${emp.plannedTimeOut}',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                    SizedBox(height: 6),
-                    Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 2,
-                            vertical: 2,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.blueAccent,
-                            borderRadius: BorderRadius.circular(4),
-                          ),
-                          child: Text(
-                            'ACT',
-                            style: TextStyle(
-                              fontSize: 8,
-                              color: Colors.white,
-                              fontWeight: FontWeight.w400,
-                            ),
-                          ),
-                        ),
-                        const SizedBox(width: 4),
-                        Text(
-                          '${emp.actualTimeIn} - ${emp.actualTimeOut}',
-                          style: TextStyle(
-                            fontSize: 10.5,
-                            color: Colors.black87,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 12),
+                  ...sod.employees!.map((emp) => _buildEmployeeCard(emp)),
+                ],
+              ],
             ),
-          ],
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTimeRow(String label, String time) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+  Widget _buildEmployeeCard(SodEmployee emp) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade50,
+        borderRadius: BorderRadius.circular(8),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: const TextStyle(fontWeight: FontWeight.w500),
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: AppColors.colorPrimary.withOpacity(0.2),
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: Text(
+                  emp.airport,
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.w600,
+                    color: AppColors.colorPrimary,
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              Expanded(
+                child: Text(
+                  emp.name,
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
           ),
-          Text(
-            time,
-            style: const TextStyle(color: Colors.black87, fontSize: 12),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTimeChip(
+                  'PLN',
+                  '${emp.plannedTimeIn} - ${emp.plannedTimeOut}',
+                  Colors.green,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 6),
+          Row(
+            children: [
+              Expanded(
+                child: _buildTimeChip(
+                  'ACT',
+                  '${emp.actualTimeIn} - ${emp.actualTimeOut}',
+                  Colors.blue,
+                ),
+              ),
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  Widget _buildTimeChip(String label, String time, Color color) {
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+          decoration: BoxDecoration(
+            color: color,
+            borderRadius: BorderRadius.circular(4),
+          ),
+          child: Text(
+            label,
+            style: const TextStyle(
+              fontSize: 9,
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+        ),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            time,
+            style: const TextStyle(
+              fontSize: 11,
+              color: Colors.black87,
+              fontWeight: FontWeight.w400,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTimeRow(String label, String time) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        Text(
+          label,
+          style: TextStyle(
+            fontWeight: FontWeight.w500,
+            fontSize: 12,
+            color: Colors.grey.shade700,
+          ),
+        ),
+        Row(
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(
+                horizontal: 6,
+                vertical: 2,
+              ),
+              decoration: BoxDecoration(
+                color: Colors.purple.shade100,
+                borderRadius: BorderRadius.circular(4),
+              ),
+              child: Text(
+                'SLA',
+                style: TextStyle(
+                  fontSize: 9,
+                  color: Colors.purple.shade900,
+                  fontWeight: FontWeight.w600,
+                  letterSpacing: 0.3,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Text(
+              time,
+              style: const TextStyle(
+                color: Colors.black87,
+                fontSize: 13,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ],
+        ),
+      ],
     );
   }
 

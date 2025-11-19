@@ -4,6 +4,7 @@ import 'package:aviation_app/models/aircraft_model.dart';
 import 'package:aviation_app/models/airline_model.dart';
 import 'package:aviation_app/models/chat_model.dart';
 import 'package:aviation_app/models/flight_no_model.dart';
+import 'package:aviation_app/models/staff_data_model.dart';
 import 'package:aviation_app/models/staff_model.dart';
 import 'package:aviation_app/services/base_service.dart';
 
@@ -487,6 +488,34 @@ class FlightChatService {
       log("[sendOCC] response : ${response.data}");
 
       return ResponseClass.success(true);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Get Staff Data
+
+  Future<ResponseClass<StaffDataModel>> getStaffData({
+    required int flightId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getStaffData,
+        data: {"flight_id": flightId},
+      );
+
+      log("[getStaffData] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final staffData = StaffDataModel.fromJson(response.data['body']);
+        return ResponseClass.success(staffData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
     } catch (e) {
       return ResponseClass.error(e.toString());
     }

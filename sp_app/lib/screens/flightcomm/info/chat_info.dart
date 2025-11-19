@@ -17,21 +17,22 @@ class ChatInfo extends StatelessWidget {
 
     // Calculate 7.5% of screen height for bottom padding
     final screenHeight = MediaQuery.of(context).size.height;
-    final bottomPadding = screenHeight * 0.025;
+    final topAndBottomPadding = screenHeight * 0.025;
 
     return CustomScrollView(
       controller: controller.scrollController,
       reverse: true,
       slivers: [
         // Add bottom padding
-        SliverToBoxAdapter(child: SizedBox(height: bottomPadding)),
+        SliverToBoxAdapter(child: SizedBox(height: topAndBottomPadding)),
+
         // 🔵 Chat Messages
         Obx(() {
           final groupedMessages = _groupMessagesByDate(controller.messages);
           final dateKeys =
               groupedMessages.keys.toList()..sort(
-                (a, b) => a.compareTo(b),
-              ); // Sort dates ascending for reverse view (oldest first, newest last at bottom)
+                (a, b) => b.compareTo(a),
+              ); // Sort dates descending (newest first in array, appears at bottom with reverse)
 
           return SliverList(
             delegate: SliverChildBuilderDelegate((context, index) {
@@ -63,6 +64,8 @@ class ChatInfo extends StatelessWidget {
             }, childCount: dateKeys.length),
           );
         }),
+
+        SliverToBoxAdapter(child: SizedBox(height: topAndBottomPadding)),
       ],
     );
   }
@@ -172,13 +175,15 @@ class ChatInfo extends StatelessWidget {
       grouped.putIfAbsent(messageDay, () => []).add(message);
     }
 
-    // Sort messages within each group by time (oldest first for reverse view, newest last at bottom)
+    // Sort messages within each group by time (oldest first in array, appears at bottom with reverse)
     grouped.forEach((key, value) {
       value.sort((a, b) {
         try {
           final timeA = DateTime.parse(a.time);
           final timeB = DateTime.parse(b.time);
-          return timeA.compareTo(timeB); // Ascending order
+          return timeA.compareTo(
+            timeB,
+          ); // Ascending order (oldest first, newest last)
         } catch (e) {
           return 0;
         }
@@ -186,41 +191,6 @@ class ChatInfo extends StatelessWidget {
     });
 
     return grouped;
-  }
-
-  // Build date header widget
-  Widget _buildDateHeader(DateTime date) {
-    final now = DateTime.now();
-    final today = DateTime(now.year, now.month, now.day);
-    final yesterday = today.subtract(const Duration(days: 1));
-
-    String dateText;
-    if (date == today) {
-      dateText = 'Today';
-    } else if (date == yesterday) {
-      dateText = 'Yesterday';
-    } else {
-      dateText = DateFormat('dd MMM').format(date);
-    }
-
-    return Center(
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-        margin: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.grey[300]!.withValues(alpha: 0.75),
-          borderRadius: BorderRadius.circular(4),
-        ),
-        child: Text(
-          dateText,
-          style: TextStyle(
-            color: Colors.grey[700],
-            fontSize: 12,
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-      ),
-    );
   }
 
   String _getInitials(String name) {
@@ -241,9 +211,9 @@ class ChatInfo extends StatelessWidget {
     ChatMessage message,
   ) {
     return Container(
-      height: 32.5,
-      width: 32.5,
-      padding: const EdgeInsets.all(8),
+      height: 30.0,
+      width: 30.0,
+      padding: const EdgeInsets.all(6),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         color: controller.getAvatarColor(_getInitials(message.senderName)),
@@ -254,7 +224,7 @@ class ChatInfo extends StatelessWidget {
           style: const TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.w600,
-            fontSize: 15,
+            fontSize: 13.5,
           ),
         ),
       ),
@@ -269,10 +239,10 @@ class ChatInfo extends StatelessWidget {
     // Parse message time
     DateTime messageDateTime;
     try {
-      print('[ChatInfo] Raw message time: ${message.time}');
-      print('[ChatInfo] Message from: ${message.senderName}');
+      // print('[ChatInfo] Raw message time: ${message.time}');
+      // print('[ChatInfo] Message from: ${message.senderName}');
       messageDateTime = DateTime.parse(message.time).toLocal();
-      print('[ChatInfo] Parsed DateTime (local): $messageDateTime');
+      // print('[ChatInfo] Parsed DateTime (local): $messageDateTime');
     } catch (e) {
       print('[ChatInfo] Error parsing time: $e');
       messageDateTime = DateTime.now().toLocal();
@@ -281,7 +251,7 @@ class ChatInfo extends StatelessWidget {
     // Format date and time
     final timeStr = DateFormat('HH:mm').format(messageDateTime);
     final dateStr = DateFormat('MMM dd, yyyy').format(messageDateTime);
-    print('[ChatInfo] Formatted: $timeStr $dateStr');
+    // print('[ChatInfo] Formatted: $timeStr $dateStr');
 
     return Padding(
       padding: const EdgeInsets.only(top: 4, bottom: 4),
@@ -289,13 +259,15 @@ class ChatInfo extends StatelessWidget {
         children: [
           Flexible(
             child: Text(
-              message.senderName,
+              message.station.isNotEmpty && message.station != 'Unknown'
+                  ? '${message.senderName} - ${message.station}'
+                  : message.senderName,
               style: TextStyle(
                 color: controller.getAvatarColor(
                   _getInitials(message.senderName),
                 ),
-                fontSize: 13.5,
-                fontWeight: FontWeight.w600,
+                fontSize: 13.0,
+                fontWeight: FontWeight.w500,
               ),
               overflow: TextOverflow.ellipsis,
               maxLines: 1,

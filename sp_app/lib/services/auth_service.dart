@@ -18,6 +18,8 @@ class AuthService {
     required String deviceToken,
   }) async {
     try {
+      log('[login] Request: deviceType=$deviceType, deviceToken=$deviceToken');
+
       final response = await BaseService.instance.dio.post(
         ApiConfig.loginAPI,
         data: {

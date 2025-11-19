@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -5,6 +6,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:get/get.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 /// Top-level function for handling background messages
 @pragma('vm:entry-point')
@@ -37,17 +39,41 @@ class NotificationService {
       AndroidNotificationChannel(
     'high_importance_channel', // id
     'High Importance Notifications', // name
-    description: 'This channel is used for important notifications.',
-    importance: Importance.high,
+    description: 'This channel is used for important notifications with sound and vibration.',
+    importance: Importance.max,
     playSound: true,
     enableVibration: true,
+    enableLights: true,
+    showBadge: true,
   );
 
   String? _fcmToken;
   String? get fcmToken => _fcmToken;
 
+  // Track if user is logged in (notifications should only show when logged in)
+  bool _isUserLoggedIn = false;
+  bool get isUserLoggedIn => _isUserLoggedIn;
+
+  // Track if service is already initialized (prevent multiple initializations)
+  bool _isInitialized = false;
+
+  // Store stream subscriptions to properly manage them and prevent duplicates
+  StreamSubscription<RemoteMessage>? _foregroundMessageSubscription;
+  StreamSubscription<RemoteMessage>? _backgroundMessageSubscription;
+  StreamSubscription<String>? _tokenRefreshSubscription;
+
+  // Track processed message IDs to prevent duplicate notifications
+  final Set<String> _processedMessageIds = {};
+  Timer? _messageIdCleanupTimer;
+
   /// Initialize notification service
   Future<void> initialize() async {
+    // Guard against multiple initializations
+    if (_isInitialized) {
+      debugPrint('[NotificationService] ⚠️ Already initialized - skipping re-initialization');
+      return;
+    }
+
     try {
       debugPrint('[NotificationService] ========================================');
       debugPrint('[NotificationService] 🚀 Starting Notification Service...');
@@ -72,6 +98,12 @@ class NotificationService {
       // Setup token refresh listener
       debugPrint('[NotificationService] Step 5: Setting up token refresh listener...');
       _setupTokenRefreshListener();
+
+      // Start cleanup timer for processed message IDs (clean every 5 minutes)
+      _startMessageIdCleanupTimer();
+
+      // Mark as initialized
+      _isInitialized = true;
 
       debugPrint('[NotificationService] ========================================');
       debugPrint('[NotificationService] ✅ Notification Service Initialized Successfully');
@@ -101,14 +133,24 @@ class NotificationService {
         '[NotificationService] iOS permission status: ${settings.authorizationStatus}',
       );
     } else if (Platform.isAndroid) {
-      // Request Android 13+ permissions
+      // Request Android 13+ (API 33+) notification permission
+      if (await Permission.notification.isDenied) {
+        final status = await Permission.notification.request();
+        debugPrint('[NotificationService] Android 13+ notification permission: $status');
+
+        if (status.isPermanentlyDenied) {
+          debugPrint('[NotificationService] ⚠️ Notification permission permanently denied. User needs to enable in settings.');
+        }
+      }
+
+      // Request Android local notification permissions
       final androidPlugin = _localNotifications.resolvePlatformSpecificImplementation<
           AndroidFlutterLocalNotificationsPlugin>();
 
       await androidPlugin?.requestNotificationsPermission();
       await androidPlugin?.createNotificationChannel(_channel);
 
-      debugPrint('[NotificationService] Android permissions requested');
+      debugPrint('[NotificationService] Android permissions requested and channel created');
     }
   }
 
@@ -154,7 +196,11 @@ class NotificationService {
 
   /// Setup token refresh listener
   void _setupTokenRefreshListener() {
-    _firebaseMessaging.onTokenRefresh.listen((newToken) {
+    // Cancel existing subscription if any
+    _tokenRefreshSubscription?.cancel();
+
+    // Create new subscription and store it
+    _tokenRefreshSubscription = _firebaseMessaging.onTokenRefresh.listen((newToken) {
       _fcmToken = newToken;
       debugPrint('[NotificationService] Token refreshed: $newToken');
 
@@ -167,12 +213,16 @@ class NotificationService {
   void _setupMessageHandlers() {
     debugPrint('[NotificationService] Setting up message handlers...');
 
-    // Handle foreground messages
-    FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
+    // Cancel existing subscriptions to prevent duplicates
+    _foregroundMessageSubscription?.cancel();
+    _backgroundMessageSubscription?.cancel();
+
+    // Handle foreground messages - Store subscription
+    _foregroundMessageSubscription = FirebaseMessaging.onMessage.listen(_handleForegroundMessage);
     debugPrint('[NotificationService] ✓ Foreground message handler registered');
 
-    // Handle notification tap when app is in background
-    FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
+    // Handle notification tap when app is in background - Store subscription
+    _backgroundMessageSubscription = FirebaseMessaging.onMessageOpenedApp.listen(_handleNotificationTap);
     debugPrint('[NotificationService] ✓ Background tap handler registered');
 
     // Handle notification tap when app was terminated
@@ -192,6 +242,24 @@ class NotificationService {
     }
 
     debugPrint('[NotificationService] Data: ${message.data}');
+
+    // Check for duplicate message (prevent processing same message multiple times)
+    if (message.messageId != null && _processedMessageIds.contains(message.messageId)) {
+      debugPrint('[NotificationService] ⚠️ Duplicate message detected - already processed: ${message.messageId}');
+      return;
+    }
+
+    // Add to processed messages set
+    if (message.messageId != null) {
+      _processedMessageIds.add(message.messageId!);
+      debugPrint('[NotificationService] ✓ Message ID added to processed list (${_processedMessageIds.length} total)');
+    }
+
+    // Check if user is logged in before showing notification
+    if (!_isUserLoggedIn) {
+      debugPrint('[NotificationService] ⚠️ User not logged in - skipping notification');
+      return;
+    }
 
     // Show local notification when app is in foreground
     if (message.notification != null) {
@@ -244,24 +312,44 @@ class NotificationService {
       debugPrint('[NotificationService] Body: $body');
       debugPrint('[NotificationService] Payload: $payload');
 
-      const androidDetails = AndroidNotificationDetails(
+      final androidDetails = AndroidNotificationDetails(
         'high_importance_channel',
         'High Importance Notifications',
-        channelDescription: 'This channel is used for important notifications.',
-        importance: Importance.high,
-        priority: Priority.high,
+        channelDescription: 'This channel is used for important notifications with sound and vibration.',
+        importance: Importance.max,
+        priority: Priority.max,
         playSound: true,
         enableVibration: true,
+        enableLights: true,
+        color: const Color(0xFF2196F3),
+        showWhen: true,
+        channelShowBadge: true,
+        autoCancel: true,
         icon: '@mipmap/ic_launcher',
+        styleInformation: BigTextStyleInformation(
+          body,
+          contentTitle: title,
+          summaryText: 'SP',
+          htmlFormatContent: false,
+          htmlFormatContentTitle: false,
+        ),
+        ticker: title,
+        visibility: NotificationVisibility.public,
+        category: AndroidNotificationCategory.message,
       );
 
       const iosDetails = DarwinNotificationDetails(
         presentAlert: true,
         presentBadge: true,
         presentSound: true,
+        sound: 'default', // Use default iOS notification sound
+        badgeNumber: 1,
+        attachments: [],
+        threadIdentifier: 'sp_app_notifications',
+        interruptionLevel: InterruptionLevel.active, // Active interruption level for sound
       );
 
-      const notificationDetails = NotificationDetails(
+      final notificationDetails = NotificationDetails(
         android: androidDetails,
         iOS: iosDetails,
       );
@@ -385,5 +473,56 @@ class NotificationService {
   /// Clear badge count
   Future<void> clearBadge() async {
     await setBadgeCount(0);
+  }
+
+  /// Start timer to cleanup old message IDs (prevent memory leak)
+  void _startMessageIdCleanupTimer() {
+    // Clean up every 5 minutes
+    _messageIdCleanupTimer?.cancel();
+    _messageIdCleanupTimer = Timer.periodic(const Duration(minutes: 5), (timer) {
+      final oldCount = _processedMessageIds.length;
+      _processedMessageIds.clear();
+      debugPrint('[NotificationService] 🧹 Cleaned up processed message IDs (removed $oldCount)');
+    });
+  }
+
+  /// Enable notifications (call this when user logs in)
+  void enableNotifications() {
+    _isUserLoggedIn = true;
+    debugPrint('[NotificationService] ✅ Notifications ENABLED - User logged in');
+  }
+
+  /// Disable notifications and clear all (call this when user logs out)
+  Future<void> disableNotifications() async {
+    _isUserLoggedIn = false;
+    await cancelAllNotifications();
+
+    // Clear processed message IDs on logout
+    _processedMessageIds.clear();
+
+    debugPrint('[NotificationService] 🔕 Notifications DISABLED - User logged out');
+    debugPrint('[NotificationService] All notifications cleared');
+    debugPrint('[NotificationService] Processed message IDs cleared');
+  }
+
+  /// Dispose/cleanup method (call when app is closing or service needs reset)
+  Future<void> dispose() async {
+    debugPrint('[NotificationService] 🧹 Disposing notification service...');
+
+    // Cancel all subscriptions
+    await _foregroundMessageSubscription?.cancel();
+    await _backgroundMessageSubscription?.cancel();
+    await _tokenRefreshSubscription?.cancel();
+
+    // Cancel cleanup timer
+    _messageIdCleanupTimer?.cancel();
+
+    // Clear processed messages
+    _processedMessageIds.clear();
+
+    // Reset initialization flag
+    _isInitialized = false;
+
+    debugPrint('[NotificationService] ✅ Notification service disposed');
   }
 }
