@@ -7,7 +7,6 @@ import 'package:get/get.dart';
 import '../../../constant.dart';
 import '../../../controllers/flight/chat_controller.dart';
 // import '../../../controllers/flight/flight_info_controller.dart';
-import '../../../controllers/flight/flight_info_controller.dart';
 import '../../../utils/app_colors.dart';
 
 class TRCForm extends StatelessWidget {
@@ -16,7 +15,16 @@ class TRCForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
-    final flightInfoController = Get.find<FlightInfoController>();
+
+    // Initialize controllers with flight detail values
+    if (controller.flightDetail.value != null) {
+      controller.gateController.text =
+          controller.flightDetail.value?.basicDetails.gate ?? '';
+      controller.standController.text =
+          controller.flightDetail.value?.basicDetails.pos ?? '';
+      controller.baggageBeltController.text =
+          controller.flightDetail.value?.basicDetails.beggageBelt ?? '';
+    }
 
     return SingleChildScrollView(
       child: Padding(
@@ -79,9 +87,9 @@ class TRCForm extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: singleLabel(
+                  child: singleField(
                     "Gate",
-                    controller.flightDetail.value?.basicDetails.gate ?? '',
+                    controller: controller.gateController,
                   ),
                 ),
               ],
@@ -91,17 +99,16 @@ class TRCForm extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: singleLabel(
+                  child: singleField(
                     "Stand",
-                    controller.flightDetail.value?.basicDetails.pos ?? '',
+                    controller: controller.standController,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: singleLabel(
+                  child: singleField(
                     "Baggage Belt",
-                    controller.flightDetail.value?.basicDetails.beggageBelt ??
-                        '',
+                    controller: controller.baggageBeltController,
                   ),
                 ),
               ],

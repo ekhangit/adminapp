@@ -5,7 +5,6 @@ import 'package:get/get.dart';
 
 import '../../../constant.dart';
 import '../../../controllers/flight/chat_controller.dart';
-import '../../../controllers/flight/flight_info_controller.dart';
 import '../../../utils/app_colors.dart';
 
 class StaffForm extends StatelessWidget {
@@ -14,7 +13,6 @@ class StaffForm extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
-    final flightInfoController = Get.find<FlightInfoController>();
 
     // Get staff names for dropdown
     final staffNames =

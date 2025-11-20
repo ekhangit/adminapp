@@ -609,6 +609,11 @@ class ChatController extends GetxController {
 
   final List<String> posOptions = ["11", "12", "13", "14"];
 
+  // TRC FORM
+  final TextEditingController gateController = TextEditingController();
+  final TextEditingController standController = TextEditingController();
+  final TextEditingController baggageBeltController = TextEditingController();
+
   // ARR FORM
   final TextEditingController lofoController = TextEditingController();
   final TextEditingController lofoRemarksController = TextEditingController();

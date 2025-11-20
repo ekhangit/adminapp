@@ -13,6 +13,16 @@ class CheckInForm extends StatelessWidget {
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
 
+    // Initialize controllers with flight detail values
+    if (controller.flightDetail.value != null) {
+      controller.gateController.text =
+          controller.flightDetail.value?.basicDetails.gate ?? '';
+      controller.standController.text =
+          controller.flightDetail.value?.basicDetails.pos ?? '';
+      controller.baggageBeltController.text =
+          controller.flightDetail.value?.basicDetails.beggageBelt ?? '';
+    }
+
     return SingleChildScrollView(
       child: Padding(
         padding: const EdgeInsets.only(
@@ -74,9 +84,9 @@ class CheckInForm extends StatelessWidget {
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: singleLabel(
+                  child: singleField(
                     "Gate",
-                    controller.flightDetail.value?.basicDetails.gate ?? '',
+                    controller: controller.gateController,
                   ),
                 ),
               ],
@@ -86,68 +96,20 @@ class CheckInForm extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: singleLabel(
+                  child: singleField(
                     "Stand",
-                    controller.flightDetail.value?.basicDetails.pos ?? '',
+                    controller: controller.standController,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
-                  child: singleLabel(
+                  child: singleField(
                     "Baggage Belt",
-                    controller.flightDetail.value?.basicDetails.beggageBelt ??
-                        '',
+                    controller: controller.baggageBeltController,
                   ),
                 ),
               ],
             ),
-
-            const SizedBox(height: 24),
-
-            // 🔹 Title Section
-            const Text(
-              "Staff Info",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.colorPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-
-            singleField("Select or Add CKIN", showLabel: false),
-            const SizedBox(height: 12),
-
-            singleField("Select or Add Gate", showLabel: false),
-            const SizedBox(height: 12),
-
-            singleField("Select or Add Gate SPVR", showLabel: false),
-            const SizedBox(height: 12),
-            singleField("SPVR RMKS", maxLines: 2),
-
-            const SizedBox(height: 24),
-
-            // 🔹 Title Section
-            const Text(
-              "Flight Breifing",
-              style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.w700,
-                color: AppColors.colorPrimary,
-              ),
-            ),
-            const SizedBox(height: 16),
-            singleField("SPECIALS"),
-            const SizedBox(height: 12),
-            singleField("BOOKING STATUS"),
-            const SizedBox(height: 12),
-            singleField("SCHDULE INFO"),
-            const SizedBox(height: 12),
-            singleField("DOCS CHECK"),
-            const SizedBox(height: 12),
-            singleField("RAMP (SPECIAL)"),
-            const SizedBox(height: 12),
-            singleField("OTHERS"),
 
             const SizedBox(height: 24),
 
@@ -211,6 +173,51 @@ class CheckInForm extends StatelessWidget {
                 const SizedBox(height: 24),
               ],
             ),
+
+            // 🔹 Title Section
+            const Text(
+              "Staff Info",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.colorPrimary,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            singleField("Select or Add CKIN", showLabel: false),
+            const SizedBox(height: 12),
+
+            singleField("Select or Add Gate", showLabel: false),
+            const SizedBox(height: 12),
+
+            singleField("Select or Add Gate SPVR", showLabel: false),
+            const SizedBox(height: 12),
+            singleField("SPVR RMKS", maxLines: 2),
+
+            const SizedBox(height: 24),
+
+            // 🔹 Title Section
+            const Text(
+              "Flight Breifing",
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w700,
+                color: AppColors.colorPrimary,
+              ),
+            ),
+            const SizedBox(height: 16),
+            singleField("SPECIALS"),
+            const SizedBox(height: 12),
+            singleField("BOOKING STATUS"),
+            const SizedBox(height: 12),
+            singleField("SCHDULE INFO"),
+            const SizedBox(height: 12),
+            singleField("DOCS CHECK"),
+            const SizedBox(height: 12),
+            singleField("RAMP (SPECIAL)"),
+            const SizedBox(height: 12),
+            singleField("OTHERS"),
           ],
         ),
       ),

@@ -27,7 +27,7 @@ class UpdateInfoScreen extends StatelessWidget {
     return AnnotatedRegion(
       value: SystemUiOverlayStyle(
         statusBarColor: Colors.white,
-        statusBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
         systemNavigationBarColor: Colors.grey.shade100,
       ),
       child: Scaffold(

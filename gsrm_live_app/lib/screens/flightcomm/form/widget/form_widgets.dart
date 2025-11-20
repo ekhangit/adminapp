@@ -317,9 +317,7 @@ Widget timerField2ForChat({
                 width: double.infinity,
                 decoration: const BoxDecoration(
                   color: AppColors.colorPrimary,
-                  borderRadius: BorderRadius.vertical(
-                    top: Radius.circular(4),
-                  ),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(4)),
                 ),
                 padding: padding ?? const EdgeInsets.symmetric(horizontal: 24),
                 child: Center(
@@ -370,9 +368,12 @@ Widget singleLabel(String title, String label, {bool showTitleCenter = false}) {
         width: double.infinity,
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: AppColors.colorPrimary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey, width: 0.2),
+          border: Border.all(
+            color: AppColors.colorPrimary.withOpacity(0.2),
+            width: 0.5,
+          ),
         ),
         child: Text(
           label,

@@ -370,9 +370,12 @@ Widget singleLabel(String title, String label, {bool showTitleCenter = false}) {
         width: double.infinity,
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: Colors.grey.shade100,
+          color: AppColors.colorPrimary.withOpacity(0.1),
           borderRadius: BorderRadius.circular(8),
-          border: Border.all(color: Colors.grey, width: 0.2),
+          border: Border.all(
+            color: AppColors.colorPrimary.withOpacity(0.2),
+            width: 0.5,
+          ),
         ),
         child: Text(
           label,

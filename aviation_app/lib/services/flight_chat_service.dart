@@ -185,7 +185,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[getSSROption] response : ${response.data}");
+      // log("[getSSROption] response : ${response.data}");
 
       if (response.statusCode == 200 && response.data['status'] == true) {
         if (response.data['body'] == {}) {
@@ -284,7 +284,7 @@ class FlightChatService {
         ApiConfig.getAirlines,
       );
 
-      log("[getAirlines] response : ${response.data}");
+      // log("[getAirlines] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -371,7 +371,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[getPTSOption] response : ${response.data}");
+      // log("[getPTSOption] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
