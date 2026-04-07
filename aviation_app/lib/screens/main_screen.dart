@@ -72,16 +72,15 @@ class MainScreen extends StatelessWidget {
                 label: 'Notification',
               ),
               NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/svg/about.svg',
-                  width: 30,
-                  height: 30,
+                icon: Icon(
+                  Icons.info_outline,
+                  size: 30,
                   color:
                       controller.selectedIndex.value == 2
                           ? AppColors.colorPrimary
                           : Colors.grey.shade400,
                 ),
-                label: 'About',
+                label: 'About Us',
               ),
               NavigationDestination(
                 icon: SvgPicture.asset(

@@ -32,6 +32,7 @@ android {
         targetSdk = 34
         versionCode = flutter.versionCode
         versionName = flutter.versionName
+        multiDexEnabled = true
     }
 
     buildTypes {
@@ -51,5 +52,6 @@ dependencies {
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:2.0.20")
     implementation("com.google.android.gms:play-services-base:18.5.0")
     implementation("com.google.firebase:firebase-messaging:24.0.0")
+    implementation("io.github.oothp:android-pdf-viewer:3.2.0-beta05")
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.4")
 }

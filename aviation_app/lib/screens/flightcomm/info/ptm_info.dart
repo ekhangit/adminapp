@@ -10,33 +10,44 @@ class PtmInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final controller = Get.find<ChatController>();
-
     final messages = controller.flightDetail.value?.messages;
-    final ptmMessages = messages?.ptm ?? [];
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(top: 16, bottom: 24),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          if (ptmMessages.isEmpty)
-            const Padding(
-              padding: EdgeInsets.all(16),
-              child: Center(
-                child: Text(
-                  'No messages available',
-                  style: TextStyle(
-                    fontSize: 16,
-                    color: Colors.grey,
-                    fontStyle: FontStyle.italic,
+          // PTM Section
+          if (messages?.ptm.isNotEmpty ?? false) ...[
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 12),
+                    child: Text(
+                      "PTM",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
                   ),
-                ),
+                  ...messages!.ptm.map(
+                    (msg) => buildMessageCard(msg, Colors.yellow.shade100),
+                  ),
+                ],
               ),
             ),
-          if (ptmMessages.isNotEmpty)
-            ...ptmMessages.map(
-              (msg) => buildMessageCard(msg, Colors.yellow.shade100),
-            ),
+          ],
         ],
       ),
     );

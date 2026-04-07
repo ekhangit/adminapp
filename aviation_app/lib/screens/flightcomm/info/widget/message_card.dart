@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../models/flight_detail_model.dart';
 
-Widget buildMessageCard(MessageData message, Color backgroundColor) {
+Widget buildMessageCard(MessageData message, Color backgroundColor, {String? title}) {
   final formattedMessage = message.message.replaceAll('\r\n', '\n');
   final receivedTime = DateTime.parse(message.receivedDatetime);
   final updatedTime = DateTime.parse(message.updatedAt);
@@ -28,17 +28,19 @@ Widget buildMessageCard(MessageData message, Color backgroundColor) {
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // MVT Header
-        const Text(
-          'MVT',
-          style: TextStyle(
-            fontSize: 14,
-            fontWeight: FontWeight.w700,
-            color: Colors.black87,
-            letterSpacing: 0.5,
+        // Dynamic Header (only show if title is provided)
+        if (title != null) ...[
+          Text(
+            title,
+            style: const TextStyle(
+              fontSize: 14,
+              fontWeight: FontWeight.w700,
+              color: Colors.black87,
+              letterSpacing: 0.5,
+            ),
           ),
-        ),
-        const SizedBox(height: 12),
+          const SizedBox(height: 12),
+        ],
 
         // Message Content
         Text(

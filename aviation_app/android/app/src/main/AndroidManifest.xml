@@ -12,9 +12,22 @@
     <!-- Notification permissions for Android 13+ (API 33+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
     <uses-permission android:name="android.permission.VIBRATE"/>
+
+
+    <!-- Optional: Add if your PDF viewer needs to open other apps -->
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:mimeType="application/pdf" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.PROCESS_TEXT"/>
+            <data android:mimeType="text/plain"/>
+        </intent>
+    </queries>
     
     <application
-        android:label="GSRM"
+        android:label="GSRM Test"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

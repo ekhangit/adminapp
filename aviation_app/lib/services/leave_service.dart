@@ -74,7 +74,6 @@ class LeaveService {
     String? profile,
   }) async {
     try {
-
       var data = {
         "leave_type_id": leaveTypeId,
         "start_date": fromDate,
@@ -87,7 +86,7 @@ class LeaveService {
 
       final response = await BaseService.instance.dio.post(
         ApiConfig.leaveRequest,
-        data: data
+        data: data,
       );
 
       log("[submitLeaveRequest] response : ${response.data}");

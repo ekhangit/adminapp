@@ -54,4 +54,14 @@ class ApiConfig {
   static const customRoster = '/api/v1/my-roster/custom-range';
   static const addBreakTimeRoster = '/api/v1/my-roster/add-break-time';
   static const markDutyRoster = '/api/v1/my-roster/mark-duty';
+
+  // LIBRARY
+  static const getFolders = '/api/v1/library/folders';
+  static const getDocumentsByFolder = '/api/v1/library/get-documentBy-folder';
+  static const getAllReadAndSign = '/api/v1/library/get-all-read-and-sign';
+  static const getReadAndSignByEmp = '/api/v1/library/get-read-and-sign-by-emp';
+  static const getSafetyDocument = '/api/v1/library/get-safety-document';
+  static const getAirlineFolders = '/api/v1/library/airline-folders';
+  static const getDocumentsByAirlineFolder = '/api/v1/library/get-document-by-airline-folder';
+  static const updateLastViewedDocument = '/api/v1/library/update-last-viewed-of-document';
 }

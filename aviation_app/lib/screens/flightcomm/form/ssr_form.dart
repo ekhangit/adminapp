@@ -49,7 +49,8 @@ class SSRForm extends StatelessWidget {
                           controller: ssrController,
                           decoration: InputDecoration(
                             labelText: ssr,
-                            hintText: "Enter details for $ssr",
+                            hintText: "Type details for $ssr",
+                            hintStyle: TextStyle(color: Colors.grey.shade400),
                             filled: true,
                             fillColor: Colors.grey.shade100,
                             border: OutlineInputBorder(

@@ -23,14 +23,14 @@ class ARRForm extends StatelessWidget {
           children: [
             singleField(
               "LOFO",
-              showLabel: false,
+              showLabel: true,
               controller: controller.lofoController,
             ),
             const SizedBox(height: 12),
 
             singleField(
               "LOFO RMKS",
-              showLabel: false,
+              showLabel: true,
               maxLines: 3,
               controller: controller.lofoRemarksController,
             ),
@@ -64,22 +64,33 @@ class ARRForm extends StatelessWidget {
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  // MHB parent label
+                  Text(
+                    "MHB",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
                   singleField(
-                    "MHB AHL",
-                    showLabel: false,
+                    "AHL",
+                    showLabel: true,
                     controller: controller.mhbAHLController,
                   ),
                   const SizedBox(height: 12),
                   singleField(
                     "OHD",
-                    showLabel: false,
+                    showLabel: true,
                     controller: controller.ohdController,
                   ),
                   const SizedBox(height: 12),
                   singleField(
                     "DPR",
-                    showLabel: false,
+                    showLabel: true,
                     controller: controller.dprController,
                   ),
                 ],

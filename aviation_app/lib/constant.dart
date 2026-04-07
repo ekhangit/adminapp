@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // Server Configuration
-const apiUrl = "https://global-staging.avsysdev.com";
+const apiUrl = "https://gsrm-stage.avbis.online";
 
 const String appName = "AvBIS";
 const String fontFamily = "Helvetica";
@@ -61,5 +61,22 @@ String formatChatTimestamp(String raw) {
     return formatted;
   } catch (_) {
     return raw; // fallback if parsing fails
+  }
+}
+
+String formatDateLibrary(DateTime date) {
+  return '${date.day}/${date.month}/${date.year}';
+}
+
+Color getStatusColor(String status) {
+  switch (status.toLowerCase()) {
+    case 'active':
+      return Colors.green;
+    case 'pending':
+      return Colors.red;
+    case 'expired':
+      return Colors.red;
+    default:
+      return Colors.grey;
   }
 }

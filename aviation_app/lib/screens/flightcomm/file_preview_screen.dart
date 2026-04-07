@@ -6,12 +6,13 @@ import 'package:flutter_svg/flutter_svg.dart';
 import 'package:get/get.dart';
 
 import '../../constant.dart';
+import '../../utils/app_colors.dart';
 
-class FilePreviewScreen extends StatelessWidget {
+class FilePreviewScreen extends StatefulWidget {
   final File file;
   final String fileName;
   final String fileSize;
-  final Function(File) onSend;
+  final Function(File, String) onSend;
 
   const FilePreviewScreen({
     super.key,
@@ -20,6 +21,26 @@ class FilePreviewScreen extends StatelessWidget {
     required this.fileSize,
     required this.onSend,
   });
+
+  @override
+  State<FilePreviewScreen> createState() => _FilePreviewScreenState();
+}
+
+class _FilePreviewScreenState extends State<FilePreviewScreen> {
+  String? selectedType;
+
+  final List<String> fileTypes = [
+    'Cargo',
+    'Ckin',
+    'Docs',
+    'Fpln',
+    'Fuel',
+    'Gate',
+    'Lds',
+    'Lir',
+    'Mics',
+    'Ramp'
+  ];
 
   IconData _getFileIcon(String fileName) {
     final extension = fileName.split('.').last.toLowerCase();
@@ -67,6 +88,111 @@ class FilePreviewScreen extends StatelessWidget {
       default:
         return Colors.blueGrey;
     }
+  }
+
+  void _showTypeSelectionBottomSheet() {
+    Get.bottomSheet(
+      Container(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(20),
+            topRight: Radius.circular(20),
+          ),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Drag handle
+            Container(
+              width: 40,
+              height: 4,
+              margin: const EdgeInsets.only(top: 12, bottom: 8),
+              decoration: BoxDecoration(
+                color: Colors.grey.shade300,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+            // Title
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Row(
+                children: [
+                  const Text(
+                    'Select File Type',
+                    style: TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.black87,
+                    ),
+                  ),
+                  const Spacer(),
+                  IconButton(
+                    onPressed: () => Get.back(),
+                    icon: const Icon(Icons.close, color: Colors.black54),
+                  ),
+                ],
+              ),
+            ),
+            const Divider(height: 1),
+            // Type options
+            Flexible(
+              child: ListView.builder(
+                shrinkWrap: true,
+                itemCount: fileTypes.length,
+                padding: const EdgeInsets.symmetric(vertical: 8),
+                itemBuilder: (context, index) {
+                  final type = fileTypes[index];
+                  final isSelected = selectedType == type;
+
+                  return ListTile(
+                    onTap: () {
+                      setState(() {
+                        selectedType = type;
+                      });
+                      Get.back();
+                    },
+                    leading: Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? AppColors.colorPrimary.withOpacity(0.1)
+                            : Colors.grey.shade100,
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        isSelected ? Icons.check_circle : Icons.circle_outlined,
+                        color:
+                            isSelected ? AppColors.colorPrimary : Colors.grey,
+                        size: 24,
+                      ),
+                    ),
+                    title: Text(
+                      type,
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
+                        color: isSelected ? AppColors.colorPrimary : Colors.black87,
+                      ),
+                    ),
+                    trailing: isSelected
+                        ? const Icon(
+                            Icons.check,
+                            color: AppColors.colorPrimary,
+                          )
+                        : null,
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 8),
+          ],
+        ),
+      ),
+      isDismissible: true,
+      enableDrag: true,
+    );
   }
 
   @override
@@ -135,19 +261,19 @@ class FilePreviewScreen extends StatelessWidget {
                           width: 100,
                           height: 100,
                           decoration: BoxDecoration(
-                            color: _getFileColor(fileName).withOpacity(0.1),
+                            color: _getFileColor(widget.fileName).withOpacity(0.1),
                             shape: BoxShape.circle,
                           ),
                           child: Icon(
-                            _getFileIcon(fileName),
+                            _getFileIcon(widget.fileName),
                             size: 50,
-                            color: _getFileColor(fileName),
+                            color: _getFileColor(widget.fileName),
                           ),
                         ),
                         const SizedBox(height: 24),
                         // File name
                         Text(
-                          fileName,
+                          widget.fileName,
                           style: const TextStyle(
                             fontSize: 16,
                             fontWeight: FontWeight.w600,
@@ -158,12 +284,84 @@ class FilePreviewScreen extends StatelessWidget {
                         const SizedBox(height: 8),
                         // File size
                         Text(
-                          fileSize,
+                          widget.fileSize,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w400,
                             color: Colors.grey.shade600,
                           ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              // Type selection button
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                color: const Color(0xFFF5F5F5),
+                child: GestureDetector(
+                  onTap: _showTypeSelectionBottomSheet,
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: selectedType != null
+                            ? AppColors.colorPrimary
+                            : Colors.grey.shade300,
+                        width: 1.5,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          selectedType != null
+                              ? Icons.check_circle
+                              : Icons.category_outlined,
+                          color: selectedType != null
+                              ? AppColors.colorPrimary
+                              : Colors.grey.shade600,
+                          size: 24,
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              Text(
+                                selectedType ?? 'Select Type',
+                                style: TextStyle(
+                                  color: selectedType != null
+                                      ? Colors.black87
+                                      : Colors.grey.shade600,
+                                  fontSize: 16,
+                                  fontWeight: selectedType != null
+                                      ? FontWeight.w600
+                                      : FontWeight.w400,
+                                ),
+                              ),
+                              if (selectedType == null)
+                                Text(
+                                  'Required before sending',
+                                  style: TextStyle(
+                                    color: Colors.grey.shade500,
+                                    fontSize: 12,
+                                  ),
+                                ),
+                            ],
+                          ),
+                        ),
+                        Icon(
+                          Icons.arrow_forward_ios,
+                          color: Colors.grey.shade400,
+                          size: 16,
                         ),
                       ],
                     ),
@@ -217,23 +415,42 @@ class FilePreviewScreen extends StatelessWidget {
                     // Send button
                     Expanded(
                       child: GestureDetector(
-                        onTap: () {
-                          Get.back();
-                          onSend(file);
-                        },
+                        onTap: selectedType == null
+                            ? () {
+                                Get.snackbar(
+                                  'Type Required',
+                                  'Please select a file type before sending',
+                                  snackPosition: SnackPosition.BOTTOM,
+                                  backgroundColor: Colors.orange.shade100,
+                                  colorText: Colors.orange.shade900,
+                                  duration: const Duration(seconds: 2),
+                                );
+                              }
+                            : () {
+                                Get.back();
+                                widget.onSend(widget.file, selectedType!);
+                              },
                         child: Container(
                           padding: const EdgeInsets.symmetric(vertical: 14),
-                          decoration: const BoxDecoration(
-                            gradient: appThemeGradientSoft,
-                            borderRadius: BorderRadius.all(Radius.circular(50)),
+                          decoration: BoxDecoration(
+                            gradient: selectedType != null
+                                ? appThemeGradientSoft
+                                : null,
+                            color: selectedType == null
+                                ? Colors.grey.shade300
+                                : null,
+                            borderRadius:
+                                const BorderRadius.all(Radius.circular(50)),
                           ),
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              const Text(
+                              Text(
                                 'Send',
                                 style: TextStyle(
-                                  color: Colors.white,
+                                  color: selectedType != null
+                                      ? Colors.white
+                                      : Colors.grey.shade600,
                                   fontSize: 15,
                                   fontWeight: FontWeight.w600,
                                 ),
@@ -243,8 +460,10 @@ class FilePreviewScreen extends StatelessWidget {
                                 'assets/svg/send.svg',
                                 width: 18,
                                 height: 18,
-                                colorFilter: const ColorFilter.mode(
-                                  Colors.white,
+                                colorFilter: ColorFilter.mode(
+                                  selectedType != null
+                                      ? Colors.white
+                                      : Colors.grey.shade600,
                                   BlendMode.srcIn,
                                 ),
                               ),

@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:aviation_app/controllers/flight/flight_comm_controller.dart';
 import 'package:aviation_app/controllers/flight/flight_info_controller.dart';
@@ -14,6 +15,7 @@ import 'package:intl/intl.dart';
 
 import '../../models/flight_detail_model.dart';
 import '../../models/staff_model.dart';
+import '../../models/staff_data_model.dart';
 import '../storage/data_storage_controller.dart';
 
 class ChatController extends GetxController {
@@ -29,6 +31,7 @@ class ChatController extends GetxController {
   bool _isLoadingMessages = false;
 
   var staffList = <StaffModel>[].obs;
+  Rxn<StaffDataModel> staffData = Rxn<StaffDataModel>();
 
   StreamSubscription<QuerySnapshot>? _messagesSubscription;
 
@@ -310,6 +313,238 @@ class ChatController extends GetxController {
     }
   }
 
+  Future<void> sendImageMessage({
+    required File file,
+    required String fileName,
+    required String type,
+    String? messageText,
+  }) async {
+    if (isSendingMessage.value) return;
+
+    isSendingMessage.value = true;
+    try {
+      final currentUser = DataStorageController.to.user;
+      final currentUserIdStr = currentUser.id.toString();
+
+      final matchedStaff = staffList.firstWhereOrNull(
+        (staff) => staff.id.toString() == currentUserIdStr,
+      );
+
+      // Get file extension
+      final extension = fileName.split('.').last.toLowerCase();
+
+      // Create optimistic message for UI
+      final optimisticMessage = ChatMessage(
+        id: 'optimistic-${DateTime.now().millisecondsSinceEpoch}',
+        senderId: currentUser.id,
+        senderName: matchedStaff?.displayName ?? 'User',
+        station: matchedStaff?.airport?.iataCode ?? 'Unknown',
+        message: messageText ?? 'Sent a file',
+        time: DateTime.now().toUtc().toIso8601String(),
+        isOwn: true,
+        readBy: [currentUser.id],
+        type: 'attachment',
+        fileName: fileName,
+        attachment: file.path, // Temporary local path
+        attachmentMessage: AttachmentMessage(
+          messageAttach: messageText ?? '',
+          filePath: file.path,
+          fileExtension: extension,
+          type: type,
+        ),
+      );
+
+      // Add optimistically to UI
+      messages.add(optimisticMessage);
+      _scrollToBottom(instant: true);
+
+      // 1. Upload to API
+      final apiResponse = await FlightChatService.instance.sendImageMessage(
+        flightId: argument as int,
+        type: type,
+        filePath: file.path,
+        message: messageText ?? '',
+      );
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.errorMessage ?? 'Failed to upload file');
+      }
+
+      final fileUrl = apiResponse.data ?? '';
+
+      // 2. Send to Firebase with file URL from API
+      final docRef = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(argument.toString())
+          .collection('messages')
+          .add({
+            'sender_id': currentUserIdStr,
+            'message': {
+              'message_attach': messageText ?? '',
+              'file_path': fileUrl,
+              'file_extension': extension,
+              'type': type,
+            },
+            'message_type': 'attachment',
+            'file_name': fileName,
+            'attachment': fileUrl,
+            'read_by': [currentUserIdStr],
+            'created_at': FieldValue.serverTimestamp(),
+          });
+
+      // Update local message with actual data
+      final index = messages.indexOf(optimisticMessage);
+      if (index != -1) {
+        messages[index] = ChatMessage(
+          id: docRef.id,
+          senderId: currentUser.id,
+          senderName: matchedStaff?.displayName ?? 'User',
+          station: matchedStaff?.airport?.iataCode ?? 'Unknown',
+          message: messageText ?? 'Sent a file',
+          time: DateTime.now().toUtc().toIso8601String(),
+          isOwn: true,
+          readBy: [currentUser.id],
+          type: 'attachment',
+          fileName: fileName,
+          attachment: fileUrl,
+          attachmentMessage: AttachmentMessage(
+            messageAttach: messageText ?? '',
+            filePath: fileUrl,
+            fileExtension: extension,
+            type: type,
+          ),
+        );
+      }
+
+      Get.snackbar(
+        'Success',
+        'File sent successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade900,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      messages.removeWhere((msg) => msg.id.startsWith('optimistic-'));
+      debugPrint('Error sending file: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to send file: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isSendingMessage.value = false;
+    }
+  }
+
+  Future<String?> showTypeSelectionDialog() async {
+    final types = [
+      'Cargo',
+      'Ckin',
+      'Docs',
+      'Fpln',
+      'Fuel',
+      'Gate',
+      'Lds',
+      'Lir',
+      'Mics',
+      'Ramp'
+    ];
+
+    return await Get.dialog<String>(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Select File Type',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Please select the type of file you are sending:',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ...types.map((type) {
+                return InkWell(
+                  onTap: () => Get.back(result: type),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Get.back(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
+  }
+
   Future<void> markVisibleMessagesAsRead() async {
     // log('[ChatController] markVisibleMessagesAsRead called');
 
@@ -546,6 +781,7 @@ class ChatController extends GetxController {
 
       if (response.isSuccess && response.data != null) {
         flightDetail.value = response.data!;
+
       } else {
         log('[fetchFlightChatDetail] API Error: ${response.errorMessage}');
       }
@@ -786,6 +1022,27 @@ class ChatController extends GetxController {
       log("[ChatController] Stack: $stack");
     } finally {
       saveLoading.value = false;
+    }
+  }
+
+  // STAFF FORM
+  Future<void> fetchStaffData(int flightId) async {
+    log('[fetchStaffData] flightId : $flightId');
+
+    try {
+      final response = await FlightChatService.instance.getStaffData(
+        flightId: flightId,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        staffData.value = response.data!;
+        log('[fetchStaffData] Staff data fetched successfully');
+      } else {
+        log('[fetchStaffData] API Error: ${response.errorMessage}');
+      }
+    } catch (e, stack) {
+      log('[fetchStaffData] Exception: $e');
+      log('[fetchStaffData] Stack: $stack');
     }
   }
 }

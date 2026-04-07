@@ -31,9 +31,7 @@ class DataStorageController extends GetxController {
   );
 
   Future<String> fetchAuthToken() async {
-    if (_prefs == null) {
-      _prefs = await SharedPreferences.getInstance();
-    }
+    _prefs ??= await SharedPreferences.getInstance();
     return _prefs!.getString("auth") ?? "";
   }
 

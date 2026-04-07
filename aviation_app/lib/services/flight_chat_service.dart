@@ -7,6 +7,7 @@ import 'package:aviation_app/models/flight_no_model.dart';
 import 'package:aviation_app/models/staff_data_model.dart';
 import 'package:aviation_app/models/staff_model.dart';
 import 'package:aviation_app/services/base_service.dart';
+import 'package:dio/dio.dart' as dio;
 
 import '../models/flight_detail_model.dart';
 import '../utils/api_config.dart';
@@ -28,7 +29,7 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      // log("[flightChatDetail] response : ${response.data}");
+      log("[flightChatDetail] response : ${response.data}");
 
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
@@ -511,6 +512,45 @@ class FlightChatService {
           response.data['body'] != null) {
         final staffData = StaffDataModel.fromJson(response.data['body']);
         return ResponseClass.success(staffData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Send Image/File Message
+
+  Future<ResponseClass<String>> sendImageMessage({
+    required int flightId,
+    required String type,
+    required String filePath,
+    required String message,
+  }) async {
+    try {
+      // Extract filename from path
+      final fileName = filePath.split('/').last;
+
+      final formData = dio.FormData.fromMap({
+        'flight_id': flightId,
+        'type': type,
+        'file': await dio.MultipartFile.fromFile(filePath, filename: fileName),
+        'message': message,
+      });
+
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.sendMessage,
+        data: formData,
+      );
+
+      log("[sendImageMessage] response : ${response.data}");
+
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        final fileUrl = response.data['body']?['file_url']?.toString() ?? '';
+        return ResponseClass.success(fileUrl);
       } else {
         return ResponseClass.error(
           response.data['message'] ?? 'Unknown error occurred',

@@ -11,6 +11,7 @@ import '../../widgets/custom_box.dart';
 import '../attendance/attendence_screen.dart';
 import '../flightcomm/flight_comm_screen.dart';
 import '../leave/leave_request_screen.dart';
+import '../library/library_screen.dart';
 import '../myroster/my_roster_screen.dart';
 import '../pts/pts_screen.dart';
 
@@ -107,7 +108,7 @@ class DashboardScreen extends StatelessWidget {
                   ),
                   child: LayoutBuilder(
                     builder: (context, constraints) {
-                      // Calculate item height to fit all 8 items (4 rows) without scrolling
+                      // Calculate item height to fit all 8 items (4 rows) as before
                       final availableHeight = constraints.maxHeight;
                       final itemHeight =
                           (availableHeight - 20) /
@@ -123,7 +124,7 @@ class DashboardScreen extends StatelessWidget {
                         ),
                         mainAxisSpacing: 0,
                         crossAxisSpacing: 0,
-                        physics: const NeverScrollableScrollPhysics(),
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
                           CustomBox2(
                             title: 'Attendance',
@@ -131,7 +132,7 @@ class DashboardScreen extends StatelessWidget {
                             onTap: () => Get.to(() => const AttendanceScreen()),
                           ),
                           CustomBox2(
-                            title: 'Flight Comm',
+                            title: 'Flight Comms',
                             iconPath: 'assets/images/flight_comm_final.png',
                             onTap: () => Get.to(() => const FlightCommScreen()),
                           ),
@@ -146,9 +147,9 @@ class DashboardScreen extends StatelessWidget {
                             onTap: () => Get.to(() => const PtsScreen()),
                           ),
                           CustomBox2(
-                            title: 'Flight Tracker',
-                            iconPath: 'assets/images/flight_tracker_final.png',
-                            onTap: () => (),
+                            title: 'Library',
+                            iconPath: 'assets/images/library.png',
+                            onTap: () => Get.to(() => LibraryScreen()),
                           ),
                           CustomBox2(
                             title: 'Flight Watch',
@@ -164,6 +165,11 @@ class DashboardScreen extends StatelessWidget {
                           CustomBox2(
                             title: 'Staff Watch',
                             iconPath: 'assets/images/staff_watch_final.png',
+                            onTap: () => (),
+                          ),
+                          CustomBox2(
+                            title: 'Flight Tracker',
+                            iconPath: 'assets/images/flight_tracker_final.png',
                             onTap: () => (),
                           ),
                         ],

@@ -184,40 +184,12 @@ class ChatScreenNew extends StatelessWidget {
                     child: Row(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Left side: Gate, POS and Time badges
+                        // Left side: Time badges
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Row 2: Gate and POS
-                              Row(
-                                children: [
-                                  if (flight.basicDetails.gate?.isNotEmpty ??
-                                      false) ...[
-                                    Text(
-                                      "GATE: ${flight.basicDetails.gate}",
-                                      style: const TextStyle(
-                                        color: Color(0xFF1976D2),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                    const SizedBox(width: 8),
-                                  ],
-                                  if (flight.basicDetails.pos?.isNotEmpty ??
-                                      false)
-                                    Text(
-                                      "POS: ${flight.basicDetails.pos}",
-                                      style: const TextStyle(
-                                        color: Color(0xFF1976D2),
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                      ),
-                                    ),
-                                ],
-                              ),
-                              const SizedBox(height: 4),
-                              // Row 3: Time badges
+                              // Time badges
                               Row(
                                 children: [
                                   if (flight.isDeparture) ...[
@@ -488,7 +460,7 @@ class ChatScreenNew extends StatelessWidget {
     ];
 
     return Container(
-      height: 44,
+      height: 36,
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(
@@ -584,10 +556,27 @@ class ChatScreenNew extends StatelessWidget {
       case 'NOTOC':
         return Container(
           color: const Color(0xFFF5F5F5),
-          child: const Center(
-            child: Text(
-              "NOTOC view not implemented yet",
-              style: TextStyle(color: Colors.grey),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 64,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No data available',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -598,10 +587,27 @@ class ChatScreenNew extends StatelessWidget {
       case 'PAL/CAL':
         return Container(
           color: const Color(0xFFF5F5F5),
-          child: const Center(
-            child: Text(
-              "PAL/CAL view not implemented yet",
-              style: TextStyle(color: Colors.grey),
+          child: Center(
+            child: Padding(
+              padding: const EdgeInsets.all(32),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(
+                    Icons.inbox_outlined,
+                    size: 64,
+                    color: Colors.grey.shade300,
+                  ),
+                  const SizedBox(height: 16),
+                  Text(
+                    'No data available',
+                    style: TextStyle(
+                      fontSize: 16,
+                      color: Colors.grey.shade600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         );
@@ -787,15 +793,18 @@ class ChatScreenNew extends StatelessWidget {
 
       if (photo != null) {
         final File imageFile = File(photo.path);
+        final fileName = photo.path.split('/').last;
 
         // Show preview screen
         Get.to(
           () => ImagePreviewScreen(
             imageFile: imageFile,
-            onSend: (file) {
-              // TODO: Implement image upload and send
-              // controller.sendImageMessage(file);
-              debugPrint('Sending image: ${file.path}');
+            onSend: (file, type) async {
+              await controller.sendImageMessage(
+                file: file,
+                fileName: fileName,
+                type: type,
+              );
             },
           ),
         );
@@ -823,15 +832,18 @@ class ChatScreenNew extends StatelessWidget {
 
       if (photo != null) {
         final File imageFile = File(photo.path);
+        final fileName = photo.path.split('/').last;
 
         // Show preview screen
         Get.to(
           () => ImagePreviewScreen(
             imageFile: imageFile,
-            onSend: (file) {
-              // TODO: Implement image upload and send
-              // controller.sendImageMessage(file);
-              debugPrint('Sending image: ${file.path}');
+            onSend: (file, type) async {
+              await controller.sendImageMessage(
+                file: file,
+                fileName: fileName,
+                type: type,
+              );
             },
           ),
         );
@@ -867,10 +879,12 @@ class ChatScreenNew extends StatelessWidget {
             file: file,
             fileName: fileName,
             fileSize: fileSize,
-            onSend: (file) {
-              // TODO: Implement file upload and send
-              // controller.sendFileMessage(file, fileName);
-              debugPrint('Sending file: ${file.path}');
+            onSend: (file, type) async {
+              await controller.sendImageMessage(
+                file: file,
+                fileName: fileName,
+                type: type,
+              );
             },
           ),
         );

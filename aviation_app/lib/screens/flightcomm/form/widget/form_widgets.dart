@@ -83,8 +83,9 @@ Widget _formField(
               !disbaleHint
                   ? showSelect
                       ? "Select $label"
-                      : "Enter $label"
+                      : "Type $label"
                   : null,
+          hintStyle: TextStyle(color: Colors.grey.shade400),
         ),
       ),
     ],

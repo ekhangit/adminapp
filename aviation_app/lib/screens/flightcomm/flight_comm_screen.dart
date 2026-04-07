@@ -26,7 +26,7 @@ class FlightCommScreen extends StatelessWidget {
         appBar: AppBar(
           centerTitle: true,
           title: Text(
-            "Flight Comm",
+            "Flight Comms",
             style: GoogleFonts.roboto(color: Colors.white),
           ),
           leading: IconButton(

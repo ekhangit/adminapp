@@ -8,7 +8,7 @@ class CustomButton extends StatelessWidget {
   final bool isLoading;
   final double borerRadius;
   final bool disabled;
-  final Widget loadingWidget;
+  final Widget? loadingWidget;
   final bool isTransparent; // 🔹 New flag
   final double fontSize;
 
@@ -18,7 +18,7 @@ class CustomButton extends StatelessWidget {
     required this.onPressed,
     required this.color,
     required this.isLoading,
-    required this.loadingWidget,
+    this.loadingWidget,
     this.disabled = false,
     this.borerRadius = 50,
     this.isTransparent = false, // 🔹 Default to false
@@ -38,7 +38,7 @@ class CustomButton extends StatelessWidget {
           backgroundColor:
               isTransparent
                   ? Colors.transparent
-                  : color.withOpacity(isButtonDisabled ? 0.6 : 1),
+                  : color.withValues(alpha:  isButtonDisabled ? 0.6 : 1),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(borerRadius),
             side:
