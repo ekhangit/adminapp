@@ -31,16 +31,33 @@ class LoginController extends GetxController {
 
   bool get canContinue => email.value.isNotEmpty && password.value.isNotEmpty;
 
-  // **🔹 Get FCM Token Android**
-  Future<String?> getFCMToken() async {
+  // **🔹 Get device token (FCM on Android, APNS on iOS)**
+  Future<String?> getDeviceToken() async {
     final fcm = FirebaseMessaging.instance;
-    return await fcm.getToken();
-  }
 
-  // **🔹 Get FCM Token iOS**
-  Future<String?> getFCMAPNSToken() async {
-    final fcm = FirebaseMessaging.instance;
-    return await fcm.getAPNSToken();
+    // Notification permission is REQUIRED on iOS before a token is issued.
+    final settings = await fcm.requestPermission(
+      alert: true,
+      badge: true,
+      sound: true,
+    );
+    log(
+      "[LoginController] Notification permission: ${settings.authorizationStatus}",
+    );
+
+    if (Platform.isIOS) {
+      // The APNS token only exists after the device registers with APNs,
+      // which is not instant. It's null for a moment right after launch,
+      // so retry briefly before giving up.
+      String? apns = await fcm.getAPNSToken();
+      for (int i = 0; i < 5 && apns == null; i++) {
+        await Future.delayed(const Duration(seconds: 1));
+        apns = await fcm.getAPNSToken();
+      }
+      return apns;
+    }
+
+    return await fcm.getToken();
   }
 
   // fahadcse8820@gmail.com
@@ -64,13 +81,7 @@ class LoginController extends GetxController {
 
     try {
       log("[LoginController] Getting FCM token...");
-      String? deviceToken;
-
-      if (Platform.isIOS) {
-        deviceToken = await getFCMAPNSToken();
-      } else {
-        deviceToken = await getFCMToken();
-      }
+      final String? deviceToken = await getDeviceToken();
 
       log("[LoginController] deviceToken $deviceToken");
 

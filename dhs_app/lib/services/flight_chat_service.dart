@@ -4,8 +4,10 @@ import 'package:dhs_app/models/aircraft_model.dart';
 import 'package:dhs_app/models/airline_model.dart';
 import 'package:dhs_app/models/chat_model.dart';
 import 'package:dhs_app/models/flight_no_model.dart';
+import 'package:dhs_app/models/staff_data_model.dart';
 import 'package:dhs_app/models/staff_model.dart';
 import 'package:dhs_app/services/base_service.dart';
+import 'package:dio/dio.dart' as dio;
 
 import '../models/flight_detail_model.dart';
 import '../utils/api_config.dart';
@@ -32,9 +34,6 @@ class FlightChatService {
       if (response.statusCode == 200 &&
           response.data['status'] == true &&
           response.data['body'] != null) {
-        // log(
-        //   "[flightChatDetail] response basicDetail : ${response.data['body']['flight_info']['basic_details']}",
-        // );
         final flightDetail = FlightDetailModel.fromJson(response.data['body']);
         return ResponseClass.success(flightDetail);
       } else {
@@ -106,20 +105,20 @@ class FlightChatService {
 
   // Send Chat
 
-  Future<ResponseClass<bool>> sendMessage(Map<String, dynamic> data) async {
-    try {
-      final response = await BaseService.instance.dio.post(
-        ApiConfig.sendMessage,
-        data: data,
-      );
+  // Future<ResponseClass<bool>> sendMessage(Map<String, dynamic> data) async {
+  //   try {
+  //     final response = await BaseService.instance.dio.post(
+  //       ApiConfig.sendMessage,
+  //       data: data,
+  //     );
 
-      log("[sendMessage] response : ${response.data}");
+  //     log("[sendMessage] response : ${response.data}");
 
-      return ResponseClass.success(true);
-    } catch (e) {
-      return ResponseClass.error(e.toString());
-    }
-  }
+  //     return ResponseClass.success(true);
+  //   } catch (e) {
+  //     return ResponseClass.error(e.toString());
+  //   }
+  // }
 
   Future<ResponseClass<List<FlightNoModel>>> allFlightNo() async {
     try {
@@ -189,14 +188,27 @@ class FlightChatService {
 
       // log("[getSSROption] response : ${response.data}");
 
-      if (response.statusCode == 200 &&
-          response.data['status'] == true &&
-          response.data['body'] != null) {
-        final List rawList = response.data['body'];
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        if (response.data['body'] == {}) {
+          return ResponseClass.success([]);
+        } else if (response.data['body'] is Map) {
+          final Map<String, dynamic> bodyMap = response.data['body'];
 
-        final List<String> ssrData = rawList.map((e) => e.toString()).toList();
-
-        return ResponseClass.success(ssrData);
+          // If it's an empty map, return empty list
+          if (bodyMap.isEmpty) {
+            return ResponseClass.success([]);
+          } else {
+            // Convert map values to list of strings
+            final List<String> ssrData =
+                bodyMap.values.map((e) => e.toString()).toList();
+            return ResponseClass.success(ssrData);
+          }
+        } else {
+          final List rawList = response.data['body'];
+          final List<String> ssrData =
+              rawList.map((e) => e.toString()).toList();
+          return ResponseClass.success(ssrData);
+        }
       } else {
         return ResponseClass.error(
           response.data['message'] ?? 'Unknown error occurred',
@@ -360,22 +372,14 @@ class FlightChatService {
         data: {"flight_id": flightId},
       );
 
-      log("[getPTSOption] response : ${response.data}");
+      // log("[getPTSOption] response : ${response.data}");
 
-      if (response.statusCode == 200 && response.data['status'] == true) {
-        final dynamic body = response.data['body'];
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final List rawList = response.data['body'];
 
-        List<String> ptsData = [];
-
-        // Handle both list and map responses
-        if (body is List) {
-          ptsData = body.map((e) => e.toString()).toList();
-        } else if (body is Map) {
-          // Convert map keys to list if needed
-          ptsData = body.keys.map((k) => k.toString()).toList();
-          // OR if you want values:
-          // ptsData = body.values.map((v) => v.toString()).toList();
-        }
+        final List<String> ptsData = rawList.map((e) => e.toString()).toList();
 
         return ResponseClass.success(ptsData);
       } else {
@@ -384,7 +388,6 @@ class FlightChatService {
         );
       }
     } catch (e) {
-      log("Error in getPTSOption: $e");
       return ResponseClass.error(e.toString());
     }
   }
@@ -486,6 +489,73 @@ class FlightChatService {
       log("[sendOCC] response : ${response.data}");
 
       return ResponseClass.success(true);
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Get Staff Data
+
+  Future<ResponseClass<StaffDataModel>> getStaffData({
+    required int flightId,
+  }) async {
+    try {
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.getStaffData,
+        data: {"flight_id": flightId},
+      );
+
+      log("[getStaffData] response : ${response.data}");
+
+      if (response.statusCode == 200 &&
+          response.data['status'] == true &&
+          response.data['body'] != null) {
+        final staffData = StaffDataModel.fromJson(response.data['body']);
+        return ResponseClass.success(staffData);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
+    } catch (e) {
+      return ResponseClass.error(e.toString());
+    }
+  }
+
+  // Send Image/File Message
+
+  Future<ResponseClass<String>> sendImageMessage({
+    required int flightId,
+    required String type,
+    required String filePath,
+    required String message,
+  }) async {
+    try {
+      // Extract filename from path
+      final fileName = filePath.split('/').last;
+
+      final formData = dio.FormData.fromMap({
+        'flight_id': flightId,
+        'type': type,
+        'file': await dio.MultipartFile.fromFile(filePath, filename: fileName),
+        'message': message,
+      });
+
+      final response = await BaseService.instance.dio.post(
+        ApiConfig.sendMessage,
+        data: formData,
+      );
+
+      log("[sendImageMessage] response : ${response.data}");
+
+      if (response.statusCode == 200 && response.data['status'] == true) {
+        final fileUrl = response.data['body']?['file_url']?.toString() ?? '';
+        return ResponseClass.success(fileUrl);
+      } else {
+        return ResponseClass.error(
+          response.data['message'] ?? 'Unknown error occurred',
+        );
+      }
     } catch (e) {
       return ResponseClass.error(e.toString());
     }

@@ -17,9 +17,35 @@ class LdmInfo extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
+          // LDM Section
           if (messages?.ldm.isNotEmpty ?? false) ...[
-            ...messages!.ldm.map(
-              (msg) => buildMessageCard(msg, Colors.yellow.shade100),
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              margin: const EdgeInsets.symmetric(horizontal: 16),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(left: 4, bottom: 12),
+                    child: Text(
+                      "LDM",
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.grey.shade800,
+                      ),
+                    ),
+                  ),
+                  ...messages!.ldm.map(
+                    (msg) => buildMessageCard(msg, Colors.yellow.shade100),
+                  ),
+                ],
+              ),
             ),
           ],
         ],

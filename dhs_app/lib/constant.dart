@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
 // Server Configuration
-const apiUrl = "https://dhs.avsysdev.com";
+const apiUrl = "https://dhs-staging.avsysdev.com";
 
 const String appName = "AvBIS";
 const String fontFamily = "Helvetica";

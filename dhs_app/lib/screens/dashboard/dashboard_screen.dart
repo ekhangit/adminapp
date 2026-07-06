@@ -1,17 +1,19 @@
-import 'package:dhs_app/screens/flightcomm/flight_comm_screen.dart';
-import 'package:dhs_app/screens/leave/leave_request_screen.dart';
-import 'package:dhs_app/screens/myroster/my_roster_screen.dart';
-import 'package:dhs_app/screens/pts/pts_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:get/get.dart';
 import 'package:google_fonts/google_fonts.dart';
 
 import '../../constant.dart';
+import '../../controllers/flight/airline_controller.dart';
 import '../../controllers/storage/data_storage_controller.dart';
 import '../../utils/app_colors.dart';
 import '../../widgets/custom_box.dart';
 import '../attendance/attendence_screen.dart';
+import '../flightcomm/flight_comm_screen.dart';
+import '../leave/leave_request_screen.dart';
+import '../library/library_screen.dart';
+import '../myroster/my_roster_screen.dart';
+import '../pts/pts_screen.dart';
 
 class DashboardScreen extends StatelessWidget {
   const DashboardScreen({super.key});
@@ -19,6 +21,9 @@ class DashboardScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = DataStorageController.to.user;
+
+    // Initialize AirlineController to cache airlines
+    Get.put(AirlineController());
 
     return AnnotatedRegion<SystemUiOverlayStyle>(
       value: const SystemUiOverlayStyle(
@@ -101,72 +106,60 @@ class DashboardScreen extends StatelessWidget {
                     //   topLeft: Radius.circular(24),
                     // ),
                   ),
-                  child: Center(
-                    child: SingleChildScrollView(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      // Calculate item height to fit all 6 items (3 rows)
+                      final availableHeight = constraints.maxHeight;
+                      final itemHeight =
+                          (availableHeight - 20) /
+                          3; // 3 rows with some padding
+
+                      return GridView.count(
+                        crossAxisCount: 2,
+                        childAspectRatio:
+                            (constraints.maxWidth / 2) / itemHeight,
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 10,
+                        ),
+                        mainAxisSpacing: 0,
+                        crossAxisSpacing: 0,
+                        physics: const AlwaysScrollableScrollPhysics(),
                         children: [
-                          Wrap(
-                            spacing: 12,
-                            children: [
-                              CustomBox2(
-                                title: 'Attendance',
-                                iconPath: 'assets/images/hr_final.png',
-                                onTap:
-                                    () =>
-                                        Get.to(() => const AttendanceScreen()),
-                              ),
-                              CustomBox2(
-                                title: 'Flight Comm',
-                                iconPath: 'assets/images/flight_comm_final.png',
-                                onTap:
-                                    () =>
-                                        Get.to(() => const FlightCommScreen()),
-                              ),
-
-                              CustomBox2(
-                                title: 'My Roster',
-                                iconPath: 'assets/images/my_duties_final.png',
-                                onTap:
-                                    () => Get.to(() =>  MyRosterScreen()),
-                              ),
-                              CustomBox2(
-                                title: 'PTS',
-                                iconPath: 'assets/images/airlines_final.png',
-                                onTap: () => Get.to(() => const PtsScreen()),
-                              ),
-
-                              CustomBox2(
-                                title: 'Flight Tracker',
-                                iconPath:
-                                    'assets/images/flight_tracker_final.png',
-                                onTap: () => (),
-                              ),
-                              CustomBox2(
-                                title: 'Flight Watch',
-                                iconPath:
-                                    'assets/images/flight_watch_final.png',
-                                onTap: () => (),
-                              ),
-                              CustomBox2(
-                                title: 'Leave Request',
-                                iconPath: 'assets/images/airlines_final.png',
-                                onTap:
-                                    () => Get.to(
-                                      () => const LeaveRequestScreen(),
-                                    ),
-                              ),
-                              CustomBox2(
-                                title: 'Staff Watch',
-                                iconPath: 'assets/images/staff_watch_final.png',
-                                onTap: () => (),
-                              ),
-                            ],
+                          CustomBox2(
+                            title: 'Attendance',
+                            iconPath: 'assets/images/hr_final.png',
+                            onTap: () => Get.to(() => const AttendanceScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'Flight Comms',
+                            iconPath: 'assets/images/flight_comm_final.png',
+                            onTap: () => Get.to(() => const FlightCommScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'My Roster',
+                            iconPath: 'assets/images/my_duties_final.png',
+                            onTap: () => Get.to(() => MyRosterScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'PTS',
+                            iconPath: 'assets/images/airlines_final.png',
+                            onTap: () => Get.to(() => const PtsScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'Library',
+                            iconPath: 'assets/images/library.png',
+                            onTap: () => Get.to(() => LibraryScreen()),
+                          ),
+                          CustomBox2(
+                            title: 'Leave Request',
+                            iconPath: 'assets/images/airlines_final.png',
+                            onTap:
+                                () => Get.to(() => const LeaveRequestScreen()),
                           ),
                         ],
-                      ),
-                    ),
+                      );
+                    },
                   ),
                 ),
               ),

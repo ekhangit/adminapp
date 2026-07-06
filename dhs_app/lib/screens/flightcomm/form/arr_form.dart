@@ -23,14 +23,14 @@ class ARRForm extends StatelessWidget {
           children: [
             singleField(
               "LOFO",
-              showLabel: false,
+              showLabel: true,
               controller: controller.lofoController,
             ),
             const SizedBox(height: 12),
 
             singleField(
               "LOFO RMKS",
-              showLabel: false,
+              showLabel: true,
               maxLines: 3,
               controller: controller.lofoRemarksController,
             ),
@@ -41,18 +41,16 @@ class ARRForm extends StatelessWidget {
               child: Row(
                 children: [
                   Expanded(
-                    child: timerField(
+                    child: timerField2ForChat(
                       label: "START TIME",
-                      showHint: false,
                       controller: controller.startTimeController,
                       onTap: () => controller.pickTime(true),
                     ),
                   ),
                   const SizedBox(width: 20),
                   Expanded(
-                    child: timerField(
+                    child: timerField2ForChat(
                       label: "END TIME",
-                      showHint: false,
                       controller: controller.endTimeController,
                       onTap: () => controller.pickTime(false),
                     ),
@@ -65,30 +63,35 @@ class ARRForm extends StatelessWidget {
 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 4),
-              child: Row(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Expanded(
-                    child: singleField(
-                      "MHB AHL",
-                      showLabel: false,
-                      controller: controller.mhbAHLController,
+                  // MHB parent label
+                  Text(
+                    "MHB",
+                    style: TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Colors.grey.shade800,
                     ),
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: singleField(
-                      "OHD",
-                      showLabel: false,
-                      controller: controller.ohdController,
-                    ),
+                  const SizedBox(height: 8),
+                  singleField(
+                    "AHL",
+                    showLabel: true,
+                    controller: controller.mhbAHLController,
                   ),
-                  const SizedBox(width: 20),
-                  Expanded(
-                    child: singleField(
-                      "DPR",
-                      showLabel: false,
-                      controller: controller.dprController,
-                    ),
+                  const SizedBox(height: 12),
+                  singleField(
+                    "OHD",
+                    showLabel: true,
+                    controller: controller.ohdController,
+                  ),
+                  const SizedBox(height: 12),
+                  singleField(
+                    "DPR",
+                    showLabel: true,
+                    controller: controller.dprController,
                   ),
                 ],
               ),

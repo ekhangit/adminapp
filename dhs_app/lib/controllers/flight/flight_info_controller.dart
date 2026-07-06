@@ -132,15 +132,15 @@ class FlightInfoController extends GetxController {
       );
 
       if (response.isSuccess && response.data != null) {
-        // log('[fetchSSROptions] All Airline fetched successfully.');
+        log('[fetchSSROptions] All Airline fetched successfully.');
 
         getSSROptions.assignAll(response.data!);
       } else {
-        // log('[fetchSSROptions] API Error: ${response.errorMessage}');
+        log('[fetchSSROptions] API Error: ${response.errorMessage}');
       }
     } catch (e, stack) {
-      // log('[fetchSSROptions] Exception: $e');
-      // log('[fetchSSROptions] Stack: $stack');
+      log('[fetchSSROptions] Exception: $e');
+      log('[fetchSSROptions] Stack: $stack');
     }
   }
 
@@ -190,6 +190,9 @@ class FlightInfoController extends GetxController {
       <String, TextEditingController>{}.obs;
   final RxMap<String, String> ptsDropdownSelections = <String, String>{}.obs;
 
+  final RxMap<String, TextEditingController> ptsTextControllers =
+      <String, TextEditingController>{}.obs;
+
   // Update this to refresh all time fields when mode changes
   void updateTimeMode(String newMode) {
     selectedTimeMode.value = newMode;
@@ -230,6 +233,11 @@ class FlightInfoController extends GetxController {
               field,
               () => TextEditingController(text: ''),
             );
+          } else if (_isRegularTextField(field)) {
+            ptsTextControllers.putIfAbsent(
+              field,
+              () => TextEditingController(text: ''),
+            );
           } else {
             ptsDropdownSelections.putIfAbsent(field, () => '');
           }
@@ -248,6 +256,10 @@ class FlightInfoController extends GetxController {
 
   bool _isDropdownField(String field) {
     return ["jetway/steps", "back_steps_used"].contains(field);
+  }
+
+  bool _isRegularTextField(String field) {
+    return ["accepted_pax", "mhb_ahl"].contains(field.toLowerCase());
   }
 
   // Update this method to handle time mode
@@ -431,7 +443,7 @@ class FlightInfoController extends GetxController {
         id: 'optimistic-${DateTime.now().millisecondsSinceEpoch}',
         senderId: currentUser.id,
         senderName: matchedStaff?.displayName ?? 'User',
-        station: matchedStaff?.airport.iataCode ?? 'Unknown',
+        station: matchedStaff?.airport!.iataCode ?? 'Unknown',
         message: payloadData.toString(),
         time: DateTime.now().toUtc().toIso8601String(),
         isOwn: true,

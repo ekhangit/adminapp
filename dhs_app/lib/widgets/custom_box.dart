@@ -86,21 +86,21 @@ class CustomBox2 extends StatelessWidget {
       child: Container(
         width: (MediaQuery.of(context).size.width - 50) / 2,
         margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(22),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               decoration: BoxDecoration(shape: BoxShape.circle),
-              child: Image.asset(iconPath, width: 65, height: 65),
+              child: Image.asset(iconPath, width: 82, height: 82),
             ),
-            const SizedBox(height: 10),
+            const SizedBox(height: 12),
             Text(
               title,
               textAlign: TextAlign.center,
               style: GoogleFonts.roboto(
                 fontWeight: FontWeight.w600,
-                fontSize: 13.5,
+                fontSize: 14.5,
                 color: Colors.white,
               ),
             ),

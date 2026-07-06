@@ -1,23 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:cached_network_image/cached_network_image.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constant.dart';
 import '../../../../models/chat_model.dart';
 
 Widget buildMessageContent(ChatMessage message) {
   if (message.type == 'trc') {
-    return _buildTrcMessage(message.trcMessage!);
+    return _buildTrcMessage(message.trcMessage!, isOwn: message.isOwn);
   } else if (message.type == 'ckin' && message.ckinMessage != null) {
-    return _buildCkinMessage(message.ckinMessage!);
+    return _buildCkinMessage(message.ckinMessage!, isOwn: message.isOwn);
   } else if (message.type == 'staff') {
-    return _buildStaffMessage(message.staffServicesMessage ?? []);
+    return _buildStaffMessage(
+      message.staffServicesMessage ?? [],
+      isOwn: message.isOwn,
+    );
   } else if (message.type == 'arr') {
-    return _buildArrMessage(message.arrMessage!);
+    return _buildArrMessage(message.arrMessage!, isOwn: message.isOwn);
+  } else if (message.type == 'pts') {
+    return _buildPtsMessage(message, isOwn: message.isOwn);
   } else if (message.type == 'fhr' && message.fhrMessage != null) {
-    return _buildFhrMessage(message.fhrMessage!);
+    return _buildFhrMessage(message.fhrMessage!, isOwn: message.isOwn);
   } else if (message.type == 'ssr' && message.ssrMessage != null) {
-    return _buildSsrMessage(message.ssrMessage!);
+    return _buildSsrMessage(message.ssrMessage!, isOwn: message.isOwn);
   } else if (message.type == 'dsr' && message.dsrMessage != null) {
-    return _buildDsrMessage(message.dsrMessage!);
+    return _buildDsrMessage(message.dsrMessage!, isOwn: message.isOwn);
+  } else if (message.type == 'attachment' &&
+      message.attachmentMessage != null) {
+    return _buildAttachmentMessage(
+      message.attachmentMessage!,
+      time: message.time,
+      isOwn: message.isOwn,
+    );
   } else if (message.type == 'occ') {
     return _buildOccMessage(message);
   }
@@ -25,55 +39,52 @@ Widget buildMessageContent(ChatMessage message) {
 }
 
 Widget _buildRegularMessage(ChatMessage message) {
-  return IntrinsicWidth(
-    child: Container(
-      padding: EdgeInsets.only(
-        right: message.isOwn ? 12 : 16,
-        left: message.isOwn ? 16 : 12,
-        top: 12,
-        bottom: 12,
-      ),
-      decoration: BoxDecoration(
-        color: Colors.white,
-
-        borderRadius: BorderRadius.only(
-          topLeft:
-              message.isOwn
-                  ? const Radius.circular(12)
-                  : const Radius.circular(0),
-          topRight:
-              message.isOwn ? Radius.circular(0) : const Radius.circular(12),
-          bottomLeft: Radius.circular(12),
-          bottomRight: Radius.circular(12),
-        ),
-      ),
-
-      child: Column(
-        children: [
-          Text(
+  return Column(
+    crossAxisAlignment:
+        message.isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+    children: [
+      IntrinsicWidth(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+          decoration: BoxDecoration(
+            color: message.isOwn ? const Color(0xFFCAE9FF) : Colors.white,
+            borderRadius: BorderRadius.only(
+              topLeft:
+                  message.isOwn
+                      ? const Radius.circular(8)
+                      : const Radius.circular(4),
+              topRight:
+                  message.isOwn
+                      ? const Radius.circular(4)
+                      : const Radius.circular(8),
+              bottomLeft: const Radius.circular(8),
+              bottomRight: const Radius.circular(8),
+            ),
+          ),
+          child: Text(
             message.message,
             style: const TextStyle(color: Colors.black87, fontSize: 15),
           ),
-
-          const SizedBox(height: 1),
-          Align(
-            alignment: Alignment.bottomRight,
-            child: Text(
-              formatChatTimestamp(message.time),
-              style: TextStyle(fontSize: 10, color: Colors.black54),
-            ),
-          ),
-        ],
+        ),
       ),
-    ),
+      // Only show timestamp for own messages
+      if (message.isOwn)
+        Padding(
+          padding: const EdgeInsets.only(top: 4, right: 4),
+          child: Text(
+            formatChatTimestamp(message.time),
+            style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+          ),
+        ),
+    ],
   );
 }
 
-Widget _buildTrcMessage(TrcMessage trc) {
+Widget _buildTrcMessage(TrcMessage trc, {bool isOwn = false}) {
   return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.grey[100],
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
@@ -116,11 +127,11 @@ Widget _buildTrcMessage(TrcMessage trc) {
   );
 }
 
-Widget _buildCkinMessage(CkinMessage ckin) {
+Widget _buildCkinMessage(CkinMessage ckin, {bool isOwn = false}) {
   return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.grey[100],
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
@@ -266,11 +277,11 @@ Widget _buildCkinStaffSection(String title, List<StaffMember> staff) {
   ]);
 }
 
-Widget _buildArrMessage(ArrMessage arrMessage) {
+Widget _buildArrMessage(ArrMessage arrMessage, {bool isOwn = false}) {
   return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.grey[100],
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
@@ -309,11 +320,11 @@ Widget _buildArrMessage(ArrMessage arrMessage) {
   );
 }
 
-Widget _buildFhrMessage(FhrMessage fhrMessage) {
+Widget _buildFhrMessage(FhrMessage fhrMessage, {bool isOwn = false}) {
   return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.grey[100],
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
@@ -334,19 +345,29 @@ Widget _buildFhrMessage(FhrMessage fhrMessage) {
         const SizedBox(height: 8),
 
         // Issues
-        _builBoxItem('MISSED ARTG-5 EXPLANATION', fhrMessage.missedConnection),
-        _builBoxItem('DELAY EXPLANATION', fhrMessage.delayExplanation),
-        _builBoxItem('CHECK-IN/TKTG ISSUES', fhrMessage.checkInIssues),
-        _builBoxItem('RAMP/CREWDISRUPTIVE PAX ETC', fhrMessage.rampIssues),
-        _builBoxItem('SAFETY/SECURITY/SYSTEM', fhrMessage.safetyIssues),
-        _builBoxItem('OTHER', fhrMessage.otherIssues),
-        _builBoxItem('INVOL DENIED BOARDING', fhrMessage.deniedBoarding),
+        if (fhrMessage.missedConnection!.isNotEmpty)
+          _builBoxItem(
+            'MISSED ARTG-5 EXPLANATION',
+            fhrMessage.missedConnection!,
+          ),
+        if (fhrMessage.delayExplanation!.isNotEmpty)
+          _builBoxItem('DELAY EXPLANATION', fhrMessage.delayExplanation!),
+        if (fhrMessage.checkInIssues!.isNotEmpty)
+          _builBoxItem('CHECK-IN/TKTG ISSUES', fhrMessage.checkInIssues!),
+        if (fhrMessage.rampIssues!.isNotEmpty)
+          _builBoxItem('RAMP/CREWDISRUPTIVE PAX ETC', fhrMessage.rampIssues!),
+        if (fhrMessage.safetyIssues!.isNotEmpty)
+          _builBoxItem('SAFETY/SECURITY/SYSTEM', fhrMessage.safetyIssues!),
+        if (fhrMessage.otherIssues!.isNotEmpty)
+          _builBoxItem('OTHER', fhrMessage.otherIssues!),
+        if (fhrMessage.deniedBoarding!.isNotEmpty)
+          _builBoxItem('INVOL DENIED BOARDING', fhrMessage.deniedBoarding!),
       ],
     ),
   );
 }
 
-Widget _buildSsrMessage(SsrMessage ssrMessage) {
+Widget _buildSsrMessage(SsrMessage ssrMessage, {bool isOwn = false}) {
   // Create a map of field keys and values
   final fields = {
     if (ssrMessage.bdgp != null && ssrMessage.bdgp!.isNotEmpty)
@@ -363,7 +384,7 @@ Widget _buildSsrMessage(SsrMessage ssrMessage) {
   return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.grey[100],
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
@@ -417,65 +438,174 @@ Widget _buildSsrRow(String label, String value) {
   );
 }
 
-Widget _buildStaffMessage(List<StaffService> services) {
-  return Column(
-    crossAxisAlignment: CrossAxisAlignment.start,
-    children: [
-      const Text(
-        'Staff',
-        style: TextStyle(
-          fontWeight: FontWeight.bold,
-          color: Colors.black87,
-          fontSize: 15,
-        ),
-      ),
-      const SizedBox(height: 4),
-      ...services.map(
-        (service) => Padding(
-          padding: const EdgeInsets.only(bottom: 4),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                '• ${service.service}: ',
-                style: const TextStyle(
-                  fontWeight: FontWeight.w500,
-                  color: Colors.black87,
-                  fontSize: 15,
-                ),
-              ),
-              Expanded(
-                child: Text(
-                  service.employeeNames,
-                  style: const TextStyle(color: Colors.black87, fontSize: 15),
-                  maxLines: 1,
-                  softWrap: true,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    ],
-  );
-}
-
-Widget _buildDsrMessage(DsrMessage dsr) {
+Widget _buildStaffMessage(List<StaffService> services, {bool isOwn = false}) {
   return Container(
-    padding: EdgeInsets.all(12),
+    padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.grey[100],
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('DSR', style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        Divider(height: 1),
-        SizedBox(height: 8),
+        const Text(
+          'Staff',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Divider(height: 1, thickness: 1),
+        const SizedBox(height: 8),
+        ...services.map(
+          (service) => Padding(
+            padding: const EdgeInsets.only(bottom: 4),
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '• ${service.service}: ',
+                  style: const TextStyle(
+                    fontWeight: FontWeight.w500,
+                    color: Colors.black87,
+                    fontSize: 15,
+                  ),
+                ),
+                Expanded(
+                  child: Text(
+                    service.employeeNames,
+                    style: const TextStyle(color: Colors.black87, fontSize: 15),
+                    maxLines: 1,
+                    softWrap: true,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ],
+    ),
+  );
+}
+
+Widget _buildPtsMessage(ChatMessage message, {bool isOwn = false}) {
+  // Parse PTS data from message
+  Map<String, dynamic> ptsData = {};
+
+  if (message.message is Map) {
+    ptsData = Map<String, dynamic>.from(message.message as Map);
+  } else if (message.message is String) {
+    // Parse the string format: {key1: value1, key2: value2, ...}
+    try {
+      final str = message.message.toString();
+      // Remove the curly braces
+      final cleaned = str.substring(1, str.length - 1);
+      // Split by comma
+      final pairs = cleaned.split(', ');
+
+      for (final pair in pairs) {
+        final keyValue = pair.split(': ');
+        if (keyValue.length == 2) {
+          ptsData[keyValue[0].trim()] = keyValue[1].trim();
+        }
+      }
+    } catch (e) {
+      // Fallback: display as raw string
+      ptsData = {'raw_data': message.message.toString()};
+    }
+  }
+
+  // Format field names for display
+  String formatFieldName(String key) {
+    return key.replaceAll('_', ' ').toUpperCase();
+  }
+
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text(
+          'PTS',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontSize: 13,
+          ),
+        ),
+        const SizedBox(height: 8),
+
+        // Display all fields in simple list
+        ...ptsData.entries.map((entry) {
+          return Padding(
+            padding: const EdgeInsets.symmetric(vertical: 2),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: Text(
+                    formatFieldName(entry.key),
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 13,
+                      fontWeight: FontWeight.w400,
+                    ),
+                  ),
+                ),
+                Text(
+                  entry.value?.toString() ?? '',
+                  style: const TextStyle(
+                    color: Colors.black87,
+                    fontSize: 13,
+                    fontWeight: FontWeight.w400,
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
+
+        // Timestamp at the bottom
+        if (message.isOwn)
+          Padding(
+            padding: const EdgeInsets.only(top: 8),
+            child: Align(
+              alignment: Alignment.bottomRight,
+              child: Text(
+                formatChatTimestamp(message.time),
+                style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+              ),
+            ),
+          ),
+      ],
+    ),
+  );
+}
+
+Widget _buildDsrMessage(DsrMessage dsr, {bool isOwn = false}) {
+  return Container(
+    padding: const EdgeInsets.all(12),
+    decoration: BoxDecoration(
+      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
+      borderRadius: BorderRadius.circular(8),
+      border: Border.all(color: Colors.grey[300]!),
+    ),
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('DSR', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        const Divider(height: 1, thickness: 1),
+        const SizedBox(height: 8),
         _buildRow('Date', dsr.date),
         _buildRow('Passenger', dsr.paxName),
         _buildRow('Service', dsr.serviceType),
@@ -491,24 +621,259 @@ Widget _buildDsrMessage(DsrMessage dsr) {
 
 Widget _buildOccMessage(ChatMessage message) {
   return Container(
-    padding: EdgeInsets.all(12),
+    padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: Colors.grey[100],
+      color: message.isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text('Occ', style: TextStyle(fontWeight: FontWeight.bold)),
-        SizedBox(height: 8),
-        Divider(height: 1),
-        SizedBox(height: 8),
-
+        const Text('Occ', style: TextStyle(fontWeight: FontWeight.bold)),
+        const SizedBox(height: 8),
+        const Divider(height: 1, thickness: 1),
+        const SizedBox(height: 8),
         _buildRegularMessage(message),
       ],
     ),
   );
+}
+
+Widget _buildAttachmentMessage(
+  AttachmentMessage attachment, {
+  required String time,
+  bool isOwn = false,
+}) {
+  final fileType = attachment.getFileTypeCategory();
+
+  return Column(
+    crossAxisAlignment:
+        isOwn ? CrossAxisAlignment.end : CrossAxisAlignment.start,
+    children: [
+      InkWell(
+        onTap: () => _openAttachment(attachment.filePath),
+        borderRadius: BorderRadius.circular(8),
+        child: Container(
+          constraints: const BoxConstraints(maxWidth: 200),
+          decoration: BoxDecoration(
+            color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(color: Colors.grey[300]!),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // Image preview for images
+              if (fileType == 'image')
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(8),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(12.0),
+                    child: CachedNetworkImage(
+                      imageUrl: attachment.filePath,
+                      fit: BoxFit.contain,
+                      width: double.infinity,
+                      height: 140,
+                      placeholder:
+                          (context, url) => Container(
+                            height: 140,
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
+                              ),
+                            ),
+                          ),
+                      errorWidget:
+                          (context, url, error) => Container(
+                            height: 140,
+                            color: Colors.grey[200],
+                            child: const Center(
+                              child: Icon(
+                                Icons.error_outline,
+                                color: Colors.red,
+                                size: 24,
+                              ),
+                            ),
+                          ),
+                    ),
+                  ),
+                ),
+
+              // File icon for non-images
+              if (fileType != 'image')
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(
+                        _getFileIcon(fileType),
+                        size: 28,
+                        color: _getFileColor(fileType),
+                      ),
+                      const SizedBox(width: 8),
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            attachment.fileExtension.toUpperCase(),
+                            style: TextStyle(
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
+                              color: Colors.grey.shade700,
+                            ),
+                          ),
+                          const SizedBox(height: 1),
+                          Text(
+                            _getFileTypeLabel(fileType),
+                            style: TextStyle(
+                              fontSize: 9,
+                              color: Colors.grey.shade500,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
+                  ),
+                ),
+
+              // Message text and type badge
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 2,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    // Type badge at bottom
+                    if (attachment.type != null)
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(4),
+                          border: Border.all(
+                            color: Colors.blue.shade200,
+                            width: 0.5,
+                          ),
+                        ),
+                        child: Text(
+                          attachment.type!,
+                          style: TextStyle(
+                            fontSize: 9,
+                            fontWeight: FontWeight.w600,
+                            color: Colors.blue.shade700,
+                          ),
+                        ),
+                      ),
+
+                    // Message text
+                    if (attachment.messageAttach.isNotEmpty) ...[
+                      SizedBox(height: 6),
+                      Padding(
+                        padding: const EdgeInsets.only(left: 2.0),
+                        child: Text(
+                          attachment.messageAttach,
+                          style: const TextStyle(
+                            color: Colors.black87,
+                            fontSize: 12,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                    ],
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+
+      // Timestamp
+      if (isOwn)
+        Padding(
+          padding: const EdgeInsets.only(top: 4, right: 4),
+          child: Text(
+            formatChatTimestamp(time),
+            style: TextStyle(fontSize: 10, color: Colors.grey.shade600),
+          ),
+        ),
+    ],
+  );
+}
+
+IconData _getFileIcon(String fileType) {
+  switch (fileType) {
+    case 'pdf':
+      return Icons.picture_as_pdf;
+    case 'document':
+      return Icons.description;
+    case 'spreadsheet':
+      return Icons.table_chart;
+    case 'video':
+      return Icons.video_file;
+    case 'audio':
+      return Icons.audio_file;
+    default:
+      return Icons.insert_drive_file;
+  }
+}
+
+Color _getFileColor(String fileType) {
+  switch (fileType) {
+    case 'pdf':
+      return Colors.red.shade400;
+    case 'document':
+      return Colors.blue.shade400;
+    case 'spreadsheet':
+      return Colors.green.shade400;
+    case 'video':
+      return Colors.purple.shade400;
+    case 'audio':
+      return Colors.orange.shade400;
+    default:
+      return Colors.grey.shade400;
+  }
+}
+
+String _getFileTypeLabel(String fileType) {
+  switch (fileType) {
+    case 'pdf':
+      return 'PDF Document';
+    case 'document':
+      return 'Document';
+    case 'spreadsheet':
+      return 'Spreadsheet';
+    case 'video':
+      return 'Video File';
+    case 'audio':
+      return 'Audio File';
+    default:
+      return 'File';
+  }
+}
+
+Future<void> _openAttachment(String url) async {
+  final uri = Uri.parse(url);
+  if (await canLaunchUrl(uri)) {
+    await launchUrl(uri, mode: LaunchMode.externalApplication);
+  }
 }
 
 Widget _buildTrcSection(String title, List<Widget> rows) {

@@ -1,5 +1,5 @@
 import 'package:dhs_app/screens/auth/login_screen.dart';
-// import 'package:aviation_app/screens/auth/welcome_screen.dart';
+// import 'package:dhs_app/screens/auth/welcome_screen.dart';
 import 'package:get/get.dart';
 
 import '../screens/main_screen.dart';

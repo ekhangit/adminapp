@@ -23,6 +23,7 @@ class ApiConfig {
   static const getFlightDetail = '/api/v1/flight-comm/get-flight-details';
   static const getFlightStaff = '/api/v1/flight-comm/get-all-users';
   static const getFlightChats = '/api/v1/flight-comm/get-chat';
+  static const getStaffData = '/api/v1/flight-comm/get-staff-data';
 
   static const getAllFlightNo = '/api/v1/flight-comm/all-flight-numbers';
   static const getSSROption = '/api/v1/flight-comm/ssr-option-get';
@@ -53,4 +54,15 @@ class ApiConfig {
   static const customRoster = '/api/v1/my-roster/custom-range';
   static const addBreakTimeRoster = '/api/v1/my-roster/add-break-time';
   static const markDutyRoster = '/api/v1/my-roster/mark-duty';
+
+
+  // LIBRARY
+  static const getFolders = '/api/v1/library/folders';
+  static const getDocumentsByFolder = '/api/v1/library/get-documentBy-folder';
+  static const getAllReadAndSign = '/api/v1/library/get-all-read-and-sign';
+  static const getReadAndSignByEmp = '/api/v1/library/get-read-and-sign-by-emp';
+  static const getSafetyDocument = '/api/v1/library/get-safety-document';
+  static const getAirlineFolders = '/api/v1/library/airline-folders';
+  static const getDocumentsByAirlineFolder = '/api/v1/library/get-document-by-airline-folder';
+  static const updateLastViewedDocument = '/api/v1/library/update-last-viewed-of-document';
 }

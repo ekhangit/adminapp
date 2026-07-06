@@ -23,6 +23,7 @@ class ChatMessage {
   final SsrMessage? ssrMessage;
   final DsrMessage? dsrMessage;
   final CkinMessage? ckinMessage;
+  final AttachmentMessage? attachmentMessage;
 
   ChatMessage({
     required this.id,
@@ -44,6 +45,7 @@ class ChatMessage {
     this.ssrMessage,
     this.dsrMessage,
     this.ckinMessage,
+    this.attachmentMessage,
   });
 
   // CopyWith method to create a new instance with updated fields
@@ -236,16 +238,17 @@ class ChatMessage {
     FhrMessage? parseFhrMessage(dynamic messageData) {
       if (messageData is! Map<String, dynamic>) return null;
       return FhrMessage(
-        checkInIssues: messageData['CHECK-IN/TKTG ISSUES']?.toString() ?? '--',
+        checkInIssues: messageData['CHECK-IN/TKTG ISSUES']?.toString() ?? '',
         rampIssues:
-            messageData['RAMP/CREWDISRUPTIVE PAX ETC']?.toString() ?? '--',
-        otherIssues: messageData['OTHER']?.toString() ?? '--',
-        delayExplanation: messageData['DELAY EXPLANATION']?.toString() ?? '--',
-        deniedBoarding:
-            messageData['INVOL DENIED BOARDING']?.toString() ?? '--',
+            messageData['RAMP/CREWDISRUPTIVE PAX ETC']?.toString() ?? '',
+        otherIssues: messageData['OTHER']?.toString() ?? '',
+        delayExplanation: messageData['DELAY EXPLANATION']?.toString() ?? '',
+        deniedBoarding: messageData['INVOL DENIED BOARDING']?.toString() ?? '',
         missedConnection:
-            messageData['MISSED ARTG-5 EXPLANATION']?.toString() ?? '--',
-        safetyIssues: messageData['SAFETY/SECURITY/SYSTEM']?.toString() ?? '--',
+            messageData['MISSED ARTG-5 EXPLANATION']?.toString() ??
+            messageData['MISSED ARTSG 5 EXPLANATION']?.toString() ??
+            '--',
+        safetyIssues: messageData['SAFETY/SECURITY/SYSTEM']?.toString() ?? '',
       );
     }
 
@@ -271,6 +274,17 @@ class ChatMessage {
         return DsrMessage.fromJson(messageData);
       } catch (e) {
         log('[ChatMessage] Error parsing DSR message: $e');
+        return null;
+      }
+    }
+
+    // Add Attachment message parsing
+    AttachmentMessage? parseAttachmentMessage(dynamic messageData) {
+      if (messageData is! Map<String, dynamic>) return null;
+      try {
+        return AttachmentMessage.fromJson(messageData);
+      } catch (e) {
+        log('[ChatMessage] Error parsing Attachment message: $e');
         return null;
       }
     }
@@ -304,6 +318,10 @@ class ChatMessage {
           messageType == 'ssr' ? parseSsrMessage(json['message']) : null,
       dsrMessage:
           messageType == 'dsr' ? parseDsrMessage(json['message']) : null,
+      attachmentMessage:
+          messageType == 'attachment'
+              ? parseAttachmentMessage(json['message'])
+              : null,
     );
   }
 
@@ -320,6 +338,33 @@ class ChatMessage {
       // For complex messages, return the structured data
       return {if (fhrMessage != null) 'fhr': fhrMessage!.toMap()};
     }
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'sender_id': senderId,
+      'sender_name': senderName,
+      'station': station,
+      'message': message,
+      'attachment': attachment,
+      'file_name': fileName,
+      'message_type': type,
+      'message_from': messageFrom,
+      'created_at': time,
+      'is_own': isOwn,
+      'read_by': readBy,
+      if (staffServicesMessage != null)
+        'staff_services': staffServicesMessage!.map((s) => s.toMap()).toList(),
+      if (trcMessage != null) 'trc_message': trcMessage!.toMap(),
+      if (arrMessage != null) 'arr_message': arrMessage!.toMap(),
+      if (fhrMessage != null) 'fhr_message': fhrMessage!.toMap(),
+      if (ssrMessage != null) 'ssr_message': ssrMessage!.toMap(),
+      if (dsrMessage != null) 'dsr_message': dsrMessage!.toMap(),
+      if (ckinMessage != null) 'ckin_message': ckinMessage!.toMap(),
+      if (attachmentMessage != null)
+        'attachment_message': attachmentMessage!.toMap(),
+    };
   }
 }
 
@@ -341,6 +386,18 @@ class ArrMessage {
     required this.mhbAhl,
     required this.lofo,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'start_time': startTime,
+      'end_time': endTime,
+      'lofo_remarks': lofoRemarks,
+      'dpr': dpr,
+      'ohd': ohd,
+      'mhb_ahl': mhbAhl,
+      'lofo': lofo,
+    };
+  }
 }
 
 class SsrMessage {
@@ -349,26 +406,34 @@ class SsrMessage {
   final String? avih; // Aviation health
 
   SsrMessage({this.bdgp, this.bbsl, this.avih});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'BDGP': bdgp,
+      'BBSL': bbsl,
+      'AVIH': avih,
+    };
+  }
 }
 
 // Add this new class for FHR message data
 class FhrMessage {
-  final String checkInIssues;
-  final String rampIssues;
-  final String otherIssues;
-  final String delayExplanation;
-  final String deniedBoarding;
-  final String missedConnection;
-  final String safetyIssues;
+  final String? checkInIssues;
+  final String? rampIssues;
+  final String? otherIssues;
+  final String? delayExplanation;
+  final String? deniedBoarding;
+  final String? missedConnection;
+  final String? safetyIssues;
 
   FhrMessage({
-    required this.checkInIssues,
-    required this.rampIssues,
-    required this.otherIssues,
-    required this.delayExplanation,
-    required this.deniedBoarding,
-    required this.missedConnection,
-    required this.safetyIssues,
+    this.checkInIssues,
+    this.rampIssues,
+    this.otherIssues,
+    this.delayExplanation,
+    this.deniedBoarding,
+    this.missedConnection,
+    this.safetyIssues,
   });
 
   Map<String, dynamic> toMap() {
@@ -389,6 +454,13 @@ class StaffService {
   final String employeeNames;
 
   StaffService({required this.service, required this.employeeNames});
+
+  Map<String, dynamic> toMap() {
+    return {
+      'service': service,
+      'employeeNames': employeeNames,
+    };
+  }
 }
 
 class DsrMessage {
@@ -727,6 +799,55 @@ class CkinMessage {
       bdgGateClosed: json['bdg_gate_closed']?.toString() ?? '',
     );
   }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'ckin_staff': ckinStaff.map((s) => s.toMap()).toList(),
+      'gate_staff': gateStaff.map((s) => s.toMap()).toList(),
+      'gate_spvr': gateSpvr.map((s) => s.toMap()).toList(),
+      'spvr': spvr.map((s) => s.toMap()).toList(),
+      'spvr_remarks': spvrRemarks,
+      'flight_special': flightSpecial,
+      'flight_booking_status': flightBookingStatus,
+      'flight_schedule_info': flightScheduleInfo,
+      'flight_docs_check': flightDocsCheck,
+      'flight_ramp': flightRamp,
+      'flight_other': flightOther,
+      'flight_id': flightId,
+      'ckin_web': ckinWeb,
+      'aircraft_type_icao': aircraftTypeIcao,
+      'aircraft_icao': aircraftIcao,
+      'capacity_f': capacityF,
+      'capacity_j': capacityJ,
+      'capacity_c': capacityC,
+      'capacity_s': capacityS,
+      'capacity_w': capacityW,
+      'capacity_m': capacityM,
+      'capacity_y': capacityY,
+      'dep_iata': depIata,
+      'arr_iata': arrIata,
+      'cfg_capacity_j': cfgCapacityJ,
+      'cfg_capacity_y': cfgCapacityY,
+      'baggage_gate_pcs': baggageGatePcs,
+      'baggage_gate_wt': baggageGateWt,
+      'baggage_ckin_pcs': baggageCkinPcs,
+      'baggage_ckin_wt': baggageCkinWt,
+      'pax_c_booked': paxCBooked,
+      'pax_y_booked': paxYBooked,
+      'pax_inf_booked': paxInfBooked,
+      'pax_jmp_actual': paxJumpActual,
+      'ckin_desk_no': ckinDeskNo,
+      'ckin_desk_used': ckinDeskUsed,
+      'ckin_secured': ckinSecured,
+      'secured_gate': securedGate,
+      'ckin_opened': ckinOpened,
+      'bdg_gate_started': bdgGateStarted,
+      'ckin_closed': ckinClosed,
+      'bdg_gate_completed': bdgGateCompleted,
+      'bdg_gate_opened': bdgGateOpened,
+      'bdg_gate_closed': bdgGateClosed,
+    };
+  }
 }
 
 class StaffMember {
@@ -740,5 +861,64 @@ class StaffMember {
       id: json['id']?.toString() ?? '',
       name: json['name']?.toString() ?? '',
     );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+    };
+  }
+}
+
+class AttachmentMessage {
+  final String messageAttach;
+  final String filePath;
+  final String fileExtension;
+  final String? type;
+
+  AttachmentMessage({
+    required this.messageAttach,
+    required this.filePath,
+    required this.fileExtension,
+    this.type,
+  });
+
+  factory AttachmentMessage.fromJson(Map<String, dynamic> json) {
+    return AttachmentMessage(
+      messageAttach: json['message_attach']?.toString() ?? '',
+      filePath: json['file_path']?.toString() ?? '',
+      fileExtension: json['file_extension']?.toString() ?? '',
+      type: json['type']?.toString(),
+    );
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'message_attach': messageAttach,
+      'file_path': filePath,
+      'file_extension': fileExtension,
+      'type': type,
+    };
+  }
+
+  // Helper to determine file type category
+  String getFileTypeCategory() {
+    final ext = fileExtension.toLowerCase();
+    if (['jpg', 'jpeg', 'png', 'gif', 'webp', 'svg'].contains(ext)) {
+      return 'image';
+    } else if (['pdf'].contains(ext)) {
+      return 'pdf';
+    } else if (['doc', 'docx', 'txt'].contains(ext)) {
+      return 'document';
+    } else if (['xls', 'xlsx', 'csv'].contains(ext)) {
+      return 'spreadsheet';
+    } else if (['mp4', 'mov', 'avi', 'mkv'].contains(ext)) {
+      return 'video';
+    } else if (['mp3', 'wav', 'aac'].contains(ext)) {
+      return 'audio';
+    } else {
+      return 'file';
+    }
   }
 }

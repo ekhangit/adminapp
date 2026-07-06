@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:developer';
+import 'dart:io';
 
 import 'package:dhs_app/controllers/flight/flight_comm_controller.dart';
 import 'package:dhs_app/controllers/flight/flight_info_controller.dart';
@@ -14,6 +15,7 @@ import 'package:intl/intl.dart';
 
 import '../../models/flight_detail_model.dart';
 import '../../models/staff_model.dart';
+import '../../models/staff_data_model.dart';
 import '../storage/data_storage_controller.dart';
 
 class ChatController extends GetxController {
@@ -29,6 +31,7 @@ class ChatController extends GetxController {
   bool _isLoadingMessages = false;
 
   var staffList = <StaffModel>[].obs;
+  Rxn<StaffDataModel> staffData = Rxn<StaffDataModel>();
 
   StreamSubscription<QuerySnapshot>? _messagesSubscription;
 
@@ -37,6 +40,7 @@ class ChatController extends GetxController {
     super.onInit();
     _initializeChat();
     _setupFirestoreListener();
+    _setupTypingListener();
   }
 
   void _initializeChat() {
@@ -114,6 +118,12 @@ class ChatController extends GetxController {
     }
   }
 
+  void _setupTypingListener() {
+    messageController.addListener(() {
+      isTyping.value = messageController.text.isNotEmpty;
+    });
+  }
+
   Future<void> _loadInitialMessages() async {
     await _loadMessages();
     _isInitialLoad = true;
@@ -181,8 +191,8 @@ class ChatController extends GetxController {
       // typeCounts[type] = (typeCounts[type] ?? 0) + 1;
       log('Message Type: $type');
 
-      if (type == 'ckin') {
-        log('CKIN Message: ${message.message.toString()}');
+      if (type == 'pts') {
+        log('PTS Message: ${message.message.toString()}');
       }
     }
   }
@@ -201,27 +211,48 @@ class ChatController extends GetxController {
 
     // Get the timestamp and convert to ISO string
     final timestamp = data['created_at'] as Timestamp?;
+    // print('[ChatController] Raw Firestore timestamp: $timestamp');
+
+    // final dateTime = timestamp?.toDate();
+    // print('[ChatController] Converted DateTime: $dateTime');
+    // print('[ChatController] DateTime UTC: ${dateTime?.toUtc()}');
+
     final isoTime = timestamp?.toDate().toUtc().toIso8601String() ?? '';
+    // print('[ChatController] ISO String: $isoTime');
 
     return ChatMessage.fromJson({
       ...data,
       'sender_name': matchedStaff?.displayName ?? 'User',
-      'station': matchedStaff?.airport.iataCode ?? 'Unknown',
+      'station': matchedStaff?.airport?.iataCode ?? 'Unknown',
       'created_at': isoTime, // Use consistent UTC ISO format
       'sender_id': senderIdStr,
     });
   }
 
-  void _scrollToBottom() {
-    if (scrollController.hasClients && !_isInitialLoad) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        scrollController.animateTo(
-          scrollController.position.maxScrollExtent,
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-        );
+  void _scrollToBottom({bool instant = false}) {
+    if (!scrollController.hasClients) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!scrollController.hasClients) return;
+
+      // Add a small delay to ensure the widget has fully rebuilt
+      Future.delayed(const Duration(milliseconds: 50), () {
+        if (!scrollController.hasClients) return;
+
+        if (instant || _isInitialLoad) {
+          // Instant scroll - in reverse mode, minScrollExtent is at the top (newest messages)
+          scrollController.jumpTo(scrollController.position.minScrollExtent);
+        } else {
+          // Animated scroll - in reverse mode, minScrollExtent is at the top (newest messages)
+          scrollController.animateTo(
+            scrollController.position.minScrollExtent,
+            duration: const Duration(milliseconds: 300),
+            curve: Curves.easeOut,
+          );
+        }
       });
-    }
+    });
+
     _isInitialLoad = false;
   }
 
@@ -243,7 +274,7 @@ class ChatController extends GetxController {
         id: 'optimistic-${DateTime.now().millisecondsSinceEpoch}',
         senderId: currentUser.id,
         senderName: matchedStaff?.displayName ?? 'User',
-        station: matchedStaff?.airport.iataCode ?? 'Unknown',
+        station: matchedStaff?.airport?.iataCode ?? 'Unknown',
         message: text,
         time: DateTime.now().toUtc().toIso8601String(),
         isOwn: true,
@@ -253,7 +284,7 @@ class ChatController extends GetxController {
 
       // Add optimistically to UI
       messages.add(optimisticMessage);
-      _scrollToBottom();
+      _scrollToBottom(instant: true);
 
       final docRef = await FirebaseFirestore.instance
           .collection('chats')
@@ -280,6 +311,238 @@ class ChatController extends GetxController {
     } finally {
       isSendingMessage.value = false;
     }
+  }
+
+  Future<void> sendImageMessage({
+    required File file,
+    required String fileName,
+    required String type,
+    String? messageText,
+  }) async {
+    if (isSendingMessage.value) return;
+
+    isSendingMessage.value = true;
+    try {
+      final currentUser = DataStorageController.to.user;
+      final currentUserIdStr = currentUser.id.toString();
+
+      final matchedStaff = staffList.firstWhereOrNull(
+        (staff) => staff.id.toString() == currentUserIdStr,
+      );
+
+      // Get file extension
+      final extension = fileName.split('.').last.toLowerCase();
+
+      // Create optimistic message for UI
+      final optimisticMessage = ChatMessage(
+        id: 'optimistic-${DateTime.now().millisecondsSinceEpoch}',
+        senderId: currentUser.id,
+        senderName: matchedStaff?.displayName ?? 'User',
+        station: matchedStaff?.airport?.iataCode ?? 'Unknown',
+        message: messageText ?? 'Sent a file',
+        time: DateTime.now().toUtc().toIso8601String(),
+        isOwn: true,
+        readBy: [currentUser.id],
+        type: 'attachment',
+        fileName: fileName,
+        attachment: file.path, // Temporary local path
+        attachmentMessage: AttachmentMessage(
+          messageAttach: messageText ?? '',
+          filePath: file.path,
+          fileExtension: extension,
+          type: type,
+        ),
+      );
+
+      // Add optimistically to UI
+      messages.add(optimisticMessage);
+      _scrollToBottom(instant: true);
+
+      // 1. Upload to API
+      final apiResponse = await FlightChatService.instance.sendImageMessage(
+        flightId: argument as int,
+        type: type,
+        filePath: file.path,
+        message: messageText ?? '',
+      );
+
+      if (!apiResponse.isSuccess) {
+        throw Exception(apiResponse.errorMessage ?? 'Failed to upload file');
+      }
+
+      final fileUrl = apiResponse.data ?? '';
+
+      // 2. Send to Firebase with file URL from API
+      final docRef = await FirebaseFirestore.instance
+          .collection('chats')
+          .doc(argument.toString())
+          .collection('messages')
+          .add({
+            'sender_id': currentUserIdStr,
+            'message': {
+              'message_attach': messageText ?? '',
+              'file_path': fileUrl,
+              'file_extension': extension,
+              'type': type,
+            },
+            'message_type': 'attachment',
+            'file_name': fileName,
+            'attachment': fileUrl,
+            'read_by': [currentUserIdStr],
+            'created_at': FieldValue.serverTimestamp(),
+          });
+
+      // Update local message with actual data
+      final index = messages.indexOf(optimisticMessage);
+      if (index != -1) {
+        messages[index] = ChatMessage(
+          id: docRef.id,
+          senderId: currentUser.id,
+          senderName: matchedStaff?.displayName ?? 'User',
+          station: matchedStaff?.airport?.iataCode ?? 'Unknown',
+          message: messageText ?? 'Sent a file',
+          time: DateTime.now().toUtc().toIso8601String(),
+          isOwn: true,
+          readBy: [currentUser.id],
+          type: 'attachment',
+          fileName: fileName,
+          attachment: fileUrl,
+          attachmentMessage: AttachmentMessage(
+            messageAttach: messageText ?? '',
+            filePath: fileUrl,
+            fileExtension: extension,
+            type: type,
+          ),
+        );
+      }
+
+      Get.snackbar(
+        'Success',
+        'File sent successfully',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.green.shade100,
+        colorText: Colors.green.shade900,
+        duration: const Duration(seconds: 2),
+      );
+    } catch (e) {
+      messages.removeWhere((msg) => msg.id.startsWith('optimistic-'));
+      debugPrint('Error sending file: $e');
+      Get.snackbar(
+        'Error',
+        'Failed to send file: ${e.toString()}',
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.red.shade100,
+        colorText: Colors.red.shade900,
+        duration: const Duration(seconds: 3),
+      );
+    } finally {
+      isSendingMessage.value = false;
+    }
+  }
+
+  Future<String?> showTypeSelectionDialog() async {
+    final types = [
+      'Cargo',
+      'Ckin',
+      'Docs',
+      'Fpln',
+      'Fuel',
+      'Gate',
+      'Lds',
+      'Lir',
+      'Mics',
+      'Ramp'
+    ];
+
+    return await Get.dialog<String>(
+      Dialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              const Text(
+                'Select File Type',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'Please select the type of file you are sending:',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.black54,
+                ),
+              ),
+              const SizedBox(height: 20),
+              ...types.map((type) {
+                return InkWell(
+                  onTap: () => Get.back(result: type),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 16,
+                      vertical: 12,
+                    ),
+                    margin: const EdgeInsets.only(bottom: 8),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(8),
+                      border: Border.all(
+                        color: Colors.grey.shade300,
+                        width: 1,
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 8,
+                          height: 8,
+                          decoration: BoxDecoration(
+                            color: Colors.blue,
+                            shape: BoxShape.circle,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          type,
+                          style: const TextStyle(
+                            fontSize: 15,
+                            fontWeight: FontWeight.w500,
+                            color: Colors.black87,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }).toList(),
+              const SizedBox(height: 12),
+              Align(
+                alignment: Alignment.centerRight,
+                child: TextButton(
+                  onPressed: () => Get.back(),
+                  child: const Text(
+                    'Cancel',
+                    style: TextStyle(
+                      color: Colors.red,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+      barrierDismissible: true,
+    );
   }
 
   Future<void> markVisibleMessagesAsRead() async {
@@ -326,14 +589,14 @@ class ChatController extends GetxController {
             .where('sender_id', isEqualTo: message.senderId.toString())
             .limit(1);
 
-        log(
-          '[ChatController] markVisibleMessagesAsRead Querying for message: $query',
-        );
+        // log(
+        //   '[ChatController] markVisibleMessagesAsRead Querying for message: $query',
+        // );
 
         final snapshot = await query.get();
-        log(
-          '[ChatController] markVisibleMessagesAsRead Query result: ${snapshot.docs.length} docs found',
-        );
+        // log(
+        //   '[ChatController] markVisibleMessagesAsRead Query result: ${snapshot.docs.length} docs found',
+        // );
         if (snapshot.docs.isNotEmpty) {
           final doc = snapshot.docs.first;
           batch.update(doc.reference, {
@@ -341,7 +604,7 @@ class ChatController extends GetxController {
           });
           batchCount++;
 
-          log('[ChatController]  Message marked as read: ${message.readBy}');
+          // log('[ChatController]  Message marked as read: ${message.readBy}');
 
           // Update local message state
           if (message.readBy == null) {
@@ -462,15 +725,15 @@ class ChatController extends GetxController {
     _tabHasMessages['PTM'] = messages.ptm.isNotEmpty;
     _tabHasMessages['CPM'] = messages.cpm.isNotEmpty;
 
-    log(
-      'Message status - MVT: ${_tabHasMessages['MVT']}, '
-      'LDM: ${_tabHasMessages['LDM']}, '
-      'LIR: ${_tabHasMessages['LIR']}, '
-      'LDS: ${_tabHasMessages['LDS']}, '
-      'PSM: ${_tabHasMessages['PSM']}, '
-      'PTM: ${_tabHasMessages['PTM']}, '
-      'CPM: ${_tabHasMessages['CPM']}, ',
-    );
+    // log(
+    //   'Message status - MVT: ${_tabHasMessages['MVT']}, '
+    //   'LDM: ${_tabHasMessages['LDM']}, '
+    //   'LIR: ${_tabHasMessages['LIR']}, '
+    //   'LDS: ${_tabHasMessages['LDS']}, '
+    //   'PSM: ${_tabHasMessages['PSM']}, '
+    //   'PTM: ${_tabHasMessages['PTM']}, '
+    //   'CPM: ${_tabHasMessages['CPM']}, ',
+    // );
   }
 
   bool hasMessages(String tabName) {
@@ -499,6 +762,9 @@ class ChatController extends GetxController {
   RxList<ChatMessage> messages = <ChatMessage>[].obs;
   TextEditingController messageController = TextEditingController();
 
+  // Track if user is typing
+  var isTyping = false.obs;
+
   var flightDetailLoading = false.obs;
 
   Rxn<FlightDetailModel> flightDetail = Rxn<FlightDetailModel>();
@@ -514,8 +780,8 @@ class ChatController extends GetxController {
       );
 
       if (response.isSuccess && response.data != null) {
-        // log('[fetchFlightChatDetail] Flight detail fetched successfully.');
         flightDetail.value = response.data!;
+
       } else {
         log('[fetchFlightChatDetail] API Error: ${response.errorMessage}');
       }
@@ -578,6 +844,11 @@ class ChatController extends GetxController {
   final RxList<String> selectedVR = <String>[].obs;
 
   final List<String> posOptions = ["11", "12", "13", "14"];
+
+  // TRC FORM
+  final TextEditingController gateController = TextEditingController();
+  final TextEditingController standController = TextEditingController();
+  final TextEditingController baggageBeltController = TextEditingController();
 
   // ARR FORM
   final TextEditingController lofoController = TextEditingController();
@@ -751,6 +1022,27 @@ class ChatController extends GetxController {
       log("[ChatController] Stack: $stack");
     } finally {
       saveLoading.value = false;
+    }
+  }
+
+  // STAFF FORM
+  Future<void> fetchStaffData(int flightId) async {
+    log('[fetchStaffData] flightId : $flightId');
+
+    try {
+      final response = await FlightChatService.instance.getStaffData(
+        flightId: flightId,
+      );
+
+      if (response.isSuccess && response.data != null) {
+        staffData.value = response.data!;
+        log('[fetchStaffData] Staff data fetched successfully');
+      } else {
+        log('[fetchStaffData] API Error: ${response.errorMessage}');
+      }
+    } catch (e, stack) {
+      log('[fetchStaffData] Exception: $e');
+      log('[fetchStaffData] Stack: $stack');
     }
   }
 }

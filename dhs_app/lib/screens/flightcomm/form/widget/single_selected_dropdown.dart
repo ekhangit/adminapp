@@ -630,7 +630,7 @@ class SingleSelectDropdown extends StatelessWidget {
                   children: [
                     Text(
                       label,
-                      style:  GoogleFonts.roboto(
+                      style: GoogleFonts.roboto(
                         fontWeight: FontWeight.w600,
                         fontSize: 16,
                       ),
@@ -773,7 +773,10 @@ class GenericSelectDropdown<T> extends StatelessWidget {
                         if (selectedItem.value == null)
                           Text(
                             hint,
-                            style: GoogleFonts.roboto(color: Colors.grey, fontSize: 14),
+                            style: GoogleFonts.roboto(
+                              color: Colors.grey,
+                              fontSize: 14,
+                            ),
                             overflow: TextOverflow.ellipsis,
                           ),
                       ],

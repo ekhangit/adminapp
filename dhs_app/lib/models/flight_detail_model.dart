@@ -11,6 +11,7 @@ class FlightDetailModel {
   final TrcData? trc;
   final CkinData? ckin;
   final ArrData? arr;
+  final List<PicData> picData;
   final FlightMessages messages;
   final List<SodData> sodData;
 
@@ -27,6 +28,7 @@ class FlightDetailModel {
     this.trc,
     this.ckin,
     this.arr,
+    required this.picData,
     required this.messages,
     required this.sodData,
   });
@@ -36,6 +38,7 @@ class FlightDetailModel {
     final trcJson = json['trc'];
     final ckinJson = json['ckin'];
     final arrJson = json['arr'];
+    final picJson = json['pic'] ?? [];
     final messagesJson = json['messages'] ?? {};
     final sodJson = json['sod'] ?? [];
 
@@ -56,6 +59,7 @@ class FlightDetailModel {
       trc: trcJson != null ? TrcData.fromJson(trcJson) : null,
       ckin: ckinJson != null ? CkinData.fromJson(ckinJson) : null,
       arr: arrJson != null ? ArrData.fromJson(arrJson) : null,
+      picData: List<PicData>.from(picJson.map((x) => PicData.fromJson(x))),
       messages: FlightMessages.fromJson(messagesJson),
       sodData: List<SodData>.from(sodJson.map((x) => SodData.fromJson(x))),
     );
@@ -63,6 +67,9 @@ class FlightDetailModel {
 
   bool get isConnectingFlight =>
       inboundFlight?.isNotEmpty == true || outboundFlight?.isNotEmpty == true;
+
+  bool get isDeparture =>
+      ['FRA', 'MUC', 'DUS', 'HAM', 'STR'].contains(departureAirport.iataCode);
 }
 
 class BasicDetails {
@@ -72,6 +79,8 @@ class BasicDetails {
   final String? atd;
   final String? sta;
   final String? ata;
+  final String? eta;
+  final String? etd;
   final String date;
   final String? callSign;
   final String? gate;
@@ -85,6 +94,8 @@ class BasicDetails {
     this.atd,
     this.sta,
     this.ata,
+    this.eta,
+    this.etd,
     required this.date,
     this.callSign,
     this.gate,
@@ -99,6 +110,8 @@ class BasicDetails {
     atd: json['atd'] ?? '',
     sta: json['sta'] ?? '',
     ata: json['ata'] ?? '',
+    eta: json['eta'] ?? '',
+    etd: json['etd'] ?? '',
     date: json['date'],
     callSign: json['call_sign'] ?? '',
     gate: json['gate'] ?? '',
@@ -627,6 +640,60 @@ class ArrData {
   );
 }
 
+class PicData {
+  final int flightId;
+  final int senderId;
+  final String attachment;
+  final String createdAt;
+  final PicUser user;
+
+  PicData({
+    required this.flightId,
+    required this.senderId,
+    required this.attachment,
+    required this.createdAt,
+    required this.user,
+  });
+
+  factory PicData.fromJson(Map<String, dynamic> json) {
+    return PicData(
+      flightId: json['flight_id'] ?? 0,
+      senderId: json['sender_id'] ?? 0,
+      attachment: json['attachment'] ?? '',
+      createdAt: json['created_at'] ?? '',
+      user: PicUser.fromJson(json['user'] ?? {}),
+    );
+  }
+
+  // Helper to get full attachment URL
+  String getAttachmentUrl(String baseUrl) {
+    if (attachment.startsWith('http')) {
+      return attachment;
+    }
+    return '$baseUrl/$attachment';
+  }
+
+  // Helper to get file extension
+  String getFileExtension() {
+    final parts = attachment.split('.');
+    return parts.isNotEmpty ? parts.last.toLowerCase() : '';
+  }
+}
+
+class PicUser {
+  final int id;
+  final String name;
+
+  PicUser({required this.id, required this.name});
+
+  factory PicUser.fromJson(Map<String, dynamic> json) {
+    return PicUser(
+      id: json['id'] ?? 0,
+      name: json['name'] ?? '',
+    );
+  }
+}
+
 class FlightMessages {
   final List<MessageData> mvtDeparture;
   final List<MessageData> mvtArrival;
@@ -706,37 +773,60 @@ class MessageData {
 }
 
 class SodData {
-  final String serviceAbbr;
-  final String type;
-  final String slaTimeIn;
-  final String slaTimeOut;
-  final String duration;
-  final int requiredStaff;
-  final List<SodEmployee> employees;
+  final int? flightId;
+  final String? serviceAbbr;
+  final String? type;
+  // final String? slaTimeIn;
+  // final String? slaTimeOut;
+  final String? startTime;
+  final String? endTime;
+  final String? duration;
+  final int? requiredStaff;
+  final List<SodEmployee>? employees;
 
   SodData({
-    required this.serviceAbbr,
-    required this.type,
-    required this.slaTimeIn,
-    required this.slaTimeOut,
-    required this.duration,
-    required this.requiredStaff,
-    required this.employees,
+    this.flightId,
+    this.serviceAbbr,
+    this.type,
+    this.startTime,
+    this.endTime,
+    this.duration,
+    this.requiredStaff,
+    this.employees,
   });
 
   factory SodData.fromJson(Map<String, dynamic> json) => SodData(
-    serviceAbbr: json['service_abbr']?.toString() ?? '',
-    type: json['type']?.toString() ?? '',
-    slaTimeIn: json['sla_time_in']?.toString() ?? '',
-    slaTimeOut: json['sla_time_out']?.toString() ?? '',
+    flightId: json['flight_id'] as int?,
+    serviceAbbr:
+        json['service_abbr']?.toString() ?? json['abbr']?.toString() ?? '',
+    type: json['type']?.toString() ?? json['sla_type']?.toString() ?? '',
+    // slaTimeIn: json['sla_time_in']?.toString() ?? '',
+    // slaTimeOut: json['sla_time_out']?.toString() ?? '',
+    startTime: json['start_time'] as String?,
+    endTime: json['end_time'] as String?,
     duration: json['duration']?.toString() ?? '00:00',
     requiredStaff: (json['required_staff'] as int?) ?? 0,
+    // employees:
+    //     (json['employees'] as List<dynamic>?)
+    //         ?.map((e) => SodEmployee.fromJson(e))
+    //         .toList() ??
+    //     [],
     employees:
         (json['employees'] as List<dynamic>?)
             ?.map((e) => SodEmployee.fromJson(e))
-            .toList() ??
-        [],
+            .toList(),
   );
+
+  // Helper method to check if the object is empty
+  bool get isEmpty =>
+      flightId == null &&
+      serviceAbbr == null &&
+      type == null &&
+      startTime == null &&
+      endTime == null &&
+      duration == null &&
+      requiredStaff == null &&
+      (employees == null || employees!.isEmpty);
 }
 
 class SodEmployee {
