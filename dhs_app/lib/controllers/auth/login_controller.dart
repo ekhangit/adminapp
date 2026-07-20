@@ -54,7 +54,18 @@ class LoginController extends GetxController {
         await Future.delayed(const Duration(seconds: 1));
         apns = await fcm.getAPNSToken();
       }
-      return apns;
+
+      // Try the FCM token once APNS is available.
+      if (apns != null && apns.isNotEmpty) {
+        final fcmToken = await fcm.getToken();
+        if (fcmToken != null && fcmToken.isNotEmpty) return fcmToken;
+        return apns;
+      }
+
+      // TEMP (iOS): simulators / builds without a push entitlement can't
+      // issue an APNS token, so fall back to a placeholder to unblock login.
+      log('[LoginController] APNS token unavailable — using temporary iOS token');
+      return 'ios-temp-token';
     }
 
     return await fcm.getToken();
@@ -173,13 +184,8 @@ class LoginController extends GetxController {
     }
   }
 
-  /// **🔹 Set Loading State with Animation**
+  /// **🔹 Set Loading State**
   void _setLoading(bool state) {
     isLoading.value = state;
-    if (state) {
-      Future.delayed(Duration(milliseconds: 500), () {
-        if (isLoading.value) isLoading.value = false;
-      });
-    }
   }
 }

@@ -85,7 +85,7 @@ class LibraryScreen extends StatelessWidget {
                           children: [
                             Icon(Icons.business, size: 18),
                             SizedBox(width: 8),
-                            Text('GSRM Library'),
+                            Text('DHS Library'),
                           ],
                         ),
                       ),

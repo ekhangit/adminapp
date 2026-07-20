@@ -84,23 +84,22 @@ class CustomBox2 extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: Container(
-        width: (MediaQuery.of(context).size.width - 50) / 2,
-        margin: const EdgeInsets.only(bottom: 6),
-        padding: const EdgeInsets.all(22),
+        margin: const EdgeInsets.only(bottom: 4),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
             Container(
               decoration: BoxDecoration(shape: BoxShape.circle),
-              child: Image.asset(iconPath, width: 82, height: 82),
+              child: Image.asset(iconPath, width: 58, height: 58),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 6),
             Text(
               title,
               textAlign: TextAlign.center,
               style: GoogleFonts.roboto(
                 fontWeight: FontWeight.w600,
-                fontSize: 14.5,
+                fontSize: 12,
                 color: Colors.white,
               ),
             ),

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:get/get.dart';
+import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../constant.dart';
+import '../../../../controllers/flight/chat_controller.dart';
 import '../../../../models/chat_model.dart';
 
 Widget buildMessageContent(ChatMessage message) {
   if (message.type == 'trc') {
-    return _buildTrcMessage(message.trcMessage!, isOwn: message.isOwn);
+    return _buildTrcMessage(message);
   } else if (message.type == 'ckin' && message.ckinMessage != null) {
     return _buildCkinMessage(message.ckinMessage!, isOwn: message.isOwn);
   } else if (message.type == 'staff') {
@@ -80,48 +83,56 @@ Widget _buildRegularMessage(ChatMessage message) {
   );
 }
 
-Widget _buildTrcMessage(TrcMessage trc, {bool isOwn = false}) {
+Widget _buildTrcMessage(ChatMessage message) {
+  // Prefer values carried in the TRC message payload itself; fall back to the
+  // current flight detail (same source the TRC form uses) for anything the
+  // payload doesn't include (gate/stand/belt/regn).
+  final detail =
+      Get.isRegistered<ChatController>()
+          ? Get.find<ChatController>().flightDetail.value
+          : null;
+  final basic = detail?.basicDetails;
+  final trc = message.trcMessage;
+
+  // Picks the first meaningful value, ignoring nulls, empties and the '--' sentinel.
+  String pick(List<String?> values) {
+    for (final v in values) {
+      if (v != null && v.isNotEmpty && v != '--') return v;
+    }
+    return '--';
+  }
+
+  final acType = pick([trc?.aircraftTypeIcao, detail?.aircraftType?.icao]);
+  final acRegn = pick([trc?.aircraftIcao, detail?.aircraft?.name]);
+
   return Container(
     padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
+      color: message.isOwn ? const Color(0xFFCAE9FF) : Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        _buildExpandRow('Name', trc.name),
-        _buildExpandRow('Mobile', trc.mobile),
-        _buildExpandRow('Remarks', trc.remarks),
+        const Text(
+          'TRC',
+          style: TextStyle(
+            fontWeight: FontWeight.bold,
+            color: Colors.black87,
+            fontSize: 15,
+          ),
+        ),
+        const SizedBox(height: 8),
+        const Divider(height: 1, thickness: 1),
+        const SizedBox(height: 8),
 
-        _buildTrcSection('A/C Data', [
-          // _buildTrcRow('CREW', trc.crew),
-          _buildExpandRow('PANTRY', trc.pantry),
-          _buildExpandRow('CAPTAIN', trc.captain),
-          _buildExpandRow('DOW', trc.dow),
-          _buildExpandRow('DOI', trc.doiTrc),
-          _buildExpandRow('MTOW', trc.mtow),
-          _buildExpandRow('RTOW', trc.rtow),
-        ]),
-
-        // F.O.D
-        _buildTrcSection('F.O.D', [
-          _buildExpandRow('Before Arrival', trc.beforeArrival),
-          _buildExpandRow('Before Departure', trc.beforeDeparture),
-          _buildExpandRow('After Departure', trc.afterDeparture),
-        ]),
-
-        // Fuel Data
-        _buildTrcSection('Fuel Data', [
-          _buildExpandRow('TAXI', trc.taxi),
-          _buildExpandRow('BLOCK FUEL', trc.block),
-          _buildExpandRow('TRIP', trc.trip),
-          _buildExpandRow('E.E.T.', trc.eet),
-          _buildExpandRow('TOF', trc.tofFuel),
-          _buildExpandRow('UPLIFTED', trc.uplifted),
-          _buildExpandRow('ALTN', trc.altn),
-        ]),
+        _buildExpandRow('FLT Type', pick([basic?.flightInfo])),
+        _buildExpandRow('A/C TYPE', acType),
+        _buildExpandRow('A/C REGN', acRegn),
+        _buildExpandRow('GATE', pick([basic?.gate])),
+        _buildExpandRow('STAND', pick([basic?.pos])),
+        _buildExpandRow('BAGGAGE BELT', pick([basic?.beggageBelt])),
       ],
     ),
   );
@@ -438,56 +449,238 @@ Widget _buildSsrRow(String label, String value) {
   );
 }
 
+// Column widths for the staff roster table.
+const double _wSla = 78;
+const double _wType = 66;
+const double _wStaff = 170;
+const double _wTime = 138;
+const double _wDur = 58;
+
+// Palette (matches staff_chat.png)
+const Color _staffTeal = Color(0xFF1AA394); // service abbr badge
+const Color _staffBlue = Color(0xFF3793F4); // Type badge
+const Color _staffDepBlue = Color(0xFF5AA9F0); // service type badge
+const Color _staffOrange = Color(0xFFE8833A); // SLA badge
+const Color _staffGreen = Color(0xFF2E9E4F); // PLN badge
+
+String _fmtStaffTime(String? t) {
+  if (t == null || t.isEmpty) return '';
+  try {
+    return DateFormat('dd MMM HH:mm').format(DateTime.parse(t));
+  } catch (_) {
+    return t;
+  }
+}
+
+String _staffDuration(String? start, String? end) {
+  if (start == null || end == null || start.isEmpty || end.isEmpty) return '';
+  try {
+    final diff = DateTime.parse(end).difference(DateTime.parse(start));
+    if (diff.isNegative) return '';
+    final h = diff.inHours.toString().padLeft(2, '0');
+    final m = (diff.inMinutes % 60).toString().padLeft(2, '0');
+    return '$h:$m';
+  } catch (_) {
+    return '';
+  }
+}
+
+Widget _staffBadge(String text, Color bg) => Container(
+  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+  decoration: BoxDecoration(
+    color: bg,
+    borderRadius: BorderRadius.circular(4),
+  ),
+  child: Text(
+    text,
+    style: const TextStyle(
+      color: Colors.white,
+      fontSize: 11,
+      fontWeight: FontWeight.w600,
+    ),
+  ),
+);
+
+Widget _staffCell(
+  double width,
+  Widget child, {
+  Alignment align = Alignment.centerLeft,
+}) => Container(
+  width: width,
+  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 7),
+  alignment: align,
+  child: child,
+);
+
+Widget _staffTimeCell(String time, String label, Color labelColor) {
+  if (time.isEmpty) return const SizedBox.shrink();
+  return Row(
+    mainAxisSize: MainAxisSize.min,
+    children: [
+      Flexible(
+        child: Text(
+          time,
+          style: const TextStyle(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: Colors.black87,
+          ),
+          overflow: TextOverflow.ellipsis,
+        ),
+      ),
+      const SizedBox(width: 4),
+      _staffBadge(label, labelColor),
+    ],
+  );
+}
+
 Widget _buildStaffMessage(List<StaffService> services, {bool isOwn = false}) {
+  if (services.isEmpty) return const SizedBox.shrink();
+
+  const headerStyle = TextStyle(
+    fontSize: 11,
+    fontWeight: FontWeight.w700,
+    color: Colors.black87,
+  );
+
+  final rows = <Widget>[
+    // Column titles
+    Container(
+      color: const Color(0xFFE8F0FE),
+      child: Row(
+        children: [
+          _staffCell(_wSla, const Text('SLA', style: headerStyle),
+              align: Alignment.center),
+          _staffCell(_wType, const Text('Type', style: headerStyle),
+              align: Alignment.center),
+          _staffCell(_wStaff, const Text('Staff', style: headerStyle),
+              align: Alignment.center),
+          _staffCell(_wTime, const Text('Start Time', style: headerStyle),
+              align: Alignment.center),
+          _staffCell(_wTime, const Text('Release Time', style: headerStyle),
+              align: Alignment.center),
+          _staffCell(_wDur, const Text('Duration', style: headerStyle),
+              align: Alignment.center),
+        ],
+      ),
+    ),
+  ];
+
+  for (final s in services) {
+    // Service header row (SLA times)
+    rows.add(
+      Container(
+        color: const Color(0xFFEAF8EE),
+        child: Row(
+          children: [
+            _staffCell(_wSla, _staffBadge(s.service, _staffTeal)),
+            _staffCell(_wType, _staffBadge(s.type, _staffBlue)),
+            _staffCell(
+              _wStaff,
+              Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (s.serviceType.isNotEmpty)
+                    _staffBadge(s.serviceType, _staffDepBlue),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Required : ${s.staffRequired}',
+                    style: const TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            _staffCell(
+              _wTime,
+              _staffTimeCell(_fmtStaffTime(s.slaStart.sla), 'SLA', _staffOrange),
+            ),
+            _staffCell(
+              _wTime,
+              _staffTimeCell(
+                _fmtStaffTime(s.slaRelease.sla),
+                'SLA',
+                _staffOrange,
+              ),
+            ),
+            _staffCell(
+              _wDur,
+              Text(
+                _staffDuration(s.slaStart.sla, s.slaRelease.sla),
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
+              align: Alignment.center,
+            ),
+          ],
+        ),
+      ),
+    );
+
+    // Per-staff rows (PLN times)
+    for (int i = 0; i < s.assignments.length; i++) {
+      final a = s.assignments[i];
+      rows.add(
+        Row(
+          children: [
+            _staffCell(
+              _wSla,
+              Text(
+                '${i + 1}',
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
+              align: Alignment.center,
+            ),
+            _staffCell(_wType, const SizedBox.shrink()),
+            _staffCell(
+              _wStaff,
+              Text(
+                a.name,
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
+            ),
+            _staffCell(
+              _wTime,
+              _staffTimeCell(_fmtStaffTime(a.start.pln), 'PLN', _staffGreen),
+            ),
+            _staffCell(
+              _wTime,
+              _staffTimeCell(_fmtStaffTime(a.release.pln), 'PLN', _staffGreen),
+            ),
+            _staffCell(
+              _wDur,
+              Text(
+                _staffDuration(a.start.pln, a.release.pln),
+                style: const TextStyle(fontSize: 11, color: Colors.black87),
+              ),
+              align: Alignment.center,
+            ),
+          ],
+        ),
+      );
+    }
+  }
+
   return Container(
-    padding: const EdgeInsets.all(12),
     decoration: BoxDecoration(
-      color: isOwn ? const Color(0xFFCAE9FF) : Colors.white,
+      color: Colors.white,
       borderRadius: BorderRadius.circular(8),
       border: Border.all(color: Colors.grey[300]!),
     ),
-    child: Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text(
-          'Staff',
-          style: TextStyle(
-            fontWeight: FontWeight.bold,
-            color: Colors.black87,
-            fontSize: 15,
-          ),
-        ),
-        const SizedBox(height: 8),
-        const Divider(height: 1, thickness: 1),
-        const SizedBox(height: 8),
-        ...services.map(
-          (service) => Padding(
-            padding: const EdgeInsets.only(bottom: 4),
-            child: Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '• ${service.service}: ',
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w500,
-                    color: Colors.black87,
-                    fontSize: 15,
-                  ),
-                ),
-                Expanded(
-                  child: Text(
-                    service.employeeNames,
-                    style: const TextStyle(color: Colors.black87, fontSize: 15),
-                    maxLines: 1,
-                    softWrap: true,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ],
+    clipBehavior: Clip.antiAlias,
+    child: SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          for (int i = 0; i < rows.length; i++) ...[
+            if (i > 0) const Divider(height: 1, thickness: 0.5),
+            rows[i],
+          ],
+        ],
+      ),
     ),
   );
 }

@@ -2,7 +2,9 @@ import 'dart:developer';
 
 import 'package:get/get.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../models/emp_profile_model.dart';
 import '../../models/user_model.dart';
+import '../../services/profile_service.dart';
 
 class DataStorageController extends GetxController {
   static DataStorageController get to => Get.find();
@@ -11,6 +13,17 @@ class DataStorageController extends GetxController {
   var currentSession = Rxn<UserModel>();
   var profileCached = false.obs;
   var header = Rxn<Map>();
+
+  /// Current employee profile (fetched from get-emp-data after login).
+  final Rxn<EmpProfileData> empProfile = Rxn<EmpProfileData>();
+
+  Future<void> loadEmpProfile() async {
+    if (session.value == null) return;
+    final res = await ProfileService.instance.getEmpData(user.id);
+    if (res.isSuccess && res.data != null) {
+      empProfile.value = res.data;
+    }
+  }
 
   @override
   void onInit() async {

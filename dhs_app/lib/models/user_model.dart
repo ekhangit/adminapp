@@ -10,6 +10,9 @@ class UserModel {
   final String? lastLoginAt;
   final String? lastLoginIp;
   final String? type;
+  final String? position;
+  final String? city;
+  final String? level;
 
   UserModel({
     required this.id,
@@ -23,6 +26,9 @@ class UserModel {
     this.lastLoginAt,
     this.lastLoginIp,
     this.type,
+    this.position,
+    this.city,
+    this.level,
   });
 
   factory UserModel.fromJson(Map<String, dynamic> map) {
@@ -38,8 +44,32 @@ class UserModel {
       lastLoginAt: map['last_login_at'],
       lastLoginIp: map['last_login_ip'],
       type: map['type'],
+      position: map['position']?.toString(),
+      city: map['city']?.toString(),
+      level: map['level']?.toString(),
     );
   }
+
+  /// Two-letter initials from the name, e.g. "System User 4" -> "SU".
+  String get initials {
+    final parts =
+        name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty).toList();
+    if (parts.isEmpty) return '?';
+    if (parts.length == 1) {
+      final p = parts.first;
+      return (p.length >= 2 ? p.substring(0, 2) : p).toUpperCase();
+    }
+    return (parts[0][0] + parts[1][0]).toUpperCase();
+  }
+
+  /// Profile image URL (avatar preferred, else profile photo path). Empty if none.
+  String get photoUrl {
+    if (avatar?.isNotEmpty ?? false) return avatar!;
+    if (profilePhotoPath?.isNotEmpty ?? false) return profilePhotoPath!;
+    return '';
+  }
+
+  bool get hasPhoto => photoUrl.isNotEmpty;
 
   Map<String, dynamic> toMap() {
     return {
@@ -54,6 +84,9 @@ class UserModel {
       'last_login_at': lastLoginAt,
       'last_login_ip': lastLoginIp,
       'type': type,
+      'position': position,
+      'city': city,
+      'level': level,
     };
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:developer';
 
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import '../../services/auth_service.dart';
@@ -9,6 +10,25 @@ import '../storage/data_storage_controller.dart';
 
 class ProfileController extends GetxController {
   static ProfileController instance = Get.find();
+
+  /// 🔔 Push notification enabled state (local for now).
+  final RxBool pushEnabled = true.obs;
+
+  void togglePush(bool value) {
+    pushEnabled.value = value;
+    log("[ProfileController] Push notifications ${value ? 'enabled' : 'disabled'}");
+    // Later: wire to FirebaseMessaging subscribe/unsubscribe or backend setting.
+  }
+
+  /// 🌗 Dark mode state.
+  final RxBool darkMode = false.obs;
+
+  void toggleDarkMode(bool value) {
+    darkMode.value = value;
+    Get.changeThemeMode(value ? ThemeMode.dark : ThemeMode.light);
+    log("[ProfileController] Dark mode ${value ? 'on' : 'off'}");
+    // Later: persist preference and define a full dark theme in GetMaterialApp.
+  }
 
   /// 🔐 Logout Function
   Future<void> logout() async {

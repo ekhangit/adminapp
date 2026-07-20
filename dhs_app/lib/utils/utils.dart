@@ -10,7 +10,7 @@ class Utils {
       title,
       message,
       duration: Duration(seconds: 2),
-      snackPosition: SnackPosition.BOTTOM,
+      snackPosition: SnackPosition.TOP,
     );
   }
 
@@ -22,6 +22,7 @@ class Utils {
     Flushbar(
       duration: Duration(seconds: 3),
       backgroundColor: backgroundColor!,
+      flushbarPosition: FlushbarPosition.TOP,
       messageText: Center(
         child: Text(
           message,

@@ -27,7 +27,12 @@ class FlightCommScreen extends StatelessWidget {
           centerTitle: true,
           title: Text(
             "Flight Comms",
-            style: GoogleFonts.roboto(color: Colors.white),
+            style: GoogleFonts.rajdhani(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w600,
+              letterSpacing: 1.0,
+            ),
           ),
           leading: IconButton(
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white),

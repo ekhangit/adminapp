@@ -65,4 +65,10 @@ class ApiConfig {
   static const getAirlineFolders = '/api/v1/library/airline-folders';
   static const getDocumentsByAirlineFolder = '/api/v1/library/get-document-by-airline-folder';
   static const updateLastViewedDocument = '/api/v1/library/update-last-viewed-of-document';
+
+  // PROFILE
+  static const getEmpData = '/api/v1/profile/get-emp-data';
+  static const getEmpDetail = '/api/v1/profile/get-emp-detail';
+  static const updateEmpData = '/api/v1/profile/update-emp-data';
+  static const updateEmpDetail = '/api/v1/profile/update-employee-detail';
 }

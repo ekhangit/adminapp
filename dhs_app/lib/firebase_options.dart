@@ -50,21 +50,21 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyBMm7JXy2cZGgSNt4avXV4xACI-m-XuLtM',
-    appId: '1:564595847008:android:5010fcedf5d393243c3805',
-    messagingSenderId: '564595847008',
-    projectId: 'dhsys-ab9af',
-    databaseURL: 'https://dhsys-ab9af-default-rtdb.firebaseio.com',
-    storageBucket: 'dhsys-ab9af.firebasestorage.app',
+    apiKey: 'AIzaSyD4Llx-Im9KxnIzYcKRjn5J1ETWlKqLzaE',
+    appId: '1:236611290929:android:5d34d2e59760e6e3c05210',
+    messagingSenderId: '236611290929',
+    projectId: 'sp-avbis',
+    databaseURL: 'https://sp-avbis-default-rtdb.firebaseio.com',
+    storageBucket: 'sp-avbis.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyBGP4xzh8a2yZKvxF5_iwIbJ5dYneQ3sMI',
-    appId: '1:564595847008:ios:3f72f1396a17158a3c3805',
-    messagingSenderId: '564595847008',
-    projectId: 'dhsys-ab9af',
-    databaseURL: 'https://dhsys-ab9af-default-rtdb.firebaseio.com',
-    storageBucket: 'dhsys-ab9af.firebasestorage.app',
-    iosBundleId: 'com.aviation.dhsys',
+    apiKey: 'AIzaSyCD3skkExD4F_PzzHpNdxo0Zj8p9nesXBo',
+    appId: '1:236611290929:ios:b836243cf88fd9e4c05210',
+    messagingSenderId: '236611290929',
+    projectId: 'sp-avbis',
+    databaseURL: 'https://sp-avbis-default-rtdb.firebaseio.com',
+    storageBucket: 'sp-avbis.firebasestorage.app',
+    iosBundleId: 'com.aviation.dhsysapp',
   );
 }

@@ -61,9 +61,24 @@ class ChatController extends GetxController {
         .snapshots()
         .listen((snapshot) {
           print('[ChatController] New messages snapshot received');
+          log(
+            '🔥 [Firebase][listener] snapshot: ${snapshot.docs.length} total doc(s), '
+            '${snapshot.docChanges.length} change(s)',
+          );
+          _logFirebaseDocs('listener', snapshot.docs);
 
           _handleNewMessages(snapshot);
         });
+  }
+
+  /// Logs the raw message documents coming from Firebase.
+  void _logFirebaseDocs(String source, List<QueryDocumentSnapshot> docs) {
+    log(
+      '🔥 [Firebase][$source] chat=${argument.toString()} — ${docs.length} message doc(s)',
+    );
+    for (final doc in docs) {
+      log('🔥 [Firebase][$source] ${doc.id} => ${doc.data()}');
+    }
   }
 
   // FIXED: Handle new messages properly
@@ -154,6 +169,10 @@ class ChatController extends GetxController {
     try {
       final snapshot = await query.get();
 
+      // Raw message data coming from Firebase for this load.
+      log('💬 [Firebase][load] loadMore: $loadMore');
+      _logFirebaseDocs('load', snapshot.docs);
+
       if (snapshot.docs.isEmpty) {
         _hasMore = false;
         return;
@@ -161,6 +180,15 @@ class ChatController extends GetxController {
 
       _lastDocument = snapshot.docs.last;
       final newMessages = await _parseMessages(snapshot.docs);
+
+      // Parsed message list that will populate the chat.
+      log('💬 [Firebase][load] Parsed ${newMessages.length} message(s):');
+      for (final m in newMessages) {
+        log(
+          '💬 [Firebase][load] {id: ${m.id}, sender: ${m.senderName}, '
+          'type: ${m.type ?? 'simple'}, time: ${m.time}, message: ${m.message}}',
+        );
+      }
 
       // Log message types breakdown
       _logMessageTypes(newMessages);

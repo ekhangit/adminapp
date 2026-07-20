@@ -23,7 +23,7 @@ class MainScreen extends StatelessWidget {
           () => NavigationBar(
             // backgroundColor: Color.fromARGB(255, 78, 135, 179),
             backgroundColor: Colors.white,
-            height: 80,
+            height: 68,
             elevation: 0,
             selectedIndex: controller.selectedIndex.value,
             onDestinationSelected:
@@ -42,56 +42,76 @@ class MainScreen extends StatelessWidget {
               return TextStyle(
                 // color: Colors.black38,
                 color: Colors.grey.shade400,
-                fontSize: 12.5,
+                fontSize: 11,
                 fontWeight: FontWeight.w400,
               );
             }),
             destinations: [
               NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/svg/home.svg',
-                  width: 30,
-                  height: 30,
-                  color:
-                      controller.selectedIndex.value == 0
-                          ? AppColors.colorPrimary
-                          : Colors.grey.shade400,
+                icon: AnimatedScale(
+                  scale: controller.selectedIndex.value == 0 ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: SvgPicture.asset(
+                    'assets/svg/home.svg',
+                    width: 24,
+                    height: 24,
+                    color:
+                        controller.selectedIndex.value == 0
+                            ? AppColors.colorPrimary
+                            : Colors.grey.shade400,
+                  ),
                 ),
                 label: 'Home',
               ),
               NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/svg/notification.svg',
-                  width: 30,
-                  height: 30,
-                  color:
-                      controller.selectedIndex.value == 1
-                          ? AppColors.colorPrimary
-                          : Colors.grey.shade400,
+                icon: AnimatedScale(
+                  scale: controller.selectedIndex.value == 1 ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: SvgPicture.asset(
+                    'assets/svg/notification.svg',
+                    width: 24,
+                    height: 24,
+                    color:
+                        controller.selectedIndex.value == 1
+                            ? AppColors.colorPrimary
+                            : Colors.grey.shade400,
+                  ),
                 ),
                 label: 'Notification',
               ),
               NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/svg/about.svg',
-                  width: 30,
-                  height: 30,
-                  color:
-                      controller.selectedIndex.value == 2
-                          ? AppColors.colorPrimary
-                          : Colors.grey.shade400,
+                icon: AnimatedScale(
+                  scale: controller.selectedIndex.value == 2 ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: SvgPicture.asset(
+                    'assets/svg/about.svg',
+                    width: 24,
+                    height: 24,
+                    color:
+                        controller.selectedIndex.value == 2
+                            ? AppColors.colorPrimary
+                            : Colors.grey.shade400,
+                  ),
                 ),
                 label: 'About',
               ),
               NavigationDestination(
-                icon: SvgPicture.asset(
-                  'assets/svg/user.svg',
-                  width: 30,
-                  height: 30,
-                  color:
-                      controller.selectedIndex.value == 3
-                          ? AppColors.colorPrimary
-                          : Colors.grey.shade400,
+                icon: AnimatedScale(
+                  scale: controller.selectedIndex.value == 3 ? 1.15 : 1.0,
+                  duration: const Duration(milliseconds: 250),
+                  curve: Curves.easeOut,
+                  child: SvgPicture.asset(
+                    'assets/svg/user.svg',
+                    width: 24,
+                    height: 24,
+                    color:
+                        controller.selectedIndex.value == 3
+                            ? AppColors.colorPrimary
+                            : Colors.grey.shade400,
+                  ),
                 ),
                 label: 'Profile',
               ),

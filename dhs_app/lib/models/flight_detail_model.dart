@@ -5,7 +5,10 @@ class FlightDetailModel {
   final Aircraft? aircraft;
   final AircraftType? aircraftType;
   final Capacity capacity;
+  final String aircraftCapacity;
   final ActualPax actualPax;
+  final String stdOffset; // e.g. "UTC +3.00"
+  final String staOffset;
   final String? inboundFlight; // New field
   final String? outboundFlight;
   final TrcData? trc;
@@ -22,7 +25,10 @@ class FlightDetailModel {
     this.aircraft,
     this.aircraftType,
     required this.capacity,
+    this.aircraftCapacity = '',
     required this.actualPax,
+    this.stdOffset = '',
+    this.staOffset = '',
     this.inboundFlight,
     this.outboundFlight,
     this.trc,
@@ -52,8 +58,13 @@ class FlightDetailModel {
           info['aircraft_type'] != null
               ? AircraftType.fromJson(info['aircraft_type'])
               : null,
-      capacity: Capacity.fromJson(info['capacity']),
+      capacity: Capacity.fromJson(
+        info['flight_capacity'] ?? info['capacity'],
+      ),
+      aircraftCapacity: info['aircraft_capacity']?.toString() ?? '',
       actualPax: ActualPax.fromJson(info['actual_pax']),
+      stdOffset: info['std_offset']?.toString() ?? '',
+      staOffset: info['sta_offset']?.toString() ?? '',
       inboundFlight: info['inbound_flight']?.toString(),
       outboundFlight: info['outbound_flight']?.toString(),
       trc: trcJson != null ? TrcData.fromJson(trcJson) : null,
@@ -86,6 +97,9 @@ class BasicDetails {
   final String? gate;
   final String? pos;
   final String? beggageBelt;
+  final String? tobt;
+  final String? ctot;
+  final String? tsat;
 
   BasicDetails({
     required this.id,
@@ -101,6 +115,9 @@ class BasicDetails {
     this.gate,
     this.pos,
     this.beggageBelt,
+    this.tobt,
+    this.ctot,
+    this.tsat,
   });
 
   factory BasicDetails.fromJson(Map<String, dynamic> json) => BasicDetails(
@@ -117,17 +134,41 @@ class BasicDetails {
     gate: json['gate'] ?? '',
     pos: json['pos'] ?? '',
     beggageBelt: json['beggage_belt'] ?? '',
+    tobt: json['tobt']?.toString() ?? '',
+    ctot: json['ctot']?.toString() ?? '',
+    tsat: json['tsat']?.toString() ?? '',
   );
 }
 
 class Airport {
   final int id;
   final String iataCode;
+  final String icaoCode;
+  final String name;
+  final String city;
+  final String country;
 
-  Airport({required this.id, required this.iataCode});
+  Airport({
+    required this.id,
+    required this.iataCode,
+    this.icaoCode = '',
+    this.name = '',
+    this.city = '',
+    this.country = '',
+  });
 
-  factory Airport.fromJson(Map<String, dynamic> json) =>
-      Airport(id: json['id'] ?? 0, iataCode: json['iata_code'] ?? '');
+  factory Airport.fromJson(Map<String, dynamic> json) => Airport(
+    id: json['id'] ?? 0,
+    iataCode: json['iata_code']?.toString() ?? '',
+    icaoCode: json['icao_code']?.toString() ?? '',
+    name: json['name']?.toString().trim() ?? '',
+    city: json['city']?.toString().trim() ?? '',
+    country: json['country']?.toString().trim() ?? '',
+  );
+
+  /// "Istanbul, Türkiye" (skips empty parts).
+  String get cityCountry =>
+      [city, country].where((s) => s.isNotEmpty).join(', ');
 }
 
 class Aircraft {
@@ -147,7 +188,7 @@ class AircraftType {
   AircraftType({required this.id, required this.icao});
 
   factory AircraftType.fromJson(Map<String, dynamic> json) =>
-      AircraftType(id: json['id'] ?? 0, icao: json['icao']);
+      AircraftType(id: json['id'] ?? 0, icao: json['icao']?.toString() ?? '');
 }
 
 class Capacity {
@@ -161,15 +202,18 @@ class Capacity {
 
   Capacity({this.f, this.j, this.c, this.s, this.w, this.y, this.m});
 
-  factory Capacity.fromJson(Map<String, dynamic> json) => Capacity(
-    f: json['F'],
-    j: json['J'],
-    c: json['C'],
-    s: json['S'],
-    w: json['W'],
-    y: json['Y'],
-    m: json['M'],
-  );
+  factory Capacity.fromJson(Map<String, dynamic>? json) {
+    final data = json ?? const {};
+    return Capacity(
+      f: data['F']?.toString(),
+      j: data['J']?.toString(),
+      c: data['C']?.toString(),
+      s: data['S']?.toString(),
+      w: data['W']?.toString(),
+      y: data['Y']?.toString(),
+      m: data['M']?.toString(),
+    );
+  }
 }
 
 // class ActualPax {
@@ -231,14 +275,17 @@ class ActualPax {
     this.paxJmp,
   });
 
-  factory ActualPax.fromJson(Map<String, dynamic> json) => ActualPax(
-    paxA: json['pax_a_actual']?.toString(), // Convert to string if not null
-    paxC: json['pax_c_actual']?.toString(),
-    paxW: json['pax_w_actual']?.toString(),
-    paxY: json['pax_y_actual']?.toString(),
-    paxInf: json['pax_inf_actual']?.toString(),
-    paxJmp: json['pax_jmp_actual']?.toString(),
-  );
+  factory ActualPax.fromJson(Map<String, dynamic>? json) {
+    final data = json ?? const {};
+    return ActualPax(
+      paxA: data['pax_a_actual']?.toString(), // Convert to string if not null
+      paxC: data['pax_c_actual']?.toString(),
+      paxW: data['pax_w_actual']?.toString(),
+      paxY: data['pax_y_actual']?.toString(),
+      paxInf: data['pax_inf_actual']?.toString(),
+      paxJmp: data['pax_jmp_actual']?.toString(),
+    );
+  }
 
   // Parses a string value to int (handles empty strings and null)
   static int _parsePaxValue(String? value) {

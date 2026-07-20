@@ -1,22 +1,22 @@
 {
   "project_info": {
-    "project_number": "564595847008",
-    "firebase_url": "https://dhsys-ab9af-default-rtdb.firebaseio.com",
-    "project_id": "dhsys-ab9af",
-    "storage_bucket": "dhsys-ab9af.firebasestorage.app"
+    "project_number": "236611290929",
+    "firebase_url": "https://sp-avbis-default-rtdb.firebaseio.com",
+    "project_id": "sp-avbis",
+    "storage_bucket": "sp-avbis.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:564595847008:android:5010fcedf5d393243c3805",
+        "mobilesdk_app_id": "1:236611290929:android:5d34d2e59760e6e3c05210",
         "android_client_info": {
-          "package_name": "com.aviation.dhsys"
+          "package_name": "com.aviation.dhsysapp"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyBMm7JXy2cZGgSNt4avXV4xACI-m-XuLtM"
+          "current_key": "AIzaSyD4Llx-Im9KxnIzYcKRjn5J1ETWlKqLzaE"
         }
       ],
       "services": {

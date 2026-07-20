@@ -196,17 +196,45 @@ class ChatMessage {
 
     // Parse staff services if message type is 'staff'
     List<StaffService>? parseStaffServices(dynamic messageData) {
-      if (messageData is! Map<String, dynamic>) return null;
+      if (messageData is! Map) return null;
 
       try {
-        final servicesData =
-            messageData['servicesData'] as Map<String, dynamic>?;
-        final services = servicesData?['services'] as List<dynamic>?;
+        final servicesData = messageData['servicesData'];
+        if (servicesData is! Map) return null;
+        final services = servicesData['services'];
+        if (services is! List) return null;
 
-        return services?.map((service) {
+        // Group entries by their service (CKIN, GATE, TRC, ...). The API sends
+        // one entry per staff member, so several entries share the same service.
+        final grouped = <String, List<Map>>{};
+        for (final item in services) {
+          if (item is! Map) continue;
+          final service = item['service']?.toString();
+          if (service == null || service.isEmpty) continue;
+          grouped.putIfAbsent(service, () => []).add(item);
+        }
+
+        return grouped.entries.map((e) {
+          final first = e.value.first;
           return StaffService(
-            service: service['service'] as String,
-            employeeNames: service['employeeNames'] as String,
+            service: e.key,
+            type: first['type']?.toString() ?? 'Default',
+            serviceType: first['service_type']?.toString() ?? '',
+            staffRequired:
+                int.tryParse(first['staff_required']?.toString() ?? '') ??
+                e.value.length,
+            slaStart: StaffTime.fromJson(first['start']),
+            slaRelease: StaffTime.fromJson(first['release']),
+            assignments:
+                e.value
+                    .map(
+                      (s) => StaffAssignment(
+                        name: s['staff']?.toString() ?? '',
+                        start: StaffTime.fromJson(s['start']),
+                        release: StaffTime.fromJson(s['release']),
+                      ),
+                    )
+                    .toList(),
           );
         }).toList();
       } catch (e) {
@@ -449,17 +477,59 @@ class FhrMessage {
   }
 }
 
-class StaffService {
-  final String service;
-  final String employeeNames;
+class StaffTime {
+  final String? act;
+  final String? pln;
+  final String? sla;
 
-  StaffService({required this.service, required this.employeeNames});
+  StaffTime({this.act, this.pln, this.sla});
+
+  factory StaffTime.fromJson(dynamic json) {
+    if (json is! Map) return StaffTime();
+    return StaffTime(
+      act: json['act']?.toString(),
+      pln: json['pln']?.toString(),
+      sla: json['sla']?.toString(),
+    );
+  }
+}
+
+class StaffAssignment {
+  final String name;
+  final StaffTime start;
+  final StaffTime release;
+
+  StaffAssignment({
+    required this.name,
+    required this.start,
+    required this.release,
+  });
+}
+
+class StaffService {
+  final String service; // CKIN, GATE, B-COOR ...
+  final String type; // Default
+  final String serviceType; // DEPARTURE / ARRIVAL
+  final int staffRequired;
+  final StaffTime slaStart; // service-level SLA times (header row)
+  final StaffTime slaRelease;
+  final List<StaffAssignment> assignments;
+
+  StaffService({
+    required this.service,
+    this.type = 'Default',
+    this.serviceType = '',
+    this.staffRequired = 0,
+    StaffTime? slaStart,
+    StaffTime? slaRelease,
+    this.assignments = const [],
+  }) : slaStart = slaStart ?? StaffTime(),
+       slaRelease = slaRelease ?? StaffTime();
+
+  String get employeeNames => assignments.map((a) => a.name).join(', ');
 
   Map<String, dynamic> toMap() {
-    return {
-      'service': service,
-      'employeeNames': employeeNames,
-    };
+    return {'service': service, 'employeeNames': employeeNames};
   }
 }
 

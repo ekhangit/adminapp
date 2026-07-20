@@ -1,6 +1,6 @@
 import 'package:dhs_app/screens/library/folder_documents_screen.dart';
 import 'package:dhs_app/screens/library/my_read_sign_screen.dart';
-import 'package:dhs_app/screens/library/read_sign_screen.dart';
+// import 'package:dhs_app/screens/library/read_sign_screen.dart';
 import 'package:dhs_app/screens/library/safety_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
@@ -30,14 +30,15 @@ class GsrmLibraryTab extends StatelessWidget {
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
-                  _buildButton(
-                    title: 'Read & Sign',
-                    backgroundColor: Colors.blue.shade700,
-                    onTap: () {
-                      Get.to(() => const ReadSignScreen());
-                    },
-                  ),
-                  const SizedBox(height: 12),
+                  // Read & Sign is now accessed from the dashboard tile.
+                  // _buildButton(
+                  //   title: 'Read & Sign',
+                  //   backgroundColor: Colors.blue.shade700,
+                  //   onTap: () {
+                  //     Get.to(() => const ReadSignScreen());
+                  //   },
+                  // ),
+                  // const SizedBox(height: 12),
                   _buildButton(
                     title: 'My Read & Sign',
                     backgroundColor: Colors.green.shade700,

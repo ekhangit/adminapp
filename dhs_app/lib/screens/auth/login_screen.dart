@@ -22,19 +22,6 @@ class LoginScreen extends StatelessWidget {
       child: Scaffold(
         resizeToAvoidBottomInset: false,
         backgroundColor: AppColors.backgroundColor,
-        appBar: AppBar(
-          backgroundColor: Colors.white,
-          automaticallyImplyLeading: true,
-          title: const Text(
-            "Login",
-            style: TextStyle(color: AppColors.appBarTextColor),
-          ),
-          centerTitle: false,
-          leading: IconButton(
-            onPressed: () => Get.back(),
-            icon: Icon(Icons.arrow_back_ios, color: AppColors.appBarTextColor),
-          ),
-        ),
         body: Stack(
           children: [
             Obx(
@@ -86,17 +73,17 @@ class LoginScreen extends StatelessWidget {
                             onShow: () => controller.obscureChanged(),
                           ),
                         ),
-                        const SizedBox(height: 20),
+                        const SizedBox(height: 36),
 
                         // Login Button
                         Obx(
                           () => CustomButton(
-                            text: "Continue",
+                            text: "Sign In",
                             onPressed: () => controller.login(),
                             color: AppColors.buttonColor1,
+                            borerRadius: 10,
                             disabled: !controller.canContinue,
-                            // isLoading: controller.isLoading.value,
-                            isLoading: false,
+                            isLoading: controller.isLoading.value,
                             loadingWidget: const SizedBox(
                               width: 20,
                               height: 20,
@@ -114,36 +101,30 @@ class LoginScreen extends StatelessWidget {
               ),
             ),
 
-            // 🧊 Loading Overlay
-            Obx(() {
-              return controller.isLoading.value
-                  ? Container(
-                    color: Colors.white.withValues(alpha: 0.50),
-                    child: Center(
-                      child: Container(
-                        padding: EdgeInsets.all(12.0),
-                        height: 50,
-                        width: 50,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          color: Colors.white,
-                          boxShadow: kElevationToShadow[1],
-                          border: Border.all(
-                            color: AppColors.matteBlackColor,
-                            width: 0.05,
-                          ),
-                        ),
-                        child: const Center(
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            color: AppColors.colorPrimary,
-                          ),
-                        ),
+            // 🔻 Footer: logo + copyright
+            Positioned(
+              left: 0,
+              right: 0,
+              bottom: 20,
+              child: SafeArea(
+                top: false,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Image.asset('assets/images/logo_new.png', height: 20),
+                    const SizedBox(height: 8),
+                    Text(
+                      '2026© All Rights Reserved',
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey.shade500,
                       ),
                     ),
-                  )
-                  : const SizedBox.shrink();
-            }),
+                  ],
+                ),
+              ),
+            ),
+
           ],
         ),
       ),
